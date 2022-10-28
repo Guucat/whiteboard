@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"time"
+	"whiteboard/setting"
 )
 
 type TokenInfo struct {
@@ -14,8 +15,6 @@ type TokenInfo struct {
 
 const TokenValidDuration = 2 * time.Hour
 
-var TokenSecret = []byte("white board")
-
 // GenToken 生成JWT
 func GenToken(id int, name string) (string, error) {
 	c := TokenInfo{
@@ -23,18 +22,18 @@ func GenToken(id int, name string) (string, error) {
 		name,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(TokenValidDuration).Unix(),
-			Issuer:    "CQUPT",
+			Issuer:    setting.Conf.Issuer,
 		},
 	}
 	// 指定签名算法
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
 	// 返回token编码
-	return token.SignedString(TokenSecret)
+	return token.SignedString(setting.Conf.Secret)
 }
 
 func ParseToken(tokenString string) (*TokenInfo, error) {
 	token, err := jwt.ParseWithClaims(tokenString, &TokenInfo{}, func(token *jwt.Token) (interface{}, error) {
-		return TokenSecret, nil
+		return setting.Conf.Secret, nil
 	})
 	if err != nil {
 		return nil, err
