@@ -1,17 +1,27 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
+	"whiteboard/router"
 )
 
-type H map[string]interface{}
+type User struct {
+	gorm.Model
+	Name string // 用户名
+	Pwd  string // 密码
+}
 
 func main() {
-	r := gin.Default()
-	r.GET("/hello", func(context *gin.Context) {
-		context.JSON(200, gin.H{
-			"msg": "hello, world",
-		})
-	})
+	//mysql.DB.AutoMigrate(&User{})
+	//mysql.DB.Create(&User{
+	//	Name: "test1",
+	//	Pwd:  "test1",
+	//})
+	//var user User
+	//mysql.DB.First(&user, 1)
+	//fmt.Printf(user.Name)
+
+	// 注册路由
+	r := router.SetupRouter()
 	r.Run(":8080")
 }
