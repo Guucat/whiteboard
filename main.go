@@ -1,15 +1,12 @@
 package main
 
 import (
-	"gorm.io/gorm"
+	"log"
+	"whiteboard/dao/mysql"
+	"whiteboard/dao/redis"
 	"whiteboard/router"
+	"whiteboard/setting"
 )
-
-type User struct {
-	gorm.Model
-	Name string // 用户名
-	Pwd  string // 密码
-}
 
 func main() {
 	//mysql.DB.AutoMigrate(&User{})
@@ -21,7 +18,15 @@ func main() {
 	//mysql.DB.First(&user, 1)
 	//fmt.Printf(user.Name)
 
+	//初始化MySQL数据库
+	err := setting.Init()
+	if err != nil {
+		log.Panicln("配置文件错误:", err)
+	}
+	mysql.Init(setting.Conf.MySQLConfig)
+	redis.Init(setting.Conf.RedisConfig)
 	// 注册路由
 	r := router.SetupRouter()
 	r.Run(":8080")
+
 }
