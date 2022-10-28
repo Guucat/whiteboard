@@ -49,8 +49,8 @@ type TokenConfig struct {
 var Conf = new(FileServerConfig)
 
 func Init() (err error) {
-	viper.SetConfigName("config") //配置文件名
-	viper.AddConfigPath("../../") //配置文件的相对路径
+	viper.SetConfigName("config")    //配置文件名
+	viper.AddConfigPath("./setting") //配置文件的相对路径
 	viper.SetConfigType("yaml")
 	if err = viper.ReadInConfig(); err != nil { //读取配置文件
 		//日志信息统一用内置log输出 格式 包名-方法名-failed err:
