@@ -12,7 +12,13 @@ func SetupRouter() *gin.Engine {
 
 	r.POST("/login", controller.Login)
 	r.POST("/register", controller.Register)
-	r.GET("/board", middleware.JWTAuthMiddleware(), controller.CreateBoard)
+
+	boardGroup := r.Group("/board")
+	{
+		boardGroup.GET("/create", middleware.JWTAuthMiddleware(), controller.CreateBoard)
+		boardGroup.GET("/enter", controller.EnterBoard)
+	}
+
 	r.GET("/token", middleware.JWTAuthMiddleware(), controller.Token)
 	return r
 }
