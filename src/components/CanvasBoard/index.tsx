@@ -11,17 +11,30 @@ interface MousePos {
 const CanvasBoard: FC<CanvasProps> = (props) => {
   const { width, height } = props
   console.log(width)
-
+  const [curTools, setCurTools] = useState('箭头')
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isPainting, setIsPainting] = useState(false)
   const [mousePosition, setMousePosition] = useState<MousePos | undefined>(undefined)
-  const startPaint = useCallback((e: MouseEvent) => {
-    const inBoardPos = getPosition(e)
-    if (inBoardPos) {
-      setIsPainting(true)
-      setMousePosition(inBoardPos)
-    }
-  }, [])
+  const startPaint = useCallback(
+    (e: MouseEvent) => {
+      const inBoardPos = getPosition(e)
+      if (inBoardPos) {
+        // setIsPainting(true)
+        // setMousePosition(inBoardPos)
+        switch (curTools) {
+          case '箭头':
+            break
+          case '画笔':
+            setIsPainting(true)
+            setMousePosition(inBoardPos)
+            break
+          default:
+            break
+        }
+      }
+    },
+    [curTools]
+  )
   const getPosition = (e: MouseEvent): MousePos | undefined => {
     if (!canvasRef.current) return
     const canvas = canvasRef.current
@@ -55,6 +68,7 @@ const CanvasBoard: FC<CanvasProps> = (props) => {
       context.moveTo(originalMousePosition.x, originalMousePosition.y)
       context.lineTo(newMousePosition.x, newMousePosition.y)
       context.closePath()
+      console.log(newMousePosition.x, newMousePosition.y)
 
       context.stroke()
     }
@@ -90,10 +104,12 @@ const CanvasBoard: FC<CanvasProps> = (props) => {
       canvas.removeEventListener('mouseleave', exitPaint)
     }
   }, [exitPaint])
-
+  function getCurTools(value: string) {
+    setCurTools(value)
+  }
   return (
     <div>
-      <SelectBar></SelectBar>
+      <SelectBar getActive={getCurTools}></SelectBar>
       <canvas width={width} height={height} ref={canvasRef}></canvas>
     </div>
   )

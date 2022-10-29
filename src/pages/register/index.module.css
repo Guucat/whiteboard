@@ -1,0 +1,69 @@
+.container {
+  height: 100vh;
+  background-image: linear-gradient(to right, #ddbdfc, var(--theme-bg-blue));
+}
+.login-wrapper {
+  background-color: #fff;
+  width: 300px;
+  height: 480px;
+  border-radius: 15px;
+  padding: 0 50px;
+  position: relative;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: ease 0.37s;
+}
+.login-wrapper:hover {
+  box-shadow: rgba(73, 99, 154, 0.6) 0px 7px 29px 0px;
+}
+.title {
+  margin: 10px 0;
+  font-size: 16px;
+}
+.header {
+  font-size: 38px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 120px;
+  caret-color: transparent;
+}
+.form-wrapper {
+  width: 95%;
+}
+.input-item {
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+  border: 0;
+  padding: 10px;
+  border-bottom: 1px solid rgb(128, 125, 125);
+  font-size: 15px;
+  outline: none;
+}
+.input-item:placeholder {
+  text-transform: uppercase;
+}
+.btn {
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  margin-top: 40px;
+  background-image: linear-gradient(to right, var(--theme-bg-blue), var(--theme-bg-pink));
+  color: #fff;
+  caret-color: transparent;
+}
+.btn:hover {
+  cursor: pointer;
+  background: linear-gradient(315deg, #ddbdfc 0%, #96c8fb 74%);
+}
+.msg {
+  text-align: center;
+  line-height: 88px;
+  caret-color: transparent;
+}
+a {
+  text-decoration-line: none;
+  color: #abc1ee;
+  caret-color: transparent;
+}

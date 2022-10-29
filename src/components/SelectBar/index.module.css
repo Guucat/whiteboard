@@ -1,0 +1,71 @@
+.selectBar {
+  position: absolute;
+  z-index: 3;
+}
+.tools {
+  position: fixed;
+  left: 0;
+  top: 30px;
+  width: 100%;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  /* line-height: 40px; */
+}
+.tools .container {
+  /* height: 70px; */
+  padding: 8px 20px;
+  border-radius: 40px;
+  box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+  background: #fff;
+  /* height: 40px;
+  line-height: 40px; */
+}
+.tools button {
+  width: 60px;
+  /* height: 30px;
+  line-height: 20px; */
+  border: none;
+  outline: none;
+  background-size: 20px 20px;
+  background-position: center center;
+  background-repeat: no-repeat;
+  background-color: #fff;
+  margin: 0 6px;
+  transition: 0.3s;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+/* .tools button.save{
+    background-image: url('../image/save.png'); 
+}
+.tools button.brush{
+    background-image: url('../image/pen.png'); 
+}
+.tools button.eraser{
+    background-image: url('../image/eraser.png'); 
+}
+.tools button.clear{
+    background-image: url('../image/clear.png'); 
+}
+.tools button.undo{
+    background-image: url('../image/undo_sel.png'); 
+}
+.tools button.redo{
+    background-image: url('../image/redo_sel.png'); 
+}
+.tools button.undo.active{
+    background-image: url('../image/undo.png');
+    border-color: transparent; 
+}
+.tools button.redo.active{
+    background-image: url('../image/redo.png'); 
+    border-color: transparent;
+} */
+.active {
+  border-radius: 5px;
+  border: 1px solid #1398e6;
+  /* border-color: ; */
+  color: #1398e6;
+}
