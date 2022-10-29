@@ -12,7 +12,7 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		header := c.Request.Header.Get("Authorization")
 		if header == "" {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(http.StatusForbidden, gin.H{
 				"code": 400,
 				"msg":  "token为空",
 			})
@@ -22,8 +22,8 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		// 按空格分割
 		parts := strings.SplitN(header, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			c.JSON(http.StatusOK, gin.H{
-				"code": 2004,
+			c.JSON(http.StatusForbidden, gin.H{
+				"code": 200,
 				"msg":  "请求头中auth格式有误",
 			})
 			c.Abort()
@@ -31,7 +31,7 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		}
 		mes, err := jwt.ParseToken(parts[1])
 		if err != nil {
-			c.JSON(http.StatusOK, gin.H{
+			c.JSON(http.StatusForbidden, gin.H{
 				"code": 200,
 				"mag":  "token无效",
 			})
