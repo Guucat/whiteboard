@@ -25,6 +25,7 @@ func CreateBoard(c *gin.Context) {
 			return true
 		},
 	}).Upgrade(c.Writer, c.Request, nil)
+
 	if err != nil {
 		res.Ok(c, 400, "websocket 创建失败", nil)
 		return
@@ -53,11 +54,11 @@ func CreateBoard(c *gin.Context) {
 	}
 	for {
 		messageType, p, err := webConn.ReadMessage()
-
 		if err != nil {
 			log.Println("读取websocket消息失败:", err)
 			return
 		}
+
 		b, _ := local.Boards.Load(boardId)
 		board := b.(*model.Board)
 		for _, conn := range board.Websockets {
