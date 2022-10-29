@@ -1,8 +1,15 @@
 import { defineConfig } from 'vite'
+import { resolve } from 'path'
 import react from '@vitejs/plugin-react'
 import postcssPxToViewport from 'postcss-px-to-viewport'
 // https://vitejs.dev/config/
+
 export default defineConfig({
+  resolve: {
+    alias: {
+      '@': resolve(__dirname, 'src'),
+    },
+  },
   plugins: [react()],
   css: {
     postcss: {

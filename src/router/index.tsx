@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom'
-import CanvasBoard from '../components/CanvasBoard'
+import CreateBoard from '../pages/CreateBoard'
+import CanvasBoard from '../pages/CreateBoard'
 import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Register from '../pages/register'
@@ -22,7 +23,11 @@ export default [
     element: <Login></Login>,
   },
   {
-    path: 'board',
-    element: <CanvasBoard></CanvasBoard>,
+    path: 'createboard',
+    element: <CreateBoard></CreateBoard>,
   },
+  // {
+  //   path:'joinboard',
+  //   element:
+  // }
 ]

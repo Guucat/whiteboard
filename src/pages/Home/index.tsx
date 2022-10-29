@@ -5,7 +5,8 @@ const Home: FC = () => {
   const [visible, setVisible] = React.useState(false)
   const navigate = useNavigate()
   function handleCreate() {
-    setVisible(true)
+    navigate('/createBoard')
+    // setVisible(true)
   }
   function handleCancle() {
     setVisible(false)
@@ -19,9 +20,7 @@ const Home: FC = () => {
         <div className={style['welcome-text']}>
           <span style={{ fontSize: '75px' }}>Welcome to</span> Collaboration Whiteboard
         </div>
-        <div className={style['brief-intro']}>
-          This is a real-time collaborative drawing whiteboard, you can join it
-        </div>
+        <div className={style['brief-intro']}>This is a real-time collaborative drawing whiteboard, let's join it</div>
       </div>
       <div className={style['board-btn-box']}>
         <button className={style['join-board']}>

@@ -37,32 +37,6 @@
   cursor: pointer;
   border: 2px solid transparent;
 }
-/* .tools button.save{
-    background-image: url('../image/save.png'); 
-}
-.tools button.brush{
-    background-image: url('../image/pen.png'); 
-}
-.tools button.eraser{
-    background-image: url('../image/eraser.png'); 
-}
-.tools button.clear{
-    background-image: url('../image/clear.png'); 
-}
-.tools button.undo{
-    background-image: url('../image/undo_sel.png'); 
-}
-.tools button.redo{
-    background-image: url('../image/redo_sel.png'); 
-}
-.tools button.undo.active{
-    background-image: url('../image/undo.png');
-    border-color: transparent; 
-}
-.tools button.redo.active{
-    background-image: url('../image/redo.png'); 
-    border-color: transparent;
-} */
 .active {
   border-radius: 5px;
   border: 1px solid #1398e6;
