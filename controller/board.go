@@ -26,6 +26,7 @@ func CreateBoard(c *gin.Context) {
 			return true
 		},
 	}).Upgrade(c.Writer, c.Request, nil)
+
 	if err != nil {
 		res.Ok(c, 400, "websocket 创建失败", nil)
 		return
