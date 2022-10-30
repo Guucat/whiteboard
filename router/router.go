@@ -1,6 +1,7 @@
 package router
 
 import (
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"whiteboard/controller"
 	"whiteboard/middleware"
@@ -18,6 +19,7 @@ func SetupRouter() *gin.Engine {
 		boardGroup.GET("/create", middleware.JWTAuthMiddleware(), controller.CreateBoard)
 		boardGroup.GET("/enter", controller.EnterBoard)
 	}
+	pprof.RouteRegister(boardGroup, "pprof")
 
 	r.GET("/token", middleware.JWTAuthMiddleware(), controller.Token)
 	return r

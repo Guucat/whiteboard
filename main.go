@@ -1,33 +1,33 @@
 package main
 
 import (
+	"github.com/gin-contrib/pprof"
 	"log"
 	"whiteboard/dao/mysql"
 	"whiteboard/dao/redis"
 	"whiteboard/router"
 	"whiteboard/setting"
+	"whiteboard/utils/validator"
 )
 
-func main() {
-	//mysql.DB.AutoMigrate(&User{})
-	//mysql.DB.Create(&User{
-	//	Name: "test1",
-	//	Pwd:  "test1",
-	//})
-	//var user User
-	//mysql.DB.First(&user, 1)
-	//fmt.Printf(user.Name)
-
-	//初始化MySQL数据库
+func init() {
 	err := setting.Init()
 	if err != nil {
 		log.Panicln("配置文件错误:", err)
 	}
+	//初始化MySQL数据库
 	mysql.Init(setting.Conf.MySQLConfig)
+	//初始化Reids数据库
 	redis.Init(setting.Conf.RedisConfig)
+	//初始化Validate
+	validator.Init()
+}
 
+func main() {
 	// 注册路由
 	r := router.SetupRouter()
-	r.Run(":8080")
+	//性能测试
+	pprof.Register(r)
 
+	r.Run(":8080")
 }

@@ -18,11 +18,11 @@ func PutUniqueId() (boardId int, err error) {
 		if exist := DB.SIsMember(Ctx, "uniqueId", boardId).Val(); exist {
 			continue
 		}
-		if err = DB.SAdd(Ctx, "uniQueId", boardId).Err(); err != nil {
+		if err = DB.SAdd(Ctx, "uniqueId", boardId).Err(); err != nil {
 			return 0, err
 		}
+		return
 	}
-	return
 }
 
 func PutUserIntoBoard(boardId int, userName string) error {
