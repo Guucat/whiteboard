@@ -1,0 +1,28 @@
+machine_id: 1
+port: 8888
+start_time: "2022-10-28"
+
+mysql:
+  host: "rm-2vc34w5spf5nm2992eo.mysql.cn-chengdu.rds.aliyuncs.com"
+  port: 3306
+  root: "shengyi"
+  password: "123456@tsy"
+  db_name: "whiteboard"
+  max_open_conn: 200
+  max_idle_conn: 50
+
+redis:
+  host: "114.55.132.72"
+  port: 6379
+  db: 0
+  pool_size: 100
+
+# 选取合适的AES密钥，可选长度为16、24、32字节
+aes:
+  key: "just_a_test_key~"
+
+token:
+  secret: "just_a_test_key~"
+  issuer: "CQUPT"
+
+rabbit:
