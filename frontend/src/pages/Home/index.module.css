@@ -1,0 +1,143 @@
+.container {
+  height: 100vh;
+  background-image: linear-gradient(315deg, #96c8fb 0%, #ddbdfc 74%);
+  caret-color: transparent;
+}
+.welcome-wrapper {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+}
+.welcome-text {
+  font-size: 50px;
+  font-weight: bold;
+}
+.brief-intro {
+  margin-top: 10px;
+  font-size: 22px;
+}
+.board-btn-box {
+  position: absolute;
+  top: 62vh;
+  left: 25vw;
+  width: 36vw;
+  display: flex;
+  justify-content: space-between;
+}
+.join-board,
+.create-board {
+  width: 220px;
+  height: 52px;
+  margin: 5px;
+  font-size: 20px;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.9);
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+  transition: 300ms;
+  background: #474747;
+  box-shadow: 0px 5px #292929, 0px 10px 10px rgba(0, 0, 0, 0.25);
+}
+
+.join-board:hover,
+.create-board:hover {
+  transform: translateY(5px);
+  box-shadow: 0px 0px transparent, 0px 5px 10px rgba(0, 0, 0, 0.25);
+}
+
+.join-board:focus .create-board:focus {
+  outline: none;
+}
+
+/* 未登录弹窗 */
+.modal {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 300px;
+  padding: 30px 20px 20px 20px;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  animation: toShow 0.5s;
+  animation-fill-mode: both !important;
+  -webkit-animation-fill-mode: both !important;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: rgba(73, 99, 154, 0.6) 0px 7px 29px 0px;
+}
+
+@keyframes toShow {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.modal-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  background-color: blueviolet;
+  position: absolute;
+  left: 150px;
+  top: -30px;
+  background: url('../../assets/Snipaste_2022-10-29_10-19-41.jpg');
+  background-size: cover;
+}
+.modal-delete {
+  position: absolute;
+  right: 15px;
+  top: 5px;
+  font-size: 20px;
+}
+.modal-delete:hover,
+.go-login:hover,
+.modal-cancle:hover {
+  cursor: pointer;
+}
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px auto;
+  text-align: center;
+}
+.modal-des {
+  margin: 25px 0;
+  font-size: 15px;
+  text-align: center;
+  color: #474747;
+}
+.login-wrap {
+  width: 68%;
+  margin: 0 auto;
+}
+.go-login {
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  background-image: linear-gradient(to right, var(--theme-bg-blue), var(--theme-bg-pink));
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  transition: ease 0.6s;
+  font-size: 15px;
+  letter-spacing: 4px;
+}
+.go-login:hover {
+  background: linear-gradient(315deg, #ddbdfc 0%, #96c8fb 74%);
+}
+.modal-cancle {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  margin-top: 10px;
+  color: #898484;
+  font-size: 14px;
+}
