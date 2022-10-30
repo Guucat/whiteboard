@@ -12,6 +12,7 @@ import (
 	"whiteboard/model"
 	"whiteboard/service"
 	"whiteboard/utils/res"
+	"whiteboard/utils/validator"
 )
 
 func CreateBoard(c *gin.Context) {
@@ -61,14 +62,16 @@ func CreateBoard(c *gin.Context) {
 }
 
 func EnterBoard(c *gin.Context) {
-	boardId, err := strconv.Atoi(c.Query("boardId"))
+	tempId := c.Query("boardId")
+	err := validator.Validate.Var(tempId, "len=9,required,numeric")
 	if err != nil {
 		log.Println("boardId无效", err)
 		res.Ok(c, 400, "boardId无效", nil)
 		return
 	}
+	BoardId, _ := strconv.Atoi(tempId)
 	//判断board是否存在
-	board, ok := local.Boards.Load(boardId)
+	board, ok := local.Boards.Load(BoardId)
 	if !ok {
 		log.Println("查找board失败", err)
 		res.Ok(c, 400, "查找board失败", nil)
@@ -102,5 +105,5 @@ func EnterBoard(c *gin.Context) {
 	users = append(users, "zhy")
 	board.(*model.Board).Users = users
 
-	service.EnterBoard(webConn, boardId, "zhy")
+	service.EnterBoard(webConn, BoardId, "zhy")
 }
