@@ -1,3 +1,10 @@
-import axios from 'axios'
+import instance from './service'
 
-// 这里发送请求
+const login = (obj: FormData) => {
+  return instance.post('/login', { data: obj })
+}
+const register = (obj: FormData) => {
+  return instance.post('/register', { data: obj })
+}
+
+export { login, register }

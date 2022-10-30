@@ -25,6 +25,6 @@ export class BaseBoard {
  * @param canvas
  * @returns {x,y}
  */
-export const getPosition = (e: MouseEvent, canvas: HTMLCanvasElement): MousePos | undefined => {
+export const getPosition = (e: MouseEvent, canvas: HTMLCanvasElement): MousePos => {
   return { x: e.pageX - canvas.offsetLeft, y: e.pageY - canvas.offsetTop }
 }

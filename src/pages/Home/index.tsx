@@ -5,8 +5,9 @@ const Home: FC = () => {
   const [visible, setVisible] = React.useState(false)
   const navigate = useNavigate()
   function handleCreate() {
-    navigate('/createBoard')
-    // setVisible(true)
+    const token = localStorage.getItem('token')
+    token ? navigate('/createBoard') : setVisible(true)
+    // navigate('/createBoard')
   }
   function handleCancle() {
     setVisible(false)

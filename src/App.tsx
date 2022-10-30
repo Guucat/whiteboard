@@ -1,4 +1,5 @@
 import { useRoutes } from 'react-router-dom'
+import '@arco-design/web-react/dist/css/arco.css'
 import './App.css'
 import route from './router/index'
 

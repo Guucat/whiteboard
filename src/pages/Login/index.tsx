@@ -18,6 +18,7 @@ const Login: FC = () => {
     // 发送登录请求，得到token
     // 如果得到了token以后，判断登录是否成功，如果成功则跳转到主面
     //将token存起来
+
     navigate('/home')
   }
   return (

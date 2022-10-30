@@ -18,7 +18,7 @@
   box-shadow: rgba(73, 99, 154, 0.6) 0px 7px 29px 0px;
 }
 .title {
-  margin: 10px 0;
+  margin: 20px 0 0px 0;
   font-size: 16px;
 }
 .header {
@@ -34,7 +34,7 @@
 .input-item {
   display: block;
   width: 100%;
-  margin-bottom: 20px;
+  /* margin-bottom: 30px; */
   border: 0;
   padding: 10px;
   border-bottom: 1px solid rgb(128, 125, 125);
@@ -52,6 +52,7 @@
   background-image: linear-gradient(to right, var(--theme-bg-blue), var(--theme-bg-pink));
   color: #fff;
   caret-color: transparent;
+  font-size: 15px;
 }
 .btn:hover {
   cursor: pointer;
@@ -59,11 +60,17 @@
 }
 .msg {
   text-align: center;
-  line-height: 88px;
+  line-height: 70px;
   caret-color: transparent;
 }
 a {
   text-decoration-line: none;
   color: #abc1ee;
   caret-color: transparent;
+}
+.error {
+  color: #ee0a0a;
+  font-size: 15px;
+  margin-top: 10px;
+  margin-bottom: -10px;
 }
