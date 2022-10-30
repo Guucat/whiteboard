@@ -22,7 +22,6 @@ func PutUniqueId() (boardId int, err error) {
 			return 0, err
 		}
 	}
-	return
 }
 
 func PutUserIntoBoard(boardId int, userName string) error {

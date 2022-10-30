@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"whiteboard/dao/mysql"
 	"whiteboard/dao/redis"
 	"whiteboard/local"
 	"whiteboard/model"
@@ -43,11 +42,11 @@ func CreateBoard(c *gin.Context) {
 		return
 	}
 
-	err = mysql.CreateBoard(&model.Board{BoardId: boardId, Owner: owner, EditType: editType})
-	if err != nil {
-		res.Ok(c, 400, "创建白板错误", nil)
-		return
-	}
+	//err = mysql.CreateBoard(&model.Board{BoardId: boardId, Owner: owner, EditType: editType})
+	//if err != nil {
+	//	res.Ok(c, 400, "创建白板错误", nil)
+	//	return
+	//}
 	//redis.PutUserIntoBoard(boardId, owner)
 	websockets := []*websocket.Conn{webConn}
 	users = append(users, owner)

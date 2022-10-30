@@ -25,7 +25,7 @@ func Init(cfg *setting.MySQLConfig) {
 		log.Panicf("fail to conenct MySQL: %s", err)
 	}
 
-	err = DB.AutoMigrate(&model.User{}, &model.Board{})
+	err = DB.AutoMigrate(&model.User{})
 	if err != nil {
 		log.Panicln("fail to migrate schema ", err)
 	}
