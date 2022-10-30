@@ -21,6 +21,7 @@ func PutUniqueId() (boardId int, err error) {
 		if err = DB.SAdd(Ctx, "uniQueId", boardId).Err(); err != nil {
 			return 0, err
 		}
+		return
 	}
 }
 

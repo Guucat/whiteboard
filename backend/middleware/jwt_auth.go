@@ -16,16 +16,16 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		if protocolToken != "" {
 			fmt.Println(protocolToken)
 			// 按空格分割
-			parts := strings.SplitN(protocolToken, " ", 2)
-			if !(len(parts) == 2 && parts[0] == "Bearer") {
-				c.JSON(http.StatusForbidden, gin.H{
-					"code": 400,
-					"msg":  "请求头中auth格式有误",
-				})
-				c.Abort()
-				return
-			}
-			mes, err := jwt.ParseToken(parts[1])
+			//parts := strings.SplitN(protocolToken, " ", 2)
+			//if !(len(parts) == 2 && parts[0] == "Bearer") {
+			//	c.JSON(http.StatusForbidden, gin.H{
+			//		"code": 400,
+			//		"msg":  "请求头中auth格式有误",
+			//	})
+			//	c.Abort()
+			//	return
+			//}
+			mes, err := jwt.ParseToken(protocolToken)
 			if err != nil {
 				c.JSON(http.StatusForbidden, gin.H{
 					"code": 400,
