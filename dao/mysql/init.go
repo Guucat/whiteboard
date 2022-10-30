@@ -5,6 +5,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
+	"whiteboard/model"
 	"whiteboard/setting"
 )
 
@@ -22,5 +23,10 @@ func Init(cfg *setting.MySQLConfig) {
 	DB = db
 	if err != nil {
 		log.Panicf("fail to conenct MySQL: %s", err)
+	}
+
+	err = DB.AutoMigrate(&model.User{}, &model.Board{})
+	if err != nil {
+		log.Panicln("fail to migrate schema ", err)
 	}
 }

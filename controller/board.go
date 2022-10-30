@@ -5,9 +5,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
-	"math/rand"
 	"net/http"
 	"strconv"
+	"whiteboard/dao/mysql"
+	"whiteboard/dao/redis"
 	"whiteboard/local"
 	"whiteboard/model"
 	"whiteboard/service"
@@ -15,10 +16,18 @@ import (
 )
 
 func CreateBoard(c *gin.Context) {
-	boardId := rand.Int()
+	boardId, err := redis.PutUniqueId()
+	if err != nil {
+		log.Println("生成boardId错误", err)
+		c.JSON(http.StatusForbidden, gin.H{
+			"code": 400,
+			"msg":  "生成boardId错误",
+		})
+		return
+	}
+	users := make([]string, 0, 10)
 	owner := c.GetString("name")
 	editType := model.EditMode
-	users := make([]string, 0, 10)
 
 	c.Writer.Header().Set("Sec-WebSocket-Protocol", c.GetString("token"))
 	webConn, err := (&websocket.Upgrader{
@@ -33,6 +42,13 @@ func CreateBoard(c *gin.Context) {
 		res.Ok(c, 400, "websocket 创建失败", nil)
 		return
 	}
+
+	err = mysql.CreateBoard(&model.Board{BoardId: boardId, Owner: owner, EditType: editType})
+	if err != nil {
+		res.Ok(c, 400, "创建白板错误", nil)
+		return
+	}
+	//redis.PutUserIntoBoard(boardId, owner)
 	websockets := []*websocket.Conn{webConn}
 	users = append(users, owner)
 	local.Boards.Store(boardId, &model.Board{
@@ -52,14 +68,18 @@ func EnterBoard(c *gin.Context) {
 		res.Ok(c, 400, "boardId无效", nil)
 		return
 	}
-
-	//可修改！！！！！
+	//判断board是否存在
 	board, ok := local.Boards.Load(boardId)
 	if !ok {
 		log.Println("查找board失败", err)
 		res.Ok(c, 400, "查找board失败", nil)
 		return
 	}
+	//if redis.GetBoardById(boardId) {
+	//	log.Println("查找board失败", err)
+	//	res.Ok(c, 400, "查找board失败", nil)
+	//	return
+	//}
 
 	//升级ws协议
 	webConn, err := (&websocket.Upgrader{
@@ -74,6 +94,7 @@ func EnterBoard(c *gin.Context) {
 		return
 	}
 
+	//redis.PutUserIntoBoard(boardId, "")
 	websockets := board.(*model.Board).Websockets
 	websockets = append(websockets, webConn)
 	board.(*model.Board).Websockets = websockets
