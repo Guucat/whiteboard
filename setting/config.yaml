@@ -24,3 +24,5 @@ aes:
 token:
   secret: "just_a_test_key~"
   issuer: "CQUPT"
+
+rabbit:

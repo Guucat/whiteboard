@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
@@ -19,14 +20,15 @@ func CreateBoard(c *gin.Context) {
 	editType := model.EditMode
 	users := make([]string, 0, 10)
 
+	c.Writer.Header().Set("Sec-WebSocket-Protocol", c.GetString("token"))
 	webConn, err := (&websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
-	}).Upgrade(c.Writer, c.Request, nil)
-
+	}).Upgrade(c.Writer, c.Request, c.Writer.Header())
+	fmt.Println("升级协议完成")
 	if err != nil {
 		res.Ok(c, 400, "websocket 创建失败", nil)
 		return
