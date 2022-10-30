@@ -25,6 +25,7 @@ func main() {
 	}
 	mysql.Init(setting.Conf.MySQLConfig)
 	redis.Init(setting.Conf.RedisConfig)
+
 	// 注册路由
 	r := router.SetupRouter()
 	r.Run(":8080")

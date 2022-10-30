@@ -1,8 +1,6 @@
 package model
 
-import (
-	"github.com/gorilla/websocket"
-)
+import "github.com/gorilla/websocket"
 
 // Board 定义白板的结构体
 type Board struct {

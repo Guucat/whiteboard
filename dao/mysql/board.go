@@ -10,3 +10,10 @@ func GetBoardById(boardId int) (*model.Board, error) {
 	}
 	return board, nil
 }
+
+func CreateBoard(board *model.Board) error {
+	if err := DB.Create(board).Error; err != nil {
+		return err
+	}
+	return nil
+}
