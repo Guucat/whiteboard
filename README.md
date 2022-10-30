@@ -1,2 +1,2 @@
 # whiteboard
-diu/~diu/~diu~
+diu diu diu ...
