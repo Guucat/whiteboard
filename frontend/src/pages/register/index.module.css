@@ -1,6 +1,6 @@
 .container {
   height: 100vh;
-  background-image: linear-gradient(to right, #ddbdfc, var(--theme-bg-blue));
+  background-image: linear-gradient(315deg, #ddbdfc, var(--theme-bg-blue));
 }
 .login-wrapper {
   background-color: #fff;

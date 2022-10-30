@@ -12,36 +12,40 @@ const CreateBoard: FC<CanvasProps> = (props) => {
   // 鼠标按下事件，在鼠标按下时判断选择的工具类型
   const startPaint = useCallback(
     (e: MouseEvent) => {
+      console.log('startPoint')
+
       const canvas: HTMLCanvasElement = canvasRef.current!
       const inBoardPos = getPosition(e, canvas)
       if (inBoardPos) {
         switch (curTools) {
           case '箭头':
-            break
+            return
           case '画笔':
             setIsPainting(true)
+            console.log('设置为空')
+            setPonitData([])
             setMousePosition(inBoardPos)
-            break
+            return
           default:
-            break
+            return
         }
       }
     },
-    [curTools]
+    [curTools, isPainting]
   )
-  const [data, setData] = useState<MousePos[]>([])
+  const [pointData, setPonitData] = useState<MousePos[]>([])
   const paint = useCallback(
     (event: MouseEvent) => {
+      console.log('paint')
+
       const canvas: HTMLCanvasElement = canvasRef.current!
       if (isPainting) {
         const newMousePosition = getPosition(event, canvas)
-        //  data.push(newMousePosition)
-        // let newArr = []
-        // newArr.push(newMousePosition)
-        setData((state) => {
+        setPonitData((state) => {
           return [...state, newMousePosition]
         })
-        console.log(newMousePosition)
+        // console.log(newMousePosition)
+        console.log('移动的dada', pointData)
 
         if (mousePosition && newMousePosition) {
           const baseBoard = new BaseBoard(canvas)
@@ -50,33 +54,45 @@ const CreateBoard: FC<CanvasProps> = (props) => {
         }
       }
     },
-    [isPainting, mousePosition]
+    [mousePosition, isPainting]
   )
   // console.log('xx', data)
   const ws = useRef<WebSocket | null>(null)
   const exitPaint = useCallback(() => {
     if (ws.current?.readyState === 1) {
-      ws.current?.send(`11`)
+      console.log(pointData)
+      const dataStr = JSON.stringify(pointData)
+      ws.current?.send(dataStr)
     }
-
     setIsPainting(false)
-  }, [ws])
+  }, [ws.current, pointData])
 
   useEffect(() => {
-    ws.current = new WebSocket('ws://114.55.132.72:8080/board/create', [
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6InRlc3QxIiwiZXhwIjoxNjY3MTAwNzQzLCJpc3MiOiJDUVVQVCJ9.2B2iOM0KQaUmGjy85LF86x15ypIorp4daNzJluSAWPw',
-    ])
-    ws.current.onopen = () => {
-      console.log('websocket已建立连接')
-    }
-    ws.current.onmessage = (e) => {
-      console.log('data', e.data)
+    console.log('useEffect，WS')
+
+    const tokenstr = localStorage.getItem('token')
+    // console.log(token)
+    if (tokenstr) {
+      const token = tokenstr.substring(1, tokenstr.length - 1)
+      if (typeof WebSocket !== 'undefined') {
+        ws.current = new WebSocket('ws://114.55.132.72:8080/board/create', [token!])
+        ws.current.onopen = () => {
+          console.log('websocket已建立连接')
+        }
+        ws.current.onmessage = (e) => {
+          console.log('data', e.data)
+        }
+      } else {
+        alert('当前浏览器 Not support websocket')
+      }
     }
     return () => {
       ws.current?.close()
     }
   }, [ws])
   useEffect(() => {
+    console.log('useEffect,StartPaint')
+
     if (!canvasRef) return
     const canvas = canvasRef.current
     canvas?.addEventListener('mousedown', startPaint)
@@ -86,6 +102,7 @@ const CreateBoard: FC<CanvasProps> = (props) => {
   }, [startPaint])
 
   useEffect(() => {
+    console.log('useEffect,paint')
     if (!canvasRef.current) return
     const canvas = canvasRef.current
     canvas.addEventListener('mousemove', paint)
@@ -95,15 +112,16 @@ const CreateBoard: FC<CanvasProps> = (props) => {
   }, [paint])
 
   useEffect(() => {
+    console.log('useEffect,exitPaint')
     if (!canvasRef.current) {
       return
     }
     const canvas: HTMLCanvasElement = canvasRef.current
     canvas.addEventListener('mouseup', exitPaint)
-    canvas.addEventListener('mouseleave', exitPaint)
+    // canvas.addEventListener('mouseleave', exitPaint)
     return () => {
       canvas.removeEventListener('mouseup', exitPaint)
-      canvas.removeEventListener('mouseleave', exitPaint)
+      // canvas.removeEventListener('mouseleave', exitPaint)
     }
   }, [exitPaint])
 

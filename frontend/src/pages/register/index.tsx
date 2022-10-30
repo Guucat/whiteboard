@@ -1,32 +1,27 @@
 import { register } from '@/service'
+import { AxiosResponse } from 'axios'
 import React, { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import style from './index.module.css'
 export default function Register() {
   const navigate = useNavigate()
-  const [error, setError] = useState<boolean>(false)
 
   const userNameRef = useRef<HTMLInputElement>(null)
   const pwdRef = useRef<HTMLInputElement>(null)
   const handleRegist = async () => {
     const username = userNameRef.current!.value
     const password = pwdRef.current!.value
-    console.log('pwd', password)
+
     let formData = new FormData()
     formData.append('name', username)
     formData.append('pwd', password)
-    const getData = await register(formData).catch((err) => setError(true))
-    console.log(getData)
 
-    //  .then((res) => {
-    //     console.log(res)
-    //   })
+    const getData: any = await register(formData)
+
+    if (getData.msg === '注册成功') {
+      navigate('/login', { state: { username, password } })
+    }
   }
-  // async function handleRegist() {
-
-  //   // 这里判断输入的用户名是否仇富，是否为空，然后在进行跳转
-  //   // navigate('/login', { state: { username, password } })
-  // }
   return (
     <div className={style['container']}>
       <div className={style['login-wrapper']}>
@@ -41,14 +36,15 @@ export default function Register() {
             ref={userNameRef}
           />
           <div className={style['title']}>密码</div>
-          <input
-            type="password"
-            name="password"
-            placeholder="请输入你的密码"
-            className={style['input-item']}
-            ref={pwdRef}
-          />
-          {error && <div className={style['error']}>用户名或密码不能为空</div>}
+          <form>
+            <input
+              type="password"
+              name="password"
+              placeholder="请输入你的密码"
+              className={style['input-item']}
+              ref={pwdRef}
+            />
+          </form>
           <div className={style['btn']} onClick={handleRegist}>
             注册并跳转至登录
           </div>
