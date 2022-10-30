@@ -1,0 +1,23 @@
+/* Document
+ * ========================================================================== */
+
+/**
+ * 1. Correct the line height in all browsers.
+ * 2. Prevent adjustments of font size after orientation changes in
+ *    IE on Windows Phone and in iOS.
+ */
+* {
+  margin: 0;
+  padding: 0;
+}
+body {
+  --theme-bg-pink: #fbc2eb;
+  --theme-bg-blue: #a6c1ee;
+}
+html {
+  font-family: 'apercu', sans-serif;
+}
+button:hover,
+a:hover {
+  cursor: pointer;
+}
