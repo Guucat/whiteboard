@@ -1,4 +1,4 @@
-import { FC, useState } from 'react'
+import { FC, useRef, useState } from 'react'
 import style from './index.module.css'
 import { useNavigate } from 'react-router-dom'
 import { ModalVisible } from '@/pages/Home'
@@ -11,12 +11,20 @@ const Modal: FC<ModalProps> = (ModalProps) => {
   //  const [visible, setVisible] = useState(false)
   const { visible, describe } = ModalProps
   const [visibles, setVisible] = useRecoilState(ModalVisible)
+  const BoardIdRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   function handleCancle() {
     setVisible(false)
   }
   function handleLogin() {
     navigate('/login')
+  }
+  function handleJoinBoard() {
+    if (BoardIdRef.current) {
+      const boardId = BoardIdRef.current.value
+      console.log(boardId)
+      navigate('/joinBoard', { state: { boardId } })
+    }
   }
   return (
     <div className={style['modal']} style={visible ? { display: 'block' } : { display: 'none' }}>
@@ -47,10 +55,10 @@ const Modal: FC<ModalProps> = (ModalProps) => {
           {' '}
           <div className={style['modal-title']}>白板</div>
           <div className={style['modal-des']}>
-            <input type="text" placeholder="输入白板id即可加入房间~" className={style['input-item']} />
+            <input type="text" placeholder="输入白板id即可加入房间~" className={style['input-item']} ref={BoardIdRef} />
           </div>
           <div className={style['login-wrap']}>
-            <button className={`${style['go-login']}`} onClick={handleLogin}>
+            <button className={`${style['go-login']}`} onClick={handleJoinBoard}>
               进入白板
             </button>
           </div>
