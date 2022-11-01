@@ -28,3 +28,5 @@ export class BaseBoard {
 export const getPosition = (e: MouseEvent, canvas: HTMLCanvasElement): MousePos => {
   return { x: e.pageX - canvas.offsetLeft, y: e.pageY - canvas.offsetTop }
 }
+
+export const GetDatapaintLine = () => {}
