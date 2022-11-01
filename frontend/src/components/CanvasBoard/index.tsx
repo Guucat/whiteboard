@@ -2,6 +2,8 @@ import React, { FC, useRef, useEffect, useState, useCallback } from 'react'
 import SelectBar from '@/components/SelectBar'
 import { BaseBoard, getPosition } from '@/utils'
 import { CanvasProps, MousePos } from '@/type'
+import Header from '../Header'
+import style from './index.module.css'
 interface CanvasBoardProps {
   width?: number
   height?: number
@@ -70,10 +72,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     if (ws.current?.readyState === 1) {
       console.log('发送的数据', pointData)
       const dataStr = JSON.stringify(pointData)
-      const data = CanvasRef.current!.toDataURL()
-      console.log('快照数据', data)
+      // const data = CanvasRef.current!.toDataURL()
+      // console.log('快照数据', data)
 
-      ws.current?.send(data)
+      ws.current?.send(dataStr)
     }
     setIsPainting(false)
   }, [ws.current, pointData])
@@ -114,7 +116,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     setCurTools(value)
   }
   return (
-    <div>
+    <div className={style['canvas-wrapper']}>
+      <Header></Header>
       <SelectBar getActive={getCurTools}></SelectBar>
       <canvas width={width} height={height} ref={CanvasRef}></canvas>
     </div>

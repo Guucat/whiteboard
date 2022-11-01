@@ -6,6 +6,7 @@
  * 2. Prevent adjustments of font size after orientation changes in
  *    IE on Windows Phone and in iOS.
  */
+ @import '../public/iconfont/iconfont.css';
 * {
   margin: 0;
   padding: 0;
@@ -15,7 +16,7 @@ body {
   --theme-bg-blue: #a6c1ee;
 }
 html {
-  font-family: 'apercu', sans-serif;
+  font-family: 'apercu', sans-serif;overflow: hidden;
 }
 button:hover,
 a:hover {

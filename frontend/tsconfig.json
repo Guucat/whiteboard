@@ -19,6 +19,6 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["src"],
+  "include": ["src", "public/iconfont/iconfont.js"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
