@@ -28,7 +28,6 @@ export class BaseBoard {
     this.canvas = null
     this.bgColor = '#f2f2f2'
     this.stateArr = [] // 保存画布的操作记录
-
     this.stateIdx = 0 // 当前操作步数
     this.strokeColor = 'pink'
     this.lineSize = '1'
@@ -181,23 +180,23 @@ export class BaseBoard {
         // 设置当前正在进行绘图 或 移动操作
         this.isDrawing = true
         // 如果是自由画笔的话
-        if (this.canvas.isDrawingMode) {
-          // 时间戳生成唯一id
-          this.curDrawObjectId = new Date().getTime()
-          let pointer = this.mouseFrom
-          // let sendObj = JSON.stringify({
-          //   type: 1,
-          //   login_name: 'lijiyan',
-          //   data: {
-          //     id: this.curDrawObjectId,
-          //     type: 'mouseDown',
-          //     point: pointer,
-          //     // bruchColor: brush.color,
-          //   },
-          // })
-          let sendObj = JSON.stringify(this.canvas.toJSON())
-          this.ws.current?.send(sendObj)
-        }
+        // if (this.canvas.isDrawingMode) {
+        //   // 时间戳生成唯一id
+        //   this.curDrawObjectId = new Date().getTime()
+        //   let pointer = this.mouseFrom
+        //   // let sendObj = JSON.stringify({
+        //   //   type: 1,
+        //   //   login_name: 'lijiyan',
+        //   //   data: {
+        //   //     id: this.curDrawObjectId,
+        //   //     type: 'mouseDown',
+        //   //     point: pointer,
+        //   //     // bruchColor: brush.color,
+        //   //   },
+        //   // })
+        //   let sendObj = JSON.stringify(this.canvas.toJSON())
+        //   this.ws.current?.send(sendObj)
+        // }
         // }
       }
     })
@@ -230,23 +229,23 @@ export class BaseBoard {
         //   //   // 初始化画布移动
         //   //   this.initMove();
         // }
-        if (this.canvas.isDrawingMode) {
-          // 时间戳生成唯一id
-          this.curDrawObjectId = new Date().getTime()
-          let pointer = this.mouseFrom
-          // let sendObj = JSON.stringify({
-          //   type: 1,
-          //   login_name: 'lijiyan',
-          //   data: {
-          //     id: this.curDrawObjectId,
-          //     type: 'mouseDown',
-          //     point: pointer,
-          //     // bruchColor: brush.color,
-          //   },
-          // })
-          let sendObj = JSON.stringify(this.canvas.toJSON())
-          this.ws.current?.send(sendObj)
-        }
+        // if (this.canvas.isDrawingMode) {
+        //   // 时间戳生成唯一id
+        //   this.curDrawObjectId = new Date().getTime()
+        //   let pointer = this.mouseFrom
+        //   // let sendObj = JSON.stringify({
+        //   //   type: 1,
+        //   //   login_name: 'lijiyan',
+        //   //   data: {
+        //   //     id: this.curDrawObjectId,
+        //   //     type: 'mouseDown',
+        //   //     point: pointer,
+        //   //     // bruchColor: brush.color,
+        //   //   },
+        //   // })
+        //   let sendObj = JSON.stringify(this.canvas.toJSON())
+        //   this.ws.current?.send(sendObj)
+        // }
       }
     })
     // 监听鼠标松开事件
