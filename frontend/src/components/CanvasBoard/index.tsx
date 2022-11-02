@@ -51,7 +51,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     if (type == '画笔') {
       // 如果用户选择的是画笔工具，直接初始化，无需等待用户进行鼠标操作
       console.log('画笔', card)
-
       card.initBruch()
     }
     // else if (type == 'eraser') {
@@ -74,26 +73,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     } else {
       alert('当前浏览器 Not support websocket')
     }
-
-    // ws.onmessage = (e) => {
-    //   console.log('得到的数据啊啊啊啊啊data', e.data)
-    //   const data = JSON.parse(e.data)
-    //   // 组件一挂载建立webSocket连接，获取boardId的数据并绘制出来
-    //   const canvas = getCanvasRef.current
-    //   if (canvas) {
-    //     // canvas.drawImage(e.data)
-    //     // const baseBoard = new BaseBoard(canvas)
-    //     // if(typeof(e.data)==)
-    //     // baseBoard.cxt.drawImage(data, 0, 0)
-    //     console.log(Array.isArray(JSON.parse(e.data)))
-    //     const pointDataArr = JSON.parse(e.data)
-    //     Array.isArray(pointDataArr) &&
-    //       pointDataArr.length !== 0 &&
-    //       pointDataArr.map((_item: { x: number; y: number }, index: number, data: { x: number; y: number }[]) => {
-    //         // return index < data.length - 1 && baseBoard.paintLine(data[index], data[index + 1])
-    //       })
-    //   }
-    // }
     canvas.current = new BaseBoard({ type, curTools, ws })
     ClickTools(1, '画笔', canvas.current)
   }, [ws])

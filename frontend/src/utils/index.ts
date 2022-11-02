@@ -11,7 +11,6 @@ export class BaseBoard {
   type: string
   bgColor: string
   stateArr: any[]
-
   stateIdx: any
   strokeColor: string
   lineSize: string
@@ -74,56 +73,6 @@ export class BaseBoard {
           // if (e.data.login_name == cache_name) return;
           // 如果是画笔模式
           this.canvas.loadFromJSON(data)
-
-          // 作者：纵天
-          // 链接：https://juejin.cn/post/7039557845721251847
-          // 来源：稀土掘金
-          // 著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
-          // this.canvas.freeDrawingBrush.createPath(e.data)
-          // if (data.type == 1) {
-          //   console.log('11111')
-
-          //   let pointer = data.data.point
-          //   // brush.color = data.data.bruchColor;
-          //   let obj = {
-          //     x: pointer.x,
-          //     y: pointer.y,
-          //   }
-          //   console.log('类型', data.data.type)
-
-          //   // switch (data.data.type) {
-          //   //   case 'mouseDown': {
-          //   //     console.log('啦啦啦啦啦', this.canvas.freeDrawingBrush)
-
-          //   //     this.canvas.freeDrawingBrush.onMouseDown(obj, {
-          //   //       e: {
-          //   //         isPrimary: true,
-          //   //       },
-          //   //     })
-          //   //     break
-          //   //   }
-          //   //   case 'mouseMove': {
-          //   //     this.canvas.freeDrawingBrush.onMouseMove(obj, {
-          //   //       e: {
-          //   //         isPrimary: true,
-          //   //       },
-          //   //     })
-          //   //     break
-          //   //   }
-          //   //   case 'mouseUp': {
-          //   //     this.canvas.freeDrawingBrush.onMouseUp({
-          //   //       e: {
-          //   //         isPrimary: true,
-          //   //       },
-          //   //     })
-          //   //     // let len = this.canvas.getObjects().length;
-          //   //     // this.canvas.item(len - 1).id = data.data.id;
-          //   //     break
-          //   //   }
-          //   // }
-          // }
-
-          // }
         }
       }
     }
@@ -137,10 +86,6 @@ export class BaseBoard {
     this.canvas.freeDrawingBrush.color = this.strokeColor
     this.canvas.freeDrawingBrush.width = 4
     console.log('画笔设置执行了 ')
-
-    //     card.freeDrawingBrush = new fabric.PencilBrush(card)
-    //     card.freeDrawingBrush.color = '#000000'
-    //     card.freeDrawingBrush.width = 4
   }
   initCanvasEvent() {
     // 操作类型集合
@@ -179,25 +124,6 @@ export class BaseBoard {
         // } else {
         // 设置当前正在进行绘图 或 移动操作
         this.isDrawing = true
-        // 如果是自由画笔的话
-        // if (this.canvas.isDrawingMode) {
-        //   // 时间戳生成唯一id
-        //   this.curDrawObjectId = new Date().getTime()
-        //   let pointer = this.mouseFrom
-        //   // let sendObj = JSON.stringify({
-        //   //   type: 1,
-        //   //   login_name: 'lijiyan',
-        //   //   data: {
-        //   //     id: this.curDrawObjectId,
-        //   //     type: 'mouseDown',
-        //   //     point: pointer,
-        //   //     // bruchColor: brush.color,
-        //   //   },
-        //   // })
-        //   let sendObj = JSON.stringify(this.canvas.toJSON())
-        //   this.ws.current?.send(sendObj)
-        // }
-        // }
       }
     })
     // 监听鼠标移动事件
@@ -210,42 +136,25 @@ export class BaseBoard {
         this.mouseTo.x = options.e.clientX - this.canvas._offset.left
         this.mouseTo.y = options.e.clientY - this.canvas._offset.top
         // this.pointData.push(this.mouseTo)
-        // switch (this.selectTool) {
-        //   case 'line':
-        //     // 当前绘制直线，初始化直线绘制
-        //     // this.initLine();
-        //     console.log('线段')
+        switch (this.selectTool) {
+          case 'line':
+            // 当前绘制直线，初始化直线绘制
+            // this.initLine();
+            console.log('线段')
 
-        //     break
-        //   // case "rect":
-        //   //   // 初始化 矩形绘制
-        //   //   this.initRect();
-        //   //   break;
-        //   // case "circle":
-        //   //   // 初始化 绘制圆形
-        //   //   this.initCircle();
-        //   //   break;
-        //   // case "move":
-        //   //   // 初始化画布移动
-        //   //   this.initMove();
-        // }
-        // if (this.canvas.isDrawingMode) {
-        //   // 时间戳生成唯一id
-        //   this.curDrawObjectId = new Date().getTime()
-        //   let pointer = this.mouseFrom
-        //   // let sendObj = JSON.stringify({
-        //   //   type: 1,
-        //   //   login_name: 'lijiyan',
-        //   //   data: {
-        //   //     id: this.curDrawObjectId,
-        //   //     type: 'mouseDown',
-        //   //     point: pointer,
-        //   //     // bruchColor: brush.color,
-        //   //   },
-        //   // })
-        //   let sendObj = JSON.stringify(this.canvas.toJSON())
-        //   this.ws.current?.send(sendObj)
-        // }
+            break
+          // case "rect":
+          //   // 初始化 矩形绘制
+          //   this.initRect();
+          //   break;
+          // case "circle":
+          //   // 初始化 绘制圆形
+          //   this.initCircle();
+          //   break;
+          // case "move":
+          //   // 初始化画布移动
+          //   this.initMove();
+        }
       }
     })
     // 监听鼠标松开事件
