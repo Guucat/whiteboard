@@ -11,7 +11,7 @@ export const tools = [
   },
   {
     id: 2,
-    type: '直线',
+    type: 'line',
     value: `icon-huabigongju-zhixian`,
   },
   {
