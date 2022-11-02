@@ -1,8 +1,16 @@
+.container{
+    position: absolute;
+    z-index: 3;
+}
 .head-wrapper{
     display: flex;
     justify-content: space-between;
     padding-top: 25px;
     margin: 0px 25px 0px 25px;
+    position: fixed;
+    left: 0px;
+    top: 10px;
+    width: 100%;
 }
 .add-new-page{
     background-color: #fff;
