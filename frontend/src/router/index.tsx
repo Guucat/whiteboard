@@ -1,3 +1,4 @@
+import JoinBoard from '@/pages/JoinBoard'
 import { Navigate } from 'react-router-dom'
 import CreateBoard from '../pages/CreateBoard'
 import CanvasBoard from '../pages/CreateBoard'
@@ -26,8 +27,8 @@ export default [
     path: 'createboard',
     element: <CreateBoard></CreateBoard>,
   },
-  // {
-  //   path:'joinboard',
-  //   element:
-  // }
+  {
+    path: 'joinboard',
+    element: <JoinBoard></JoinBoard>,
+  },
 ]

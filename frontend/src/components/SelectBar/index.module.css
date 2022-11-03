@@ -4,35 +4,40 @@
 }
 .tools {
   position: fixed;
-  left: 0;
-  top: 30px;
-  width: 100%;
-  height: 40px;
+  left: 25px;
+  top: 110px;
+  width: 50px;
+  /* height: 40px; */
   display: flex;
-  justify-content: center;
-  text-align: center;
+  flex-direction: column;
+  justify-self: start;
+  /* text-align: center; */
   /* line-height: 40px; */
 }
 .tools .container {
   /* height: 70px; */
-  padding: 8px 20px;
-  border-radius: 40px;
+  padding: 8px 10px;
+  border-radius: 20px;
   box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
   background: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-self: start;
   /* height: 40px;
   line-height: 40px; */
 }
 .tools button {
-  width: 60px;
+  width: 30px;
+  height: 50px;
   /* height: 30px;
   line-height: 20px; */
   border: none;
   outline: none;
-  background-size: 20px 20px;
+  /* background-size: 20px 20px; */
   background-position: center center;
   background-repeat: no-repeat;
   background-color: #fff;
-  margin: 0 6px;
+  /* margin: 0 6px; */
   transition: 0.3s;
   cursor: pointer;
   border: 2px solid transparent;
@@ -42,4 +47,21 @@
   border: 1px solid #1398e6;
   /* border-color: ; */
   color: #1398e6;
+}
+
+.UndoRedo-wrapper{
+  position: fixed;
+  left: 25px;
+  bottom: 75px;
+  width: 50px;
+  background-color: #fff;
+  border-radius: 18px;
+  box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+}
+.undo,.redo{
+  width: 100%;
+  height: 30px;
+  margin-top: 10px;
+  text-align: center;
+  font-weight: bold;
 }
