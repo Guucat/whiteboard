@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "4890395",
+      "name": "橡皮擦",
+      "font_class": "xiangpica",
+      "unicode": "e6ed",
+      "unicode_decimal": 59117
+    },
+    {
       "icon_id": "924515",
       "name": "shapes",
       "font_class": "shapes",

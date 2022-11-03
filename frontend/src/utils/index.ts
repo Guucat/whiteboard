@@ -21,6 +21,11 @@ export class BaseBoard {
   ws: React.MutableRefObject<WebSocket | null>
   curDrawObjectId: number
   fillColor: string | Pattern | Gradient | undefined
+  canvasObject!: fabric.Rect | fabric.Line
+  textObject: any
+  fontSize: number
+  isRedoing: any
+
   constructor(props: BaseBoardProp) {
     this.type = props.type
     this.ws = props.ws
@@ -28,12 +33,17 @@ export class BaseBoard {
     this.bgColor = '#f2f2f2'
     this.stateArr = [] // 保存画布的操作记录
     this.stateIdx = 0 // 当前操作步数
-    this.strokeColor = 'pink'
+    this.strokeColor = 'black'
     this.lineSize = 1
     this.selectTool = props.curTools
     this.isDrawing = false
     this.drawingObject = null
     this.curDrawObjectId = 0
+    this.fontSize = 20
+    this.fillColor = 'transparent'
+    this.textObject = null // 保存用户创建的文本对象
+    this.isRedoing = false // 当前是否在执行撤销或重做操作
+
     this.mouseFrom = {
       x: 0,
       y: 0,
@@ -42,10 +52,12 @@ export class BaseBoard {
       x: 0,
       y: 0,
     }
-    this.initCanvas()
-    this.initCanvasEvent()
+    //  this.initCanvas()
+    // this.initCanvasEvent()
   }
   initCanvas() {
+    console.log('是否存在画布', this.canvas)
+
     if (!this.canvas) {
       this.canvas = new fabric.Canvas(this.type)
       this.canvas.setBackgroundColor(this.bgColor, undefined, {
@@ -64,17 +76,6 @@ export class BaseBoard {
       // 记录画布原始状态
       this.stateArr.push(JSON.stringify(this.canvas))
       this.stateIdx = 0
-      if (this.ws.current) {
-        console.log('lllllllll')
-
-        this.ws.current.onmessage = (e) => {
-          console.log('传递过来的数据data', e.data)
-          const data = JSON.parse(e.data)
-          // if (e.data.login_name == cache_name) return;
-          // 如果是画笔模式
-          this.canvas.loadFromJSON(data)
-        }
-      }
     }
   }
   initBruch() {
@@ -89,20 +90,35 @@ export class BaseBoard {
   }
   initCanvasEvent() {
     // 操作类型集合
-    let toolTypes = ['画笔', 'line', 'circle', 'text', 'move']
+    let toolTypes = ['brush', 'line', 'rect', 'circle', 'triangle', 'ellipse', 'rhombus', 'text']
     // 监听鼠标按下事件
     console.log('事件0', this)
 
     this.canvas.on('mouse:down', (options: any) => {
       console.log('事件', this)
-
+      if (this.selectTool != 'text' && this.textObject) {
+        // 如果当前存在文本对象，并且不是进行添加文字操作 则 退出编辑模式，并删除临时的文本对象
+        // 将当前文本对象退出编辑模式
+        this.textObject.exitEditing()
+        // this.textObject.set('backgroundColor', 'pink')
+        if (this.textObject.text == '') {
+          this.canvas.remove(this.textObject)
+        }
+        this.canvas.renderAll()
+        this.textObject = null
+      }
       // 判断当前是否选择了集合中的操作
       if (toolTypes.indexOf(this.selectTool) != -1) {
         // 记录当前鼠标的起点坐标 (减去画布在 x y轴的偏移，因为画布左上角坐标不一定在浏览器的窗口左上角)
         this.mouseFrom.x = options.e.clientX - this.canvas._offset.left
         this.mouseFrom.y = options.e.clientY - this.canvas._offset.top
-        // 设置当前正在进行绘图 或 移动操作
-        this.isDrawing = true
+        if (this.selectTool == 'text') {
+          // 文本工具初始化
+          this.initText()
+        } else {
+          // 设置当前正在进行绘图 或 移动操作
+          this.isDrawing = true
+        }
       }
     })
     // 监听鼠标移动事件
@@ -121,6 +137,20 @@ export class BaseBoard {
             this.initLine()
             console.log('线段')
             break
+          case 'rect':
+            this.initRect()
+            break
+          case 'circle':
+            this.initCircle()
+            break
+          case 'ellipse':
+            this.initEllipse()
+            break
+          case 'triangle':
+            this.initTriangle()
+            break
+          case 'rhombus':
+            this.initRhombus()
         }
       }
     })
@@ -135,24 +165,174 @@ export class BaseBoard {
         this.drawingObject = null
         // 鼠标抬起是发送消息
 
-        if (this.canvas.isDrawingMode) {
-          let sendObj = JSON.stringify(this.canvas.toJSON())
-          this.ws.current?.send(sendObj)
-        }
+        let sendObj = JSON.stringify(this.canvas.toJSON())
+        this.ws.current?.send(sendObj)
+        // } else {
+        //   let sendObj = JSON.stringify(this.canvasObject.toJSON())
+        //   this.ws.current?.send(sendObj)
+
+        // }
         // 重置正在绘制图形标志
         this.isDrawing = false
+      } else {
+        let sendObj = JSON.stringify(this.canvas.toJSON())
+        this.ws.current?.send(sendObj)
+      }
+    })
+    // 监听画布渲染完成
+    this.canvas.on('after:render', () => {
+      let recordTimer
+      if (!this.isRedoing) {
+        // 当前不是进行撤销或重做操作
+        // 在绘画时会频繁触发该回调，所以间隔1s记录当前状态
+        if (recordTimer) {
+          clearTimeout(recordTimer)
+          recordTimer = null
+        }
+        recordTimer = setTimeout(() => {
+          this.stateArr.push(JSON.stringify(this.canvas))
+          this.stateIdx++
+        }, 100)
+      } else {
+        // 当前正在执行撤销或重做操作，不记录重新绘制的画布
+        this.isRedoing = false
       }
     })
   }
+  // 初始化文本工具
+  initText() {
+    if (!this.textObject) {
+      // 当前不存在绘制中的文本对象
+      // 创建文本对象
+      this.textObject = new fabric.Textbox('', {
+        left: this.mouseFrom.x,
+        top: this.mouseFrom.y,
+        fontSize: this.fontSize,
+        fill: this.strokeColor,
+        hasControls: false,
+        editable: true,
+        width: 30,
+        backgroundColor: 'transparent',
+        selectable: true,
+        padding: 10,
+      })
+      this.canvas.add(this.textObject)
+      // 文本打开编辑模式
+      this.textObject.enterEditing()
+      // 文本编辑框获取焦点
+      this.textObject.hiddenTextarea.focus()
+    } else {
+      // 将当前文本对象退出编辑模式
+      this.textObject.exitEditing()
+      this.textObject.set('backgroundColor', 'rgba(0,0,0,0)')
+      if (this.textObject.text == '') {
+        this.canvas.remove(this.textObject)
+      }
+      this.canvas.renderAll()
+      this.textObject = null
+      return
+    }
+  }
   initLine() {
     // 根据保存的鼠标起始点坐标 创建直线对象
-    let canvasObject = new fabric.Line([this.mouseFrom.x, this.mouseFrom.y, this.mouseTo.x, this.mouseTo.y], {
+    this.canvasObject = new fabric.Line([this.mouseFrom.x, this.mouseFrom.y, this.mouseTo.x, this.mouseTo.y], {
       fill: this.fillColor,
       stroke: this.strokeColor,
       strokeWidth: this.lineSize,
     })
     // 绘制 图形对象
+    this.startDrawingObject(this.canvasObject)
+  }
+  initRect() {
+    // 计算矩形长宽
+    let left = this.mouseFrom.x
+    let top = this.mouseFrom.y
+    let width = this.mouseTo.x - this.mouseFrom.x
+    let height = this.mouseTo.y - this.mouseFrom.y
+    // 创建矩形 对象
+    this.canvasObject = new fabric.Rect({
+      left: left,
+      top: top,
+      width: width,
+      height: height,
+      stroke: this.strokeColor,
+      fill: this.fillColor,
+      strokeWidth: this.lineSize,
+    })
+    // 绘制矩形
+    this.startDrawingObject(this.canvasObject)
+  }
+  initCircle() {
+    let left = this.mouseFrom.x
+    let top = this.mouseFrom.y
+    // 计算圆形半径
+    // let radius =
+    //   Math.sqrt(this.mouseTo.x - left * (this.mouseTo.x - left) + (this.mouseTo.y - top) * (this.mouseTo.y - top)) / 2
+    let radius = Math.sqrt(Math.pow(this.mouseTo.x - left, 2) + Math.pow(this.mouseTo.y - top, 2)) / 2
+
+    // 创建 原型对象
+    let canvasObject = new fabric.Circle({
+      left: left,
+      top: top,
+      stroke: this.strokeColor,
+      fill: this.fillColor,
+      radius: radius,
+      strokeWidth: this.lineSize,
+    })
+    // 绘制圆形对象
     this.startDrawingObject(canvasObject)
+  }
+  initEllipse() {
+    let left = this.mouseFrom.x
+    let top = this.mouseFrom.y
+    let canvasObject = new fabric.Ellipse({
+      left: left,
+      top: top,
+      stroke: this.strokeColor,
+      fill: this.fillColor,
+      rx: Math.abs(left - this.mouseTo.x) / 2,
+      ry: Math.abs(top - this.mouseTo.y) / 2,
+      strokeWidth: this.lineSize,
+    })
+    // 绘制圆形对象
+    this.startDrawingObject(canvasObject)
+  }
+  initTriangle() {
+    let left = this.mouseFrom.x
+    let top = this.mouseFrom.y
+    let width = this.mouseTo.x - this.mouseFrom.x
+    let height = this.mouseTo.y - this.mouseFrom.y
+    let canvasObject = new fabric.Triangle({
+      left: left,
+      top: top,
+      stroke: this.strokeColor,
+      fill: this.fillColor,
+      width: width,
+      height: height,
+      strokeWidth: this.lineSize,
+    })
+    // 绘制圆形对象
+    this.startDrawingObject(canvasObject)
+  }
+  initRhombus() {
+    // 计算矩形长宽
+    let left = this.mouseFrom.x
+    let top = this.mouseFrom.y
+    let width = this.mouseTo.x - this.mouseFrom.x
+    let height = this.mouseTo.y - this.mouseFrom.y
+    // 创建矩形 对象
+    this.canvasObject = new fabric.Rect({
+      left: left,
+      top: top,
+      width: height,
+      height: height,
+      stroke: this.strokeColor,
+      fill: this.fillColor,
+      strokeWidth: this.lineSize,
+      angle: 45,
+    })
+    // 绘制矩形
+    this.startDrawingObject(this.canvasObject)
   }
   startDrawingObject(canvasObject: any) {
     // 禁止用户选择当前正在绘制的图形

@@ -6,7 +6,7 @@ export const tools = [
   },
   {
     id: 1,
-    type: '画笔',
+    type: 'brush',
     value: 'icon-huabigongju-tuya',
   },
   {
@@ -16,32 +16,32 @@ export const tools = [
   },
   {
     id: 3,
-    type: '文本',
+    type: 'text',
     value: 'icon-huabigongju-wenben',
   },
   {
     id: 4,
-    type: '矩形',
+    type: 'rect',
     value: 'icon-huabigongju-juxing',
   },
   {
     id: 5,
-    type: '菱形',
+    type: 'rhombus',
     value: 'icon-lingxing',
   },
   {
     id: 6,
-    type: '三角形',
+    type: 'triangle',
     value: 'icon-sanjiaoxing',
   },
   {
     id: 7,
-    type: '圆形',
+    type: 'circle',
     value: 'icon-huabigongju-tuoyuan',
   },
   {
     id: 8,
-    type: '椭圆',
+    type: 'ellipse',
     value: 'icon-tx-tuoyuanxing',
   },
 ]

@@ -48,13 +48,13 @@
     cursor: pointer;
     border: 2px solid transparent;
   }
-  .active {
+  .active,.undoRedoActive {
     border-radius: 5px;
     border: 1px solid #1398e6;
     /* border-color: ; */
     color: #1398e6;
   }
-  
+
   .UndoRedo-wrapper{
     position: fixed;
     left: 25px;
