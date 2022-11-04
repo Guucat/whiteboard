@@ -111,6 +111,13 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current.initCanvas()
     canvas.current.initCanvasEvent()
     ClickTools(1, 'brush', canvas.current)
+    document.onkeydown = (e) => {
+      if (e.key == 'Backspace') {
+        console.log('删除案件执行')
+
+        canvas.current!.deleteSelectObj()
+      }
+    }
   }, [])
   // useEffect(() => {
   //   console.log('选中图形了')

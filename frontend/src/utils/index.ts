@@ -349,4 +349,10 @@ export class BaseBoard {
     // this.isDrawing = false
     this.drawingObject = canvasObject
   }
+  // 删除当前选中图层对象
+  deleteSelectObj() {
+    console.log('删除', this.selectedObj)
+
+    this.selectedObj && this.canvas.remove(this.selectedObj)
+  }
 }
