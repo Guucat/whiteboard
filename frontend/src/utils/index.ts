@@ -26,12 +26,14 @@ export class BaseBoard {
   isRedoing: boolean
   drawingObject: fabric.Object | null
   textObject: any
-  selectedObj: fabric.Object | undefined
+  selectedObj: fabric.Object[] | null
+  curObj: {}
 
   constructor(props: BaseBoardProp) {
     this.type = props.type
     this.ws = props.ws
     // this.canvas = null
+    this.selectedObj = null
     this.bgColor = '#f2f2f2'
     this.stateArr = [] // 保存画布的操作记录
     this.stateIdx = 0 // 当前操作步数
@@ -45,7 +47,7 @@ export class BaseBoard {
     this.fillColor = 'transparent'
     this.textObject = null // 保存用户创建的文本对象
     this.isRedoing = false // 当前是否在执行撤销或重做操作
-
+    this.curObj = {}
     this.mouseFrom = {
       x: 0,
       y: 0,
@@ -148,6 +150,7 @@ export class BaseBoard {
     })
     // 监听鼠标松开事件
     let recordTimer: any
+
     this.canvas.on('mouse:up', () => {
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
@@ -156,11 +159,15 @@ export class BaseBoard {
         // 清空鼠标移动时保存的临时绘图对象
         this.drawingObject = null
         // 鼠标抬起是发送消息
+        console.log('发送的对象', this.curObj)
         let sendObj = JSON.stringify(this.canvas.toJSON())
-        this.ws.current?.send(sendObj)
+        // this.ws.current?.send(sendObj)
+        this.ws.current?.send(JSON.stringify(this.curObj))
         // 重置正在绘制图形标志
         this.isDrawing = false
       } else {
+        console.log('发送的对象', this.curObj)
+
         let sendObj = JSON.stringify(this.canvas.toJSON())
         this.ws.current?.send(sendObj)
       }
@@ -186,14 +193,41 @@ export class BaseBoard {
     })
     // 监听选中对象
     this.canvas.on('selection:created', (e) => {
-      // 选中图层事件触发时，动态更新赋值
-      this.selectedObj = e.selected![0]
-      // console.log('当前选中对象是', e.selected[0])
-      // this.isDrawing = false
-      this.canvas.bringToFront(this.selectedObj)
-      console.log('选中状态的this', this)
+      console.log('点击当前元素')
 
+      // // 选中图层事件触发时，动态更新赋值
+      this.selectedObj = e.selected!
+      // // console.log('当前选中对象是', e.selected[0])
+      // // this.isDrawing = false
+      // // this.canvas.bringToFront(this.selectedObj)
+      // console.log('选中状态的this', this)
+      document.onkeydown = (e) => {
+        if (e.key == 'Backspace' && this.selectTool !== 'text') {
+          console.log('删除案件执行', this.textObject)
+
+          this.deleteSelectObj()
+        }
+      }
       // console.log('this.isDrawing', this.isDrawing)
+    })
+
+    this.canvas.on('selection:updated', (e) => {
+      console.log('点击其他画布元素')
+
+      this.selectedObj = e.selected!
+      document.onkeydown = (e) => {
+        if (e.key == 'Backspace' && this.selectTool !== 'text') {
+          console.log('删除案件执行', this.textObject)
+
+          this.deleteSelectObj()
+        }
+      }
+    })
+
+    this.canvas.on('selection:cleared', (e) => {
+      console.log('点击其他空白区域')
+
+      this.selectedObj = null
     })
   }
   // 初始化文本工具
@@ -238,6 +272,7 @@ export class BaseBoard {
       strokeWidth: this.lineSize,
       selectable: true,
     })
+
     // 绘制 图形对象
     this.drawingGraph(this.canvasObject)
   }
@@ -276,6 +311,18 @@ export class BaseBoard {
       strokeWidth: this.lineSize,
       selectable: true,
     })
+    this.curObj = {
+      type: 'circle',
+      data: {
+        left: left,
+        top: top,
+        stroke: this.strokeColor,
+        fill: this.fillColor,
+        radius: radius,
+        strokeWidth: this.lineSize,
+        selectable: true,
+      },
+    }
     // 绘制圆形对象
     this.drawingGraph(canvasObject)
   }
@@ -353,6 +400,9 @@ export class BaseBoard {
   deleteSelectObj() {
     console.log('删除', this.selectedObj)
 
-    this.selectedObj && this.canvas.remove(this.selectedObj)
+    this.selectedObj &&
+      this.selectedObj.map((item) => {
+        this.canvas.remove(item)
+      })
   }
 }

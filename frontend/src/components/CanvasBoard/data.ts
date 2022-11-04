@@ -1,7 +1,7 @@
 export const tools = [
   {
     id: 0,
-    type: '箭头',
+    type: 'select',
     value: 'icon-jiantou1',
   },
   {

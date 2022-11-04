@@ -3,6 +3,7 @@ import Header from '../Header'
 import style from './index.module.css'
 import { BaseBoard } from '@/utils'
 import { tools } from './data'
+import { fabric } from 'fabric'
 interface CanvasBoardProps {
   width?: number
   height?: number
@@ -24,16 +25,21 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     card.canvas.isDrawingMode = false
     // 禁止图形选择编辑
     let drawObjects = card.canvas.getObjects()
-    if (drawObjects.length > 0) {
-      drawObjects.map((item: any) => {
-        item.set('selectable', false)
-      })
-    }
+    // if (drawObjects.length > 0) {
+    //   drawObjects.map((item: any) => {
+    //     item.set('selectable', false)
+    //   })
+    // }
     console.log('画笔模式', card.canvas.isDrawingMode)
     if (tool == 'brush') {
+      card.canvas.selection = false
       // 如果用户选择的是画笔工具，直接初始化，无需等待用户进行鼠标操作
       console.log('画笔', card)
       card.initBrush()
+    } else if (tool == 'select') {
+      card.canvas.selection = true
+    } else {
+      card.canvas.selection = false
     }
   }
 
@@ -98,11 +104,28 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }
     if (ws.current) {
       ws.current.onmessage = (e) => {
+        // canvas.current!.canvas.loadFromJSON(
+        //   '{"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"rx":0,"ry":0},{"type":"circle","left":100,"top":100,"width":100,"height":100,"fill":"red","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"radius":50}],"background":"rgba(0, 0, 0, 0)"}',
+        //   () => {
+        //     canvas.current!.canvas.renderAll()
+        //   }
+        // )
+
         console.log('传递过来的数据data', e.data)
         const data = JSON.parse(e.data)
-        canvas.current!.canvas.loadFromJSON(data, () => {
-          canvas.current!.canvas.renderAll()
-        })
+        if (data.type == 'circle') {
+          // canvas.current?.initCircle()
+
+          let canvasObject = new fabric.Circle(data.data)
+
+          console.log(data.data)
+          console.log(canvasObject)
+
+          canvas.current!.canvas.add(canvasObject)
+        }
+        // canvas.current!.canvas.loadFromJSON(data, () => {
+        //   canvas.current!.canvas.renderAll()
+        // })
       }
     }
   }, [ws])
@@ -111,13 +134,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current.initCanvas()
     canvas.current.initCanvasEvent()
     ClickTools(1, 'brush', canvas.current)
-    document.onkeydown = (e) => {
-      if (e.key == 'Backspace') {
-        console.log('删除案件执行')
-
-        canvas.current!.deleteSelectObj()
-      }
-    }
   }, [])
   // useEffect(() => {
   //   console.log('选中图形了')
