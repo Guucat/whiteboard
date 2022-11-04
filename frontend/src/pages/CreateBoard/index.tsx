@@ -1,7 +1,5 @@
-import React, { FC, useRef, useEffect, useState, useCallback } from 'react'
-
-// import { BaseBoard, getPosition } from '@/utils'
-import { CanvasProps, MousePos } from '@/type'
+import { FC, useRef } from 'react'
+import { CanvasProps } from '@/type'
 import CanvasBoard from '@/components/CanvasBoard'
 
 const CreateBoard: FC<CanvasProps> = (props) => {

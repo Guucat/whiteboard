@@ -1,5 +1,4 @@
 import { register } from '@/service'
-import { AxiosResponse } from 'axios'
 import React, { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import style from './index.module.css'

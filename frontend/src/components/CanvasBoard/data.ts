@@ -44,4 +44,9 @@ export const tools = [
     type: 'ellipse',
     value: 'icon-tx-tuoyuanxing',
   },
+  {
+    id: 9,
+    type: 'eraser',
+    value: 'icon-xiangpica',
+  },
 ]

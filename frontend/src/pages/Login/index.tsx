@@ -29,7 +29,6 @@ const Login: FC = () => {
     if (getLoginData.msg === '登录成功') {
       localStorage.setItem('token', JSON.stringify(getLoginData.data.token))
       navigate('/home')
-      // console.log('11')
     }
   }
   return (
