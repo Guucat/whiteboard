@@ -28,6 +28,7 @@ export class BaseBoard {
   textObject: any
   selectedObj: fabric.Object[] | null
   curObj: {}
+  newestObj: fabric.Object | undefined
 
   constructor(props: BaseBoardProp) {
     this.type = props.type
@@ -69,7 +70,7 @@ export class BaseBoard {
       // 重新渲染画布
       this.canvas.renderAll()
       // 记录画布原始状态
-      this.stateArr.push(JSON.stringify(this.canvas))
+      // this.stateArr.push(JSON.stringify(this.canvas))
       this.stateIdx = 0
     }
   }
@@ -159,15 +160,15 @@ export class BaseBoard {
         // 清空鼠标移动时保存的临时绘图对象
         this.drawingObject = null
         // 鼠标抬起是发送消息
-        console.log('发送的对象', this.curObj)
         let sendObj = JSON.stringify(this.canvas.toJSON())
-        // this.ws.current?.send(sendObj)
-        this.ws.current?.send(JSON.stringify(this.curObj))
+        this.ws.current?.send(sendObj)
         // 重置正在绘制图形标志
         this.isDrawing = false
       } else {
-        console.log('发送的对象', this.curObj)
-
+        // let sentObj = JSON.stringify(this.newestObj)
+        // console.log('发送的对象', sentObj)
+        // let obj = { object: [sentObj] }
+        // this.ws.current?.send(JSON.stringify(obj))
         let sendObj = JSON.stringify(this.canvas.toJSON())
         this.ws.current?.send(sendObj)
       }
@@ -228,6 +229,11 @@ export class BaseBoard {
       console.log('点击其他空白区域')
 
       this.selectedObj = null
+    })
+
+    this.canvas.on('object:added', (e) => {
+      console.log('画布对象被创建了', e.target)
+      this.newestObj = e.target
     })
   }
   // 初始化文本工具
@@ -293,6 +299,8 @@ export class BaseBoard {
       strokeWidth: this.lineSize,
       selectable: true,
     })
+    // console.log(toObject);
+
     // 绘制矩形
     this.drawingGraph(this.canvasObject)
   }
@@ -311,18 +319,18 @@ export class BaseBoard {
       strokeWidth: this.lineSize,
       selectable: true,
     })
-    this.curObj = {
-      type: 'circle',
-      data: {
-        left: left,
-        top: top,
-        stroke: this.strokeColor,
-        fill: this.fillColor,
-        radius: radius,
-        strokeWidth: this.lineSize,
-        selectable: true,
-      },
-    }
+    // this.curObj = {
+    //   type: 'circle',
+    //   data: {
+    //     left: left,
+    //     top: top,
+    //     stroke: this.strokeColor,
+    //     fill: this.fillColor,
+    //     radius: radius,
+    //     strokeWidth: this.lineSize,
+    //     selectable: true,
+    //   },
+    // }
     // 绘制圆形对象
     this.drawingGraph(canvasObject)
   }

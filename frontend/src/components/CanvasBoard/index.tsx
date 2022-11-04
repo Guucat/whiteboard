@@ -113,19 +113,22 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
         console.log('传递过来的数据data', e.data)
         const data = JSON.parse(e.data)
-        if (data.type == 'circle') {
-          // canvas.current?.initCircle()
 
-          let canvasObject = new fabric.Circle(data.data)
+        // if (data.type == 'circle') {
+        //   // canvas.current?.initCircle()
 
-          console.log(data.data)
-          console.log(canvasObject)
+        //   let canvasObject = new fabric.Circle(data.data)
 
-          canvas.current!.canvas.add(canvasObject)
-        }
-        // canvas.current!.canvas.loadFromJSON(data, () => {
-        //   canvas.current!.canvas.renderAll()
-        // })
+        //   console.log(data.data)
+        //   console.log(canvasObject)
+
+        //   canvas.current!.canvas.add(canvasObject)
+        // }
+        canvas.current!.canvas.loadFromJSON(data, () => {
+          canvas.current!.canvas.renderAll()
+        })
+        canvas.current!.stateArr.push(JSON.stringify(canvas.current!.canvas))
+        canvas.current!.stateIdx++
       }
     }
   }, [ws])
