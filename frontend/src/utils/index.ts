@@ -26,6 +26,7 @@ export class BaseBoard {
   isRedoing: boolean
   drawingObject: fabric.Object | null
   textObject: any
+  selectedObj: fabric.Object | undefined
 
   constructor(props: BaseBoardProp) {
     this.type = props.type
@@ -82,6 +83,11 @@ export class BaseBoard {
   }
   initCanvasEvent() {
     this.canvas.on('mouse:down', (options: any) => {
+      if (this.selectedObj) {
+        console.log('有图形被选中了')
+        this.isDrawing = false
+        return
+      }
       if (this.selectTool != 'text' && this.textObject) {
         // 如果当前存在文本对象，并且不是进行添加文字操作 则 退出编辑模式，并删除临时的文本对象
         // 将当前文本对象退出编辑模式
@@ -103,13 +109,14 @@ export class BaseBoard {
         } else {
           // 设置当前正在进行绘图 或 移动操作
           this.isDrawing = true
+          console.log('执行了')
         }
       }
     })
     // 监听鼠标移动事件
     this.canvas.on('mouse:move', (options: any) => {
-      console.log('鼠标移动')
-
+      // console.log('鼠标移动')
+      // console.log('鼠标移动的this', this)
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
         // 记录当前鼠标移动终点坐标 (减去画布在 x y轴的偏移，因为画布左上角坐标不一定在浏览器的窗口左上角)
@@ -144,6 +151,8 @@ export class BaseBoard {
     this.canvas.on('mouse:up', () => {
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
+        console.log('this.isDrawing', this.isDrawing)
+
         // 清空鼠标移动时保存的临时绘图对象
         this.drawingObject = null
         // 鼠标抬起是发送消息
@@ -175,8 +184,17 @@ export class BaseBoard {
         this.isRedoing = false
       }
     })
-    // 监听画布渲染完成
-    // this.canvas.on('after:render', () => {})
+    // 监听选中对象
+    this.canvas.on('selection:created', (e) => {
+      // 选中图层事件触发时，动态更新赋值
+      this.selectedObj = e.selected![0]
+      // console.log('当前选中对象是', e.selected[0])
+      // this.isDrawing = false
+      this.canvas.bringToFront(this.selectedObj)
+      console.log('选中状态的this', this)
+
+      // console.log('this.isDrawing', this.isDrawing)
+    })
   }
   // 初始化文本工具
   initText() {
@@ -218,6 +236,7 @@ export class BaseBoard {
       fill: this.fillColor,
       stroke: this.strokeColor,
       strokeWidth: this.lineSize,
+      selectable: true,
     })
     // 绘制 图形对象
     this.drawingGraph(this.canvasObject)
@@ -237,6 +256,7 @@ export class BaseBoard {
       stroke: this.strokeColor,
       fill: this.fillColor,
       strokeWidth: this.lineSize,
+      selectable: true,
     })
     // 绘制矩形
     this.drawingGraph(this.canvasObject)
@@ -254,6 +274,7 @@ export class BaseBoard {
       fill: this.fillColor,
       radius: radius,
       strokeWidth: this.lineSize,
+      selectable: true,
     })
     // 绘制圆形对象
     this.drawingGraph(canvasObject)
@@ -269,6 +290,7 @@ export class BaseBoard {
       rx: Math.abs(left - this.mouseTo.x) / 2,
       ry: Math.abs(top - this.mouseTo.y) / 2,
       strokeWidth: this.lineSize,
+      selectable: true,
     })
     // 绘制圆形对象
     this.drawingGraph(canvasObject)
@@ -286,6 +308,7 @@ export class BaseBoard {
       width: width,
       height: height,
       strokeWidth: this.lineSize,
+      selectable: true,
     })
     // 绘制圆形对象
     this.drawingGraph(canvasObject)
@@ -306,6 +329,7 @@ export class BaseBoard {
       fill: this.fillColor,
       strokeWidth: this.lineSize,
       angle: 45,
+      selectable: true,
     })
     // 绘制矩形
     this.drawingGraph(this.canvasObject)
@@ -313,7 +337,8 @@ export class BaseBoard {
 
   drawingGraph(canvasObject: any) {
     // 禁止用户选择当前正在绘制的图形
-    canvasObject.selectable = false
+    canvasObject.selectable = true
+
     // 如果当前图形已绘制，清除上一次绘制的图形
     if (this.drawingObject) {
       this.canvas.remove(this.drawingObject)
@@ -321,6 +346,7 @@ export class BaseBoard {
     // 将绘制对象添加到 canvas中
     this.canvas.add(canvasObject)
     // 保存当前绘制的图形
+    // this.isDrawing = false
     this.drawingObject = canvasObject
   }
 }

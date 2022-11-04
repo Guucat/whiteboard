@@ -112,6 +112,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current.initCanvasEvent()
     ClickTools(1, 'brush', canvas.current)
   }, [])
+  // useEffect(() => {
+  //   console.log('选中图形了')
+  //   if (canvas.current?.selectedObj) {
+  //   }
+  // }, [canvas.current?.selectedObj])
   return (
     <div className={style['canvas-wrapper']}>
       <Header></Header>
