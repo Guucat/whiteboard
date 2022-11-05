@@ -35,7 +35,7 @@ export class BaseBoard {
     this.ws = props.ws
     // this.canvas = null
     this.selectedObj = null
-    this.bgColor = '#f2f2f2'
+    this.bgColor = 'pink'
     this.stateArr = [] // 保存画布的操作记录
     this.stateIdx = 0 // 当前操作步数
     this.strokeColor = 'black'
@@ -72,6 +72,8 @@ export class BaseBoard {
       // 记录画布原始状态
       // this.stateArr.push(JSON.stringify(this.canvas))
       this.stateIdx = 0
+
+      console.log('当前的画布颜色', this.canvas.backgroundColor)
     }
   }
   initBrush() {
@@ -412,5 +414,13 @@ export class BaseBoard {
       this.selectedObj.map((item) => {
         this.canvas.remove(item)
       })
+  }
+  clearCanvas() {
+    let children = this.canvas.getObjects()
+    console.log('清屏', children)
+
+    if (children.length > 0) {
+      this.canvas.remove(...children)
+    }
   }
 }

@@ -46,7 +46,9 @@ export const tools = [
   },
   {
     id: 9,
-    type: 'eraser',
-    value: 'icon-xiangpica',
+    type: 'clear',
+    value: 'icon-zu',
   },
 ]
+
+export const color = ['strokeColor', 'fillColor', 'bgColor']

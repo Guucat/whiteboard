@@ -15,7 +15,6 @@
 }
 
 .tools .container {
-  /* height: 70px; */
   padding: 8px 10px;
   border-radius: 20px;
   box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
@@ -37,7 +36,9 @@
   cursor: pointer;
   border: 2px solid transparent;
 }
-
+.tools button:hover{
+  color:#1398e6 ;
+}
 .active,
 .undoRedoActive {
   border-radius: 5px;
@@ -66,3 +67,49 @@
 .no-undo-redo{
   color: gray;
 }
+.undo:hover,.redo:hover{
+  color: #1398e6;
+}
+
+/* 底部 */
+.footer-wrapper{
+  position: absolute;
+  z-index: 3;
+ 
+}
+.footer-container{
+   position: fixed;
+  left: 200px;
+bottom: 40px;
+  /* width: 50px; */
+display: flex;
+justify-content: start;
+border-radius: 20px;
+box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+background: #fff;
+/* padding: 8px; */
+/* height: ; */
+}
+.btn-color-wrapper{
+  margin: 10px 15px;
+  display: flex;
+  justify-content: start;
+  height: 25px;
+  line-height: 25px;
+}
+.btn-color-wrapper:hover,.color-picker:hover{
+  cursor: pointer;
+  color: #1398e6;
+}
+.color-picker{
+  width: 20px;
+  height: 25px;
+  outline: none;
+  border: none;
+  padding: 0;
+}
+.color-label{
+  margin-right: 3px;
+}
+::-webkit-color-swatch-wrapper{background-color:#ffffff;}
+ ::-webkit-color-swatch{position: relative;}

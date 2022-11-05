@@ -1,9 +1,10 @@
 import React, { FC, useRef, useEffect, useState } from 'react'
 import Header from '../Header'
-import style from './index.module.css'
+import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
-import { tools } from './data'
+import { color, tools } from './data'
 import { fabric } from 'fabric'
+import { SketchPicker } from 'react-color'
 interface CanvasBoardProps {
   width?: number
   height?: number
@@ -31,15 +32,23 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     //   })
     // }
     console.log('画笔模式', card.canvas.isDrawingMode)
-    if (tool == 'brush') {
-      card.canvas.selection = false
-      // 如果用户选择的是画笔工具，直接初始化，无需等待用户进行鼠标操作
-      console.log('画笔', card)
-      card.initBrush()
-    } else if (tool == 'select') {
-      card.canvas.selection = true
-    } else {
-      card.canvas.selection = false
+    switch (tool) {
+      case 'brush':
+        card.canvas.selection = false
+        // 如果用户选择的是画笔工具，直接初始化，无需等待用户进行鼠标操作
+        console.log('画笔', card)
+        card.initBrush()
+        break
+      case 'select':
+        card.canvas.selection = true
+        break
+      case 'clear':
+        card.canvas.selection = false
+        card.clearCanvas()
+        break
+      default:
+        card.canvas.selection = false
+        break
     }
   }
 
@@ -53,25 +62,25 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     console.log('当前的index撤销重做', stateIdx)
 
     if (
-      undoRef.current!.classList.contains(style['no-undo-redo']) ||
-      redoRef.current!.classList.contains(style['no-undo-redo'])
+      undoRef.current!.classList.contains(styles['no-undo-redo']) ||
+      redoRef.current!.classList.contains(styles['no-undo-redo'])
     ) {
-      undoRef.current!.classList.remove(style['no-undo-redo'])
-      redoRef.current!.classList.remove(style['no-undo-redo'])
+      undoRef.current!.classList.remove(styles['no-undo-redo'])
+      redoRef.current!.classList.remove(styles['no-undo-redo'])
     }
     // 判断是否已经到了第一步操作
     if (stateIdx < 0) {
-      undoRef.current!.classList.add(style['no-undo-redo'])
+      undoRef.current!.classList.add(styles['no-undo-redo'])
       return
     }
     // 判断是否已经到了最后一步操作
     if (stateIdx >= card.stateArr.length) {
-      redoRef.current!.classList.add(style['no-undo-redo'])
+      redoRef.current!.classList.add(styles['no-undo-redo'])
       return
     }
 
     if (card.stateArr[stateIdx]) {
-      e.target.classList.remove(style['no-undo-redo'])
+      e.target.classList.remove(styles['no-undo-redo'])
       console.log('当前的画布渲染数组', card.stateArr[stateIdx])
 
       card.canvas.loadFromJSON(card.stateArr[stateIdx], () => {
@@ -104,26 +113,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }
     if (ws.current) {
       ws.current.onmessage = (e) => {
-        // canvas.current!.canvas.loadFromJSON(
-        //   '{"objects":[{"type":"rect","left":50,"top":50,"width":20,"height":20,"fill":"green","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"rx":0,"ry":0},{"type":"circle","left":100,"top":100,"width":100,"height":100,"fill":"red","overlayFill":null,"stroke":null,"strokeWidth":1,"strokeDashArray":null,"scaleX":1,"scaleY":1,"angle":0,"flipX":false,"flipY":false,"opacity":1,"selectable":true,"hasControls":true,"hasBorders":true,"hasRotatingPoint":false,"transparentCorners":true,"perPixelTargetFind":false,"radius":50}],"background":"rgba(0, 0, 0, 0)"}',
-        //   () => {
-        //     canvas.current!.canvas.renderAll()
-        //   }
-        // )
-
         console.log('传递过来的数据data', e.data)
         const data = JSON.parse(e.data)
-
-        // if (data.type == 'circle') {
-        //   // canvas.current?.initCircle()
-
-        //   let canvasObject = new fabric.Circle(data.data)
-
-        //   console.log(data.data)
-        //   console.log(canvasObject)
-
-        //   canvas.current!.canvas.add(canvasObject)
-        // }
         canvas.current!.canvas.loadFromJSON(data, () => {
           canvas.current!.canvas.renderAll()
         })
@@ -138,35 +129,71 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current.initCanvasEvent()
     ClickTools(1, 'brush', canvas.current)
   }, [])
-  // useEffect(() => {
-  //   console.log('选中图形了')
-  //   if (canvas.current?.selectedObj) {
-  //   }
-  // }, [canvas.current?.selectedObj])
+  const [showPicker, setShowPicker] = useState(false)
+  const pickerColorRef = useRef<HTMLInputElement | null>(null)
+  function handlePicker(e: any, id: number) {
+    // setShowPicker(true)
+    // const pickerColorValue = pickerColorRef.current
+    // console.log('选择的颜色', pickerColorValue)
+    console.log(e.target.value)
+    console.log(id)
+
+    switch (id) {
+      case 0:
+        canvas.current!.strokeColor = e.target.value
+        break
+      case 1:
+        canvas.current!.fillColor = e.target.value
+        break
+      case 2:
+        canvas.current!.canvas.backgroundColor = e.target.value
+        console.log('画布颜色', canvas.current!.bgColor)
+
+      default:
+        break
+    }
+  }
   return (
-    <div className={style['canvas-wrapper']}>
+    <div className={styles['canvas-wrapper']}>
       <Header></Header>
-      <div className={style['selectBar']}>
-        <div className={style['tools']}>
-          <div className={style['container']}>
+      <div className={styles['selectBar']}>
+        <div className={styles['tools']}>
+          <div className={styles['container']}>
             {tools.map((item) => (
               <button
                 key={item.id}
                 onClick={() => ClickTools(item.id, item.type, canvas.current!)}
-                className={item.id == activeIndex ? style['active'] : style['']}
+                className={item.id == activeIndex ? styles['active'] : styles['']}
               >
                 <i className={`iconfont ${item.value}`} />
               </button>
             ))}
           </div>
         </div>
-        <div className={style['UndoRedo-wrapper']}>
-          <div className={style['undo']} onClick={(e) => handleUndoRedo(-1, e)}>
+        <div className={styles['UndoRedo-wrapper']}>
+          <div className={styles['undo']} onClick={(e) => handleUndoRedo(-1, e)}>
             <i className={`iconfont icon-undo`} ref={undoRef} />
           </div>
-          <div className={style['redo']} onClick={(e) => handleUndoRedo(1, e)}>
+          <div className={styles['redo']} onClick={(e) => handleUndoRedo(1, e)}>
             <i className={`iconfont icon-redo`} ref={redoRef} />
           </div>
+        </div>
+      </div>
+      <div className={styles['footer-wrapper']}>
+        <div className={styles['footer-container']}>
+          {color.map((item, index) => {
+            return (
+              <div className={styles['btn-color-wrapper']} key={index}>
+                <span className={styles['color-label']}>{item}</span>
+                <input
+                  type="color"
+                  className={styles['color-picker']}
+                  ref={pickerColorRef}
+                  onChange={(e) => handlePicker(e, index)}
+                ></input>
+              </div>
+            )
+          })}
         </div>
       </div>
       <canvas width={width} height={height} ref={CanvasRef} id={type}></canvas>

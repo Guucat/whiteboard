@@ -11,8 +11,10 @@
     left: 0px;
     top: 10px;
     width: 100%;
+
 }
 .add-new-page{
+    color: #636262;
     background-color: #fff;
     padding: 5px 8px;
     height: 30px;
@@ -20,15 +22,12 @@
     border-radius: 10px;
     box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58);
     transition: ease 1s;
-    color: white;
-    background-image:linear-gradient(315deg, #96c8fb 0%, #ddbdfc 74%);
-    /* background-image:linear-gradient(315deg,  #ddbdfc 0%, #96c8fb 74%); */
+
+   
 }
 .add-new-page:hover{
     cursor: pointer;
-    background-image:linear-gradient(315deg,  #ddbdfc 0%, #96c8fb 74%);
-    /* background-image:linear-gradient(315deg, #96c8fb 0%, #ddbdfc 74%); */
-    /* color: #fff; */
+   
 }
 .head-right{
      display: flex;
@@ -36,7 +35,7 @@
 }
 .selectMode{
    margin-right: 18px;
-   background-image:linear-gradient(315deg, #96c8fb 0%, #ddbdfc 74%);
+   /* background-image:linear-gradient(315deg, #96c8fb 0%, #ddbdfc 74%); */
    box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58); height: 30px;
     line-height: 30px;
     padding: 5px 8px;
@@ -44,22 +43,22 @@
 }
 .selectMode button{
     border: none;
-    outline: none;
+    outline: none;  
     /* background-size: 20px 20px; */
     background-position: center center;
     background-repeat: no-repeat;
     background: transparent;
     width: 40px;
-    color: #fff;
+    
     transition: ease 0.37s;
    
 }
 .selectMode button:hover{
-    color: #000;
+    color: #1398e6;
 }
-.division{
+/* .division{
     color: #fff;
-}
+} */
 .user{
     margin-right: 50px;
     width: 40px;
