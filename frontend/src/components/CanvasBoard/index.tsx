@@ -2,9 +2,8 @@ import React, { FC, useRef, useEffect, useState } from 'react'
 import Header from '../Header'
 import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
-import { color, tools } from './data'
-import { fabric } from 'fabric'
-import { SketchPicker } from 'react-color'
+import { color, size, tools } from './data'
+
 interface CanvasBoardProps {
   width?: number
   height?: number
@@ -18,7 +17,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [curTools, setCurTools] = useState('line')
   const [activeIndex, setActiveIndex] = useState(1)
   const canvas = useRef<BaseBoard | null>(null)
-
+  const [isSelect, setIsSelect] = useState(false)
   function ClickTools(id: number, tool: string, card: BaseBoard) {
     setActiveIndex(id)
     canvas.current!.selectTool = tool
@@ -51,7 +50,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         break
     }
   }
-
   const undoRef = useRef<HTMLElement | null>(null)
   const redoRef = useRef<HTMLElement | null>(null)
   function handleUndoRedo(flag: number, e: any) {
@@ -71,11 +69,13 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     // 判断是否已经到了第一步操作
     if (stateIdx < 0) {
       undoRef.current!.classList.add(styles['no-undo-redo'])
+
       return
     }
     // 判断是否已经到了最后一步操作
     if (stateIdx >= card.stateArr.length) {
       redoRef.current!.classList.add(styles['no-undo-redo'])
+
       return
     }
 
@@ -129,7 +129,48 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current.initCanvasEvent()
     ClickTools(1, 'brush', canvas.current)
   }, [])
-  const [showPicker, setShowPicker] = useState(false)
+  useEffect(() => {
+    // 监听选中对象
+    const board = canvas.current!
+    board.canvas.on('selection:created', (e) => {
+      console.log('点击当前元素', e.selected!)
+      if (e.selected!.length == 1) {
+        setIsSelect(true)
+      }
+
+      // // 选中图层事件触发时，动态更新赋值
+      board.selectedObj = e.selected!
+      console.log('当前选中对象是', board.selectedObj)
+      document.onkeydown = (e) => {
+        if (e.key == 'Backspace' && board.selectTool !== 'text') {
+          console.log('删除案件执行', board.textObject)
+
+          board.deleteSelectObj()
+        }
+      }
+    })
+
+    board.canvas.on('selection:updated', (e) => {
+      console.log('点击其他画布元素')
+      if (e.selected!.length == 1) {
+        setIsSelect(true)
+      }
+      board.selectedObj = e.selected!
+      document.onkeydown = (e) => {
+        if (e.key == 'Backspace' && board.selectTool !== 'text') {
+          console.log('删除案件执行', board.textObject)
+
+          board.deleteSelectObj()
+        }
+      }
+    })
+
+    board.canvas.on('selection:cleared', (e) => {
+      console.log('点击其他空白区域')
+      setIsSelect(false)
+      board.selectedObj = null
+    })
+  }, [isSelect])
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   function handlePicker(e: any, id: number) {
     // setShowPicker(true)
@@ -148,10 +189,21 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       case 2:
         canvas.current!.canvas.backgroundColor = e.target.value
         console.log('画布颜色', canvas.current!.bgColor)
-
+        break
       default:
         break
     }
+  }
+  function handleSize(e: any) {
+    canvas.current!.fontSize = e.target.value
+  }
+  function editObj(type: any, e: any) {
+    console.log('type', type)
+    console.log('e', e)
+
+    console.log('hhhh', canvas.current!.selectedObj![0].stroke)
+    canvas.current!.selectedObj![0].set(type, e.target.value)
+    canvas.current!.canvas.renderAll()
   }
   return (
     <div className={styles['canvas-wrapper']}>
@@ -194,8 +246,92 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
               </div>
             )
           })}
+
+          <div className={styles['btn-size-wrapper']}>
+            <span className={styles['color-label']}>fontSize</span>
+            <input
+              type="range"
+              className={styles['size-picekr']}
+              ref={pickerColorRef}
+              onChange={(e) => handleSize(e)}
+              min="10"
+              max="40"
+            ></input>
+          </div>
         </div>
       </div>
+      <div className={styles['select-edit-wrapper']}>
+        <div className={styles['select-edit-container']} style={isSelect ? { display: 'block' } : { display: 'none' }}>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>描边</div>
+            <div className={styles['select-item-desc']}>
+              <input
+                type="color"
+                className={styles['select-color']}
+                onChange={(e) => {
+                  editObj('stroke', e)
+                }}
+              />
+              <div className={styles['show-color']}>
+                <div className={styles['detail-color-title']}>颜色</div>
+                <div className={styles['detail-color']}>#ffffff</div>
+              </div>
+            </div>
+          </div>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>填充</div>
+            <div className={styles['select-item-desc']}>
+              <input
+                type="color"
+                className={styles['select-color']}
+                onChange={(e) => {
+                  editObj('fill', e)
+                }}
+              />
+              <div className={styles['show-color']}>
+                <div className={styles['detail-color-title']}>颜色</div>
+                <div className={styles['detail-color']}>#ffffff</div>
+              </div>
+            </div>
+          </div>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>边框样式</div>
+            <div className={styles['select-item-desc']}>
+              <div className={styles['show-line']}>
+                <div className={styles['detail-line']}>实线</div>
+                <div className={styles['detail-line1']}>大虚线</div>
+                <div className={styles['detail-line2']}>小虚线</div>
+              </div>
+            </div>
+          </div>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>透明度</div>
+            <input
+              type="range"
+              className={styles['size-width']}
+              ref={pickerColorRef}
+              onChange={(e) => {
+                editObj('opacity', e)
+              }}
+              min="0"
+              max="1"
+              step="0.01"
+            ></input>
+          </div>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>角度 </div>
+            <input
+              type="range"
+              className={styles['size-width']}
+              ref={pickerColorRef}
+              onChange={(e) => {
+                editObj('angle', e)
+              }}
+            ></input>
+          </div>
+        </div>
+      </div>
+
       <canvas width={width} height={height} ref={CanvasRef} id={type}></canvas>
     </div>
   )

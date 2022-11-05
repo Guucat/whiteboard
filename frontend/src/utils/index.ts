@@ -1,6 +1,7 @@
 import { Gradient, Pattern } from 'fabric/fabric-impl'
 import { fabric } from 'fabric'
 import { toolTypes } from './data'
+
 interface BaseBoardProp {
   type: string
   curTools: string
@@ -39,7 +40,7 @@ export class BaseBoard {
     this.stateArr = [] // 保存画布的操作记录
     this.stateIdx = 0 // 当前操作步数
     this.strokeColor = 'black'
-    this.lineSize = 1
+    this.lineSize = 4
     this.selectTool = props.curTools
     this.isDrawing = false
     this.drawingObject = null
@@ -76,16 +77,7 @@ export class BaseBoard {
       console.log('当前的画布颜色', this.canvas.backgroundColor)
     }
   }
-  initBrush() {
-    // 设置绘画模式画笔类型为 铅笔类型
-    this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas)
-    // 设置画布模式为绘画模式
-    this.canvas.isDrawingMode = true
-    // 设置绘画模式 画笔颜色与画笔线条大小
-    this.canvas.freeDrawingBrush.color = this.strokeColor
-    this.canvas.freeDrawingBrush.width = 4
-    console.log('画笔设置执行了 ')
-  }
+
   initCanvasEvent() {
     this.canvas.on('mouse:down', (options: any) => {
       if (this.selectedObj) {
@@ -194,49 +186,21 @@ export class BaseBoard {
         this.isRedoing = false
       }
     })
-    // 监听选中对象
-    this.canvas.on('selection:created', (e) => {
-      console.log('点击当前元素')
-
-      // // 选中图层事件触发时，动态更新赋值
-      this.selectedObj = e.selected!
-      // // console.log('当前选中对象是', e.selected[0])
-      // // this.isDrawing = false
-      // // this.canvas.bringToFront(this.selectedObj)
-      // console.log('选中状态的this', this)
-      document.onkeydown = (e) => {
-        if (e.key == 'Backspace' && this.selectTool !== 'text') {
-          console.log('删除案件执行', this.textObject)
-
-          this.deleteSelectObj()
-        }
-      }
-      // console.log('this.isDrawing', this.isDrawing)
-    })
-
-    this.canvas.on('selection:updated', (e) => {
-      console.log('点击其他画布元素')
-
-      this.selectedObj = e.selected!
-      document.onkeydown = (e) => {
-        if (e.key == 'Backspace' && this.selectTool !== 'text') {
-          console.log('删除案件执行', this.textObject)
-
-          this.deleteSelectObj()
-        }
-      }
-    })
-
-    this.canvas.on('selection:cleared', (e) => {
-      console.log('点击其他空白区域')
-
-      this.selectedObj = null
-    })
 
     this.canvas.on('object:added', (e) => {
       console.log('画布对象被创建了', e.target)
       this.newestObj = e.target
     })
+  }
+  initBrush() {
+    // 设置绘画模式画笔类型为 铅笔类型
+    this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas)
+    // 设置画布模式为绘画模式
+    this.canvas.isDrawingMode = true
+    // 设置绘画模式 画笔颜色与画笔线条大小
+    this.canvas.freeDrawingBrush.color = this.strokeColor
+    this.canvas.freeDrawingBrush.width = this.lineSize
+    console.log('画笔设置执行了 ')
   }
   // 初始化文本工具
   initText() {
@@ -254,6 +218,8 @@ export class BaseBoard {
         backgroundColor: 'transparent',
         selectable: true,
         padding: 10,
+        angle: 0,
+        opacity: 1,
       })
       this.canvas.add(this.textObject)
       // 文本打开编辑模式
@@ -279,6 +245,8 @@ export class BaseBoard {
       stroke: this.strokeColor,
       strokeWidth: this.lineSize,
       selectable: true,
+      angle: 0,
+      opacity: 1,
     })
 
     // 绘制 图形对象
@@ -300,6 +268,8 @@ export class BaseBoard {
       fill: this.fillColor,
       strokeWidth: this.lineSize,
       selectable: true,
+      angle: 0,
+      opacity: 1,
     })
     // console.log(toObject);
 
@@ -320,19 +290,10 @@ export class BaseBoard {
       radius: radius,
       strokeWidth: this.lineSize,
       selectable: true,
+      angle: 0,
+      opacity: 1,
     })
-    // this.curObj = {
-    //   type: 'circle',
-    //   data: {
-    //     left: left,
-    //     top: top,
-    //     stroke: this.strokeColor,
-    //     fill: this.fillColor,
-    //     radius: radius,
-    //     strokeWidth: this.lineSize,
-    //     selectable: true,
-    //   },
-    // }
+
     // 绘制圆形对象
     this.drawingGraph(canvasObject)
   }
@@ -348,6 +309,8 @@ export class BaseBoard {
       ry: Math.abs(top - this.mouseTo.y) / 2,
       strokeWidth: this.lineSize,
       selectable: true,
+      angle: 0,
+      opacity: 1,
     })
     // 绘制圆形对象
     this.drawingGraph(canvasObject)
@@ -366,17 +329,17 @@ export class BaseBoard {
       height: height,
       strokeWidth: this.lineSize,
       selectable: true,
+      angle: 0,
+      opacity: 1,
     })
-    // 绘制圆形对象
     this.drawingGraph(canvasObject)
   }
+  // 菱形
   initRhombus() {
     // 计算矩形长宽
     let left = this.mouseFrom.x
     let top = this.mouseFrom.y
-    let width = this.mouseTo.x - this.mouseFrom.x
     let height = this.mouseTo.y - this.mouseFrom.y
-    // 创建矩形 对象
     this.canvasObject = new fabric.Rect({
       left: left,
       top: top,
@@ -387,8 +350,8 @@ export class BaseBoard {
       strokeWidth: this.lineSize,
       angle: 45,
       selectable: true,
+      opacity: 1,
     })
-    // 绘制矩形
     this.drawingGraph(this.canvasObject)
   }
 
@@ -415,6 +378,7 @@ export class BaseBoard {
         this.canvas.remove(item)
       })
   }
+  // 清屏
   clearCanvas() {
     let children = this.canvas.getObjects()
     console.log('清屏', children)

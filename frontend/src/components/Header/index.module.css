@@ -40,6 +40,7 @@
     line-height: 30px;
     padding: 5px 8px;
     border-radius: 10px;
+    background-color: #fff;
 }
 .selectMode button{
     border: none;

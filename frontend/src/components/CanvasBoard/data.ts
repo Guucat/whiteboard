@@ -52,3 +52,4 @@ export const tools = [
 ]
 
 export const color = ['strokeColor', 'fillColor', 'bgColor']
+export const size = ['lineSize', 'fontSize']

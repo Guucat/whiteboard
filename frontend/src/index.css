@@ -1,12 +1,6 @@
-/* Document
- * ========================================================================== */
 
-/**
- * 1. Correct the line height in all browsers.
- * 2. Prevent adjustments of font size after orientation changes in
- *    IE on Windows Phone and in iOS.
- */
  @import '../public/iconfont/iconfont.css';
+
 * {
   margin: 0;
   padding: 0;

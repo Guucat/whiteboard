@@ -36,9 +36,11 @@
   cursor: pointer;
   border: 2px solid transparent;
 }
-.tools button:hover{
-  color:#1398e6 ;
+
+.tools button:hover {
+  color: #1398e6;
 }
+
 .active,
 .undoRedoActive {
   border-radius: 5px;
@@ -64,52 +66,182 @@
   text-align: center;
   font-weight: bold;
 }
-.no-undo-redo{
+
+.no-undo-redo {
   color: gray;
+  cursor: not-allowed;
 }
-.undo:hover,.redo:hover{
+
+.undo:hover,
+.redo:hover {
   color: #1398e6;
 }
 
 /* 底部 */
-.footer-wrapper{
+.footer-wrapper {
   position: absolute;
   z-index: 3;
- 
+
 }
-.footer-container{
-   position: fixed;
+
+.footer-container {
+  position: fixed;
   left: 200px;
-bottom: 40px;
+  bottom: 40px;
   /* width: 50px; */
-display: flex;
-justify-content: start;
-border-radius: 20px;
-box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
-background: #fff;
-/* padding: 8px; */
-/* height: ; */
+  display: flex;
+  justify-content: start;
+  border-radius: 20px;
+  box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+  background: #fff;
+  /* padding: 8px; */
+  /* height: ; */
 }
-.btn-color-wrapper{
+
+.btn-color-wrapper,
+.btn-size-wrapper {
   margin: 10px 15px;
   display: flex;
   justify-content: start;
   height: 25px;
   line-height: 25px;
 }
-.btn-color-wrapper:hover,.color-picker:hover{
+
+.btn-color-wrapper:hover,
+.color-picker:hover {
   cursor: pointer;
   color: #1398e6;
 }
-.color-picker{
+
+.color-picker {
   width: 20px;
   height: 25px;
   outline: none;
   border: none;
   padding: 0;
 }
-.color-label{
+
+.color-label {
   margin-right: 3px;
 }
-::-webkit-color-swatch-wrapper{background-color:#ffffff;}
- ::-webkit-color-swatch{position: relative;}
+
+
+
+.select-edit-wrapper {
+
+  position: absolute;
+  z-index: 3;
+}
+
+
+/* 选中修改 */
+.select-edit-container {
+  animation: fadeInRight 0.5s;
+  animation-fill-mode: both !important;
+  -webkit-animation-fill-mode: both !important;
+  position: fixed;
+  right: 35px;
+  top: 110px;
+  width: 250px;
+  height: 380px;
+  background-color: #fff;
+  padding: 10px 15px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58);
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    -webkit-transform: translate(1000px, 0);
+    transform: stranslate(1000px, 0);
+  }
+
+  to {
+    opacity: 1;
+    -webkit-transform: translate(10px, 0);
+    transform: stranslate(10px, 0);
+  }
+}
+
+.select-item-wrapper{
+  margin-bottom: 10px;
+}
+.select-item-title{
+  color: #343a40;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+.select-item-desc{
+ display: flex;
+ justify-content: start;
+}
+.select-color{
+  outline: none;
+  border: none;
+  padding: 0;
+  width: 36px;
+  height: 40px;
+  margin-right: 8px;
+}
+.show-color{
+  display: flex;
+  justify-content: start;
+  width: 90%;
+  margin-top: 3px;
+}
+.detail-color-title{
+  background-color: #f5f7fa;
+  color:#909399;
+ 
+  border-radius: 4px;
+  font-size: 16px;
+  width: 30%;
+  height: 35px;
+  line-height: 35px;
+  text-align: center;
+  white-space: nowrap;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0px;
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+}
+.detail-color{
+  padding: 0px 10px;
+border-radius: 4px;
+  border-left: 0px;
+  width: 60%;
+  height: 35px;
+  line-height: 35px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+}
+.size-width{
+  width: 100%;
+
+}
+.show-line{
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  display: flex;
+  justify-content: start;
+  font-size: 16px;
+ width: 100%;
+ height: 35px;
+ line-height: 35px;
+}
+.detail-line,.detail-line1,.detail-line2{
+  width: 30%;
+  text-align: center;
+}
+.detail-line,.detail-line1{
+  border-right: 1px solid #dcdfe6;
+}
+::-webkit-color-swatch-wrapper {
+  background-color: #ffffff;
+}
+
+::-webkit-color-swatch {
+  position: relative;
+}
