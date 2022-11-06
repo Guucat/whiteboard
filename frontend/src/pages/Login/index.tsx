@@ -1,3 +1,4 @@
+import { login } from '@/service'
 import React, { FC, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import style from './index.module.css'
@@ -14,12 +15,22 @@ const Login: FC = () => {
     }
   }, [])
 
-  function handleLogin() {
+  const handleLogin = async () => {
     // 发送登录请求，得到token
     // 如果得到了token以后，判断登录是否成功，如果成功则跳转到主面
     //将token存起来
+    let formData = new FormData()
+    console.log('name', userNameRef.current!.value)
 
-    navigate('/home')
+    formData.append('name', userNameRef.current!.value)
+    formData.append('pwd', pwdRef.current!.value)
+    const getLoginData: any = await login(formData)
+    console.log(getLoginData)
+    if (getLoginData.msg === '登录成功') {
+      localStorage.setItem('token', JSON.stringify(getLoginData.data.token))
+      navigate('/home')
+      // console.log('11')
+    }
   }
   return (
     <div className={style['container']}>
@@ -27,7 +38,16 @@ const Login: FC = () => {
         <div className={style['header']}>Login</div>
         <div className={style['form-wrapper']}>
           <input type="text" name="username" placeholder="username" className={style['input-item']} ref={userNameRef} />
-          <input type="password" name="password" placeholder="password" className={style['input-item']} ref={pwdRef} />
+          <form action="">
+            <input
+              type="password"
+              name="password"
+              placeholder="password"
+              className={style['input-item']}
+              ref={pwdRef}
+            />
+          </form>
+
           <div className={style['btn']} onClick={handleLogin}>
             Login
           </div>
