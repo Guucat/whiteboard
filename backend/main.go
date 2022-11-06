@@ -5,6 +5,7 @@ import (
 	"log"
 	"whiteboard/dao/mysql"
 	"whiteboard/dao/redis"
+	"whiteboard/middleware/rabbitmq"
 	"whiteboard/router"
 	"whiteboard/setting"
 	"whiteboard/utils/validator"
@@ -21,6 +22,7 @@ func init() {
 	redis.Init(setting.Conf.RedisConfig)
 	//初始化Validate
 	validator.Init()
+	rabbitmq.Init()
 }
 
 func main() {

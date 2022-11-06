@@ -6,15 +6,15 @@ type ExchangeInfo struct {
 	ExchangeName string
 	queueName    string
 	// 创建队列后, 通过Message消费消息
-	Messages <-chan amqp.Delivery
+	messages <-chan amqp.Delivery
 }
 
 func (info *ExchangeInfo) NewPsExchange() error {
 	return Chan.ExchangeDeclare(
 		info.ExchangeName,
 		"fanout",
-		true,
 		false,
+		true,
 		false,
 		false,
 		nil,
@@ -27,7 +27,7 @@ func (info *ExchangeInfo) NewPsQueue() error {
 	que, err := Chan.QueueDeclare(
 		"",
 		false,
-		false,
+		true,
 		true, // When the connection that declared it closes, the queue will be deleted
 		false,
 		nil,
@@ -47,7 +47,7 @@ func (info *ExchangeInfo) NewPsQueue() error {
 		return err
 	}
 	// 初始化消息Channel
-	info.Messages, err = Chan.Consume(
+	info.messages, err = Chan.Consume(
 		info.queueName,
 		"",
 		true,
@@ -60,4 +60,23 @@ func (info *ExchangeInfo) NewPsQueue() error {
 		return err
 	}
 	return nil
+}
+
+func (info *ExchangeInfo) SendMessage(data string) error {
+	err := Chan.Publish(
+		info.ExchangeName,
+		"",
+		false,
+		false,
+		amqp.Publishing{
+			DeliveryMode: amqp.Transient,
+			ContentType:  "text/plain",
+			Body:         []byte(data),
+		},
+	)
+	return err
+}
+
+func (info *ExchangeInfo) ReceiveMessage() <-chan amqp.Delivery {
+	return info.messages
 }

@@ -8,7 +8,7 @@ import (
 var Chan *amqp.Channel
 
 func Init() {
-	conn, err := amqp.Dial("amqp://test:test@localhost:5672")
+	conn, err := amqp.Dial("amqp://test:test@114.55.132.72:5672")
 	if err != nil {
 		log.Panicf("%s: %s", "连接RabbitMQ服务器失败: ", err)
 	}

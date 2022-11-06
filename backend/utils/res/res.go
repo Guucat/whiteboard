@@ -12,3 +12,11 @@ func Ok(c *gin.Context, code int, msg string, data gin.H) {
 		"data": data,
 	})
 }
+
+func Fail(c *gin.Context, code int, msg string, data gin.H) {
+	c.JSON(http.StatusBadRequest, gin.H{
+		"code": code,
+		"msg":  msg,
+		"data": data,
+	})
+}

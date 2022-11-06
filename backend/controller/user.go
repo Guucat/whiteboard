@@ -14,13 +14,13 @@ func Register(c *gin.Context) {
 	pwd := c.PostForm("pwd")
 	err := validator.Validate.Struct(&model.User{Name: name, Pwd: pwd})
 	if err != nil {
-		res.Ok(c, 400, "注册失败, 用户名或密码为空", nil)
+		res.Fail(c, 400, "注册失败, 用户名或密码为空", nil)
 		return
 	}
 
 	err = service.Register(name, pwd)
 	if err != nil {
-		res.Ok(c, 400, "注册失败, 账号已注册", nil)
+		res.Fail(c, 400, "注册失败, 账号已注册", nil)
 		return
 	}
 	res.Ok(c, 200, "注册成功", nil)

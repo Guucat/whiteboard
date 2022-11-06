@@ -26,16 +26,35 @@ func PutUniqueId() (boardId int, err error) {
 }
 
 func PutUserIntoBoard(boardId int, userName string) error {
-	if err := DB.SAdd(Ctx, strconv.Itoa(boardId), userName).Err(); err != nil {
-		return err
-	}
-	return nil
+	key := strconv.Itoa(boardId) + "users"
+	return DB.SAdd(Ctx, key, userName).Err()
 }
 
-func GetBoardById(boardId int) bool {
-	ok := DB.Exists(Ctx, strconv.Itoa(boardId)).Val()
-	if ok == 1 {
-		return true
-	}
-	return false
+func RemoveUserFromBoard(boardId int, userName string) error {
+	key := strconv.Itoa(boardId) + "users"
+	return DB.SRem(Ctx, key, userName).Err()
+}
+
+func GetUsersOfBoard(boarId int) []string {
+	key := strconv.Itoa(boarId) + "users"
+	return DB.SMembers(Ctx, key).Val()
+}
+
+func PutPageIntoBoard(boardId int, pageId int, data string) error {
+	key := strconv.Itoa(boardId) + "pages"
+	filed := strconv.Itoa(pageId)
+	return DB.HSet(Ctx, key, filed, data).Err()
+}
+
+func GetPages(boardId int, pageId int) (string, error) {
+	key := strconv.Itoa(boardId) + "pages"
+	filed := strconv.Itoa(pageId)
+	res := DB.HGet(Ctx, key, filed)
+	return res.Result()
+}
+
+func ExistBoard(boardId int) bool {
+	key := strconv.Itoa(boardId) + "board"
+	ok := DB.Exists(Ctx, key).Val()
+	return ok == 1
 }

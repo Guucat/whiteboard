@@ -18,6 +18,8 @@ func SetupRouter() *gin.Engine {
 	{
 		boardGroup.GET("/create", middleware.JWTAuthMiddleware(), controller.CreateBoard)
 		boardGroup.GET("/enter", controller.EnterBoard)
+		boardGroup.GET("/validate", controller.ValidateBoardId)
+		boardGroup.GET("/users", controller.GetOnlineUsers)
 	}
 	pprof.RouteRegister(boardGroup, "pprof")
 
