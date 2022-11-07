@@ -1,5 +1,5 @@
 import { register } from '@/service'
-import React, { useRef, useState } from 'react'
+import { useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import style from './index.module.css'
 export default function Register() {
@@ -16,6 +16,7 @@ export default function Register() {
     formData.append('pwd', password)
 
     const getData: any = await register(formData)
+    console.log('register', getData)
 
     if (getData.msg === '注册成功') {
       navigate('/login', { state: { username, password } })

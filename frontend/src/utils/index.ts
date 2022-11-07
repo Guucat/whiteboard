@@ -58,6 +58,8 @@ export class BaseBoard {
       x: 0,
       y: 0,
     }
+    this.initCanvas()
+    this.initCanvasEvent()
   }
   initCanvas() {
     if (!this.canvas) {
@@ -81,6 +83,8 @@ export class BaseBoard {
         this.isDrawing = false
         return
       }
+      console.log('鼠标按下事件执行了', options)
+
       if (this.selectTool != 'text' && this.textObject) {
         // 如果当前存在文本对象，并且不是进行添加文字操作 则 退出编辑模式，并删除临时的文本对象
         // 将当前文本对象退出编辑模式
@@ -107,6 +111,8 @@ export class BaseBoard {
     })
     // 监听鼠标移动事件
     this.canvas.on('mouse:move', (options: any) => {
+      console.log('鼠标移动事件执行了', options)
+
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
         // 记录当前鼠标移动终点坐标 (减去画布在 x y轴的偏移，因为画布左上角坐标不一定在浏览器的窗口左上角)
@@ -177,6 +183,8 @@ export class BaseBoard {
     })
   }
   initBrush() {
+    console.log('初始化画笔执行了')
+
     // 设置绘画模式画笔类型为 铅笔类型
     this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas)
     // 设置画布模式为绘画模式
@@ -190,6 +198,8 @@ export class BaseBoard {
     if (!this.textObject) {
       // 当前不存在绘制中的文本对象
       // 创建文本对象
+      console.log('文本', this.selectTool)
+
       this.textObject = new fabric.Textbox('', {
         left: this.mouseFrom.x,
         top: this.mouseFrom.y,

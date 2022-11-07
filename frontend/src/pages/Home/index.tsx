@@ -1,5 +1,5 @@
 import Modal from '@/components/Modal'
-import React, { FC, useEffect, useState, useRef } from 'react'
+import { FC, useEffect, useState } from 'react'
 import { atom, useRecoilState } from 'recoil'
 import { useNavigate } from 'react-router-dom'
 import style from './index.module.css'

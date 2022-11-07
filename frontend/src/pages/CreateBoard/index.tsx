@@ -5,11 +5,9 @@ import CanvasBoard from '@/components/CanvasBoard'
 const CreateBoard: FC<CanvasProps> = (props) => {
   const { width, height } = props
 
-  const ws = useRef<WebSocket | null>(null)
-
   return (
     <div>
-      <CanvasBoard width={width} height={height} ws={ws} type={'create'}></CanvasBoard>
+      <CanvasBoard width={width} height={height} type={'create'}></CanvasBoard>
     </div>
   )
 }

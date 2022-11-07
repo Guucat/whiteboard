@@ -1,99 +1,23 @@
-import React, { FC, useRef, useEffect, useState } from 'react'
+import { FC, useRef, useEffect, useState } from 'react'
 import Header from '../Header'
 import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
-import { color, size, tools } from './data'
-import { fabric } from 'fabric'
+import { color, tools } from '@/utils/data'
 import { useRecoilState } from 'recoil'
 import { ModalVisible } from '@/pages/Home'
 import Modal from '../Modal'
-import { Message, Popconfirm } from '@arco-design/web-react'
-interface CanvasBoardProps {
-  width?: number
-  height?: number
-  type: string
-  CanvasRef?: React.RefObject<HTMLCanvasElement>
-  ws?: React.MutableRefObject<WebSocket | null>
-  boardId?: number
-}
+import { CanvasBoardProps } from '@/type'
+import SelectBar from '../SelectBar'
+
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   // 弹窗
   const [visibles, setVisible] = useRecoilState(ModalVisible)
   const [modalType, setModalType] = useState('')
-  const { width, height, CanvasRef, type, boardId } = props
+  const { width, height, type, boardId } = props
   const [curTools, setCurTools] = useState('line')
-  const [activeIndex, setActiveIndex] = useState(1)
   const canvas = useRef<BaseBoard | null>(null)
   const [isSelect, setIsSelect] = useState(false)
-  function ClickTools(id: number, tool: string, card: BaseBoard) {
-    setActiveIndex(id)
-    canvas.current!.selectTool = tool
-    // 禁用画笔模式
-    card.canvas.isDrawingMode = false
-    // 禁止图形选择编辑
-    let drawObjects = card.canvas.getObjects()
-    switch (tool) {
-      case 'brush':
-        card.canvas.selection = false
-        // 如果用户选择的是画笔工具，直接初始化，无需等待用户进行鼠标操作
-        card.initBrush()
-        break
-      case 'select':
-        card.canvas.selection = true
-        break
-      case 'clear':
-        card.canvas.selection = false
-        card.clearCanvas()
-        break
-      default:
-        card.canvas.selection = false
-        break
-    }
-  }
-  const undoRef = useRef<HTMLElement | null>(null)
-  const redoRef = useRef<HTMLElement | null>(null)
-  function handleUndoRedo(flag: number, e: any) {
-    const card = canvas.current!
-    card.isRedoing = true
-    let stateIdx = card.stateIdx + flag
-
-    if (
-      undoRef.current!.classList.contains(styles['no-undo-redo']) ||
-      redoRef.current!.classList.contains(styles['no-undo-redo'])
-    ) {
-      undoRef.current!.classList.remove(styles['no-undo-redo'])
-      redoRef.current!.classList.remove(styles['no-undo-redo'])
-    }
-    // 判断是否已经到了第一步操作
-    if (stateIdx < 0) {
-      undoRef.current!.classList.add(styles['no-undo-redo'])
-
-      return
-    }
-    // 判断是否已经到了最后一步操作
-    if (stateIdx >= card.stateArr.length) {
-      redoRef.current!.classList.add(styles['no-undo-redo'])
-
-      return
-    }
-
-    if (card.stateArr[stateIdx]) {
-      e.target.classList.remove(styles['no-undo-redo'])
-      card.canvas.loadFromJSON(card.stateArr[stateIdx], () => {
-        card.canvas.renderAll()
-        card.isRedoing = false
-      })
-      let obj = { pageId: 0, seqData: card.stateArr[stateIdx] }
-      let sendObj = JSON.stringify(obj)
-      card.ws.current?.send(sendObj)
-      if (card.canvas.getObjects().length > 0) {
-        card.canvas.getObjects().forEach((item: any) => {
-          item.set('selectable', false)
-        })
-      }
-      card.stateIdx = stateIdx
-    }
-  }
+  const [loading, setLoading] = useState(true)
   const ws = useRef<WebSocket | null>(null)
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
@@ -112,7 +36,16 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     if (ws.current) {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        const canvasData = data.data.seqData
+        console.log('接收到的数据是', data)
+        // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
+        let canvasData
+        if (data.type == 1) {
+          canvasData = data.data.history[0]
+          console.log('history', canvasData)
+        } else {
+          canvasData = data.data.seqData
+        }
+        //  = data.data.seqData
         canvas.current!.canvas.loadFromJSON(canvasData, () => {
           canvas.current!.canvas.renderAll()
         })
@@ -122,11 +55,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }
   }, [ws])
   useEffect(() => {
-    setVisible(false)
     canvas.current = new BaseBoard({ type, curTools, ws })
-    canvas.current.initCanvas()
-    canvas.current.initCanvasEvent()
-    ClickTools(1, 'brush', canvas.current)
+    setVisible(false)
+    setLoading(false)
   }, [])
   useEffect(() => {
     // 监听选中对象
@@ -227,29 +158,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   return (
     <div className={styles['canvas-wrapper']}>
       <Header></Header>
-      <div className={styles['selectBar']}>
-        <div className={styles['tools']}>
-          <div className={styles['container']}>
-            {tools.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => ClickTools(item.id, item.type, canvas.current!)}
-                className={item.id == activeIndex ? styles['active'] : styles['']}
-              >
-                <i className={`iconfont ${item.value}`} />
-              </button>
-            ))}
-          </div>
-        </div>
-        <div className={styles['UndoRedo-wrapper']}>
-          <div className={styles['undo']} onClick={(e) => handleUndoRedo(-1, e)}>
-            <i className={`iconfont icon-undo`} ref={undoRef} />
-          </div>
-          <div className={styles['redo']} onClick={(e) => handleUndoRedo(1, e)}>
-            <i className={`iconfont icon-redo`} ref={redoRef} />
-          </div>
-        </div>
-      </div>
+
+      {loading ? <></> : <SelectBar canvas={canvas.current!}></SelectBar>}
+
       <div className={styles['footer-wrapper']}>
         <div className={styles['footer-container']}>
           {color.map((item, index) => {
@@ -365,7 +276,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       </div>
       <Modal visible={visibles} describe={modalType} jsonData={jsonData.current}></Modal>
 
-      <canvas width={width} height={height} ref={CanvasRef} id={type}></canvas>
+      <canvas width={width} height={height} id={type}></canvas>
     </div>
   )
 }

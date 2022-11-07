@@ -1,5 +1,5 @@
 import { login } from '@/service'
-import React, { FC, useEffect, useRef } from 'react'
+import { FC, useEffect, useRef } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import style from './index.module.css'
 
@@ -20,12 +20,9 @@ const Login: FC = () => {
     // 如果得到了token以后，判断登录是否成功，如果成功则跳转到主面
     //将token存起来
     let formData = new FormData()
-    console.log('name', userNameRef.current!.value)
-
     formData.append('name', userNameRef.current!.value)
     formData.append('pwd', pwdRef.current!.value)
     const getLoginData: any = await login(formData)
-    console.log(getLoginData)
     if (getLoginData.msg === '登录成功') {
       localStorage.setItem('token', JSON.stringify(getLoginData.data.token))
       navigate('/home')
