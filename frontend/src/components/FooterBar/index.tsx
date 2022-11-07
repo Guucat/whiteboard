@@ -79,6 +79,9 @@ const FooterBar: FC<SelectBarProps> = (props) => {
   function handleCancle() {
     setIsDownload(false)
   }
+
+  //上传json文件到白板
+  function uploadJson() {}
   return (
     <>
       {' '}
@@ -110,7 +113,7 @@ const FooterBar: FC<SelectBarProps> = (props) => {
             ></input>
           </div>
           <div className={styles['btn-size-wrapper']}>
-            <i className={`iconfont icon-shangchuan1`} />
+            <i className={`iconfont icon-shangchuan1`} onClick={uploadJson} />
           </div>
           <div className={`${styles['btn-size-wrapper']} ${styles['download']}`}>
             <i className={`iconfont icon-xiazai2`} onClick={showDownload} />
