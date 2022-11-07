@@ -18,3 +18,9 @@ export interface CanvasBoardProps {
 export interface SelectBarProps {
   canvas: BaseBoard
 }
+
+export interface BaseBoardProp {
+  type: string
+  curTools: string
+  ws: React.MutableRefObject<WebSocket | null>
+}

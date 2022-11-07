@@ -1,16 +1,11 @@
 import { Gradient, Pattern } from 'fabric/fabric-impl'
 import { fabric } from 'fabric'
 import { toolTypes } from './data'
+import { BaseBoardProp } from '@/type'
 
-interface BaseBoardProp {
-  type: string
-  curTools: string
-  ws: React.MutableRefObject<WebSocket | null>
-}
 export class BaseBoard {
   canvas!: fabric.Canvas
   type: string
-
   stateArr: string[]
   stateIdx: number
   strokeColor: string
@@ -29,14 +24,11 @@ export class BaseBoard {
   textObject: any
   selectedObj: fabric.Object[] | null
   curObj: {}
-  newestObj: fabric.Object | undefined
 
   constructor(props: BaseBoardProp) {
     this.type = props.type
     this.ws = props.ws
-    // this.canvas = null
     this.selectedObj = null
-
     this.stateArr = [] // 保存画布的操作记录
     this.stateIdx = 0 // 当前操作步数
     this.strokeColor = 'black'
@@ -68,26 +60,21 @@ export class BaseBoard {
       this.canvas.selection = false
       // 设置当前鼠标停留在
       this.canvas.hoverCursor = 'default'
-      // this.canvas.backgroundColor = this.bgColor
       // 重新渲染画布
       this.canvas.renderAll()
-      // 记录画布原始状态
-      // this.stateArr.push(JSON.stringify(this.canvas))
       this.stateIdx = 0
     }
   }
 
   initCanvasEvent() {
-    this.canvas.on('mouse:down', (options: any) => {
+    this.canvas.on('mouse:down', (options) => {
+      console.log('鼠标按下事件执行了', options)
       if (this.selectedObj) {
         this.isDrawing = false
         return
       }
-      console.log('鼠标按下事件执行了', options)
-
       if (this.selectTool != 'text' && this.textObject) {
-        // 如果当前存在文本对象，并且不是进行添加文字操作 则 退出编辑模式，并删除临时的文本对象
-        // 将当前文本对象退出编辑模式
+        // 如果当前存在文本对象，并且不是进行添加文字操作 则 退出编辑模式
         this.textObject.exitEditing()
         if (this.textObject.text == '') {
           this.canvas.remove(this.textObject)
@@ -97,11 +84,10 @@ export class BaseBoard {
       }
       // 判断当前是否选择了集合中的操作
       if (toolTypes.indexOf(this.selectTool) != -1) {
-        // 记录当前鼠标的起点坐标 (减去画布在 x y轴的偏移，因为画布左上角坐标不一定在浏览器的窗口左上角)
+        // 记录当前鼠标的起点坐标
         this.mouseFrom.x = options.e.clientX
         this.mouseFrom.y = options.e.clientY
         if (this.selectTool == 'text') {
-          // 文本工具初始化
           this.initText()
         } else {
           // 设置当前正在进行绘图 或 移动操作
@@ -110,13 +96,12 @@ export class BaseBoard {
       }
     })
     // 监听鼠标移动事件
-    this.canvas.on('mouse:move', (options: any) => {
+    this.canvas.on('mouse:move', (options) => {
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
-        // 记录当前鼠标移动终点坐标 (减去画布在 x y轴的偏移，因为画布左上角坐标不一定在浏览器的窗口左上角)
+        // 记录当前鼠标移动终点坐标
         this.mouseTo.x = options.e.clientX
         this.mouseTo.y = options.e.clientY
-        // this.pointData.push(this.mouseTo)
         switch (this.selectTool) {
           case 'line':
             // 当前绘制直线，初始化直线绘制
@@ -141,27 +126,18 @@ export class BaseBoard {
     })
     // 监听鼠标松开事件
     let recordTimer: any
-
+    // 鼠标抬起是发送消息
     this.canvas.on('mouse:up', () => {
-      // 如果当前正在进行绘图或移动相关操作
+      // 清空鼠标移动时保存的临时绘图对象
+      this.drawingObject = null
+      let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
+      let sendObj = JSON.stringify(obj)
+      this.ws.current?.send(sendObj)
       if (this.isDrawing) {
-        // 清空鼠标移动时保存的临时绘图对象
-        this.drawingObject = null
-        // 鼠标抬起是发送消息
-        let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
-        let sendObj = JSON.stringify(obj)
-        this.ws.current?.send(sendObj)
-        // 重置正在绘制图形标志
         this.isDrawing = false
-      } else {
-        let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
-        let sendObj = JSON.stringify(obj)
-        this.ws.current?.send(sendObj)
       }
-
+      // 当前不是进行撤销或重做操作
       if (!this.isRedoing) {
-        // 当前不是进行撤销或重做操作
-        // 在绘画时会频繁触发该回调，所以间隔1s记录当前状态
         if (recordTimer) {
           clearTimeout(recordTimer)
           recordTimer = null
@@ -171,13 +147,8 @@ export class BaseBoard {
           this.stateIdx++
         }, 100)
       } else {
-        // 当前正在执行撤销或重做操作，不记录重新绘制的画布
         this.isRedoing = false
       }
-    })
-
-    this.canvas.on('object:added', (e) => {
-      this.newestObj = e.target
     })
   }
   initBrush() {
@@ -239,7 +210,6 @@ export class BaseBoard {
       angle: 0,
       opacity: 1,
     })
-
     // 绘制 图形对象
     this.drawingGraph(this.canvasObject)
   }
@@ -346,17 +316,12 @@ export class BaseBoard {
   }
 
   drawingGraph(canvasObject: any) {
-    // 禁止用户选择当前正在绘制的图形
     canvasObject.selectable = true
-
     // 如果当前图形已绘制，清除上一次绘制的图形
     if (this.drawingObject) {
       this.canvas.remove(this.drawingObject)
     }
-    // 将绘制对象添加到 canvas中
     this.canvas.add(canvasObject)
-    // 保存当前绘制的图形
-    // this.isDrawing = false
     this.drawingObject = canvasObject
   }
   // 删除当前选中图层对象

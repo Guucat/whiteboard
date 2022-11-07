@@ -2,10 +2,8 @@ import { FC, useRef, useEffect, useState } from 'react'
 import Header from '../Header'
 import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
-import { color, tools } from '@/utils/data'
 import { useRecoilState } from 'recoil'
 import { ModalVisible } from '@/pages/Home'
-import Modal from '../Modal'
 import { CanvasBoardProps } from '@/type'
 import SelectBar from '../SelectBar'
 import FooterBar from '../FooterBar'
@@ -19,6 +17,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [isSelect, setIsSelect] = useState(false)
   const [loading, setLoading] = useState(true)
   const ws = useRef<WebSocket | null>(null)
+  const pickerColorRef = useRef<HTMLInputElement | null>(null)
+  /**
+   * @des 初始化websocket
+   */
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
@@ -54,11 +56,17 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       }
     }
   }, [ws])
+  /**
+   * @des 初始化白板类
+   */
   useEffect(() => {
     canvas.current = new BaseBoard({ type, curTools, ws })
     setVisible(false)
     setLoading(false)
   }, [])
+  /**
+   * @des 监听是否选中当前图形
+   */
   useEffect(() => {
     // 监听选中对象
     const board = canvas.current!
@@ -93,9 +101,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       board.selectedObj = null
     })
   }, [isSelect])
-  const pickerColorRef = useRef<HTMLInputElement | null>(null)
 
-  function editObj(type: any, e: any) {
+  function editObj(type: any, e: React.ChangeEvent<HTMLInputElement>) {
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
