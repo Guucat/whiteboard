@@ -60,8 +60,6 @@ export class BaseBoard {
     }
   }
   initCanvas() {
-    console.log('是否存在画布', this.canvas)
-
     if (!this.canvas) {
       this.canvas = new fabric.Canvas(this.type)
       // 禁止用户进行组选择
@@ -74,15 +72,12 @@ export class BaseBoard {
       // 记录画布原始状态
       // this.stateArr.push(JSON.stringify(this.canvas))
       this.stateIdx = 0
-
-      console.log('当前的画布颜色', this.canvas.backgroundColor)
     }
   }
 
   initCanvasEvent() {
     this.canvas.on('mouse:down', (options: any) => {
       if (this.selectedObj) {
-        console.log('有图形被选中了')
         this.isDrawing = false
         return
       }
@@ -107,14 +102,11 @@ export class BaseBoard {
         } else {
           // 设置当前正在进行绘图 或 移动操作
           this.isDrawing = true
-          console.log('执行了')
         }
       }
     })
     // 监听鼠标移动事件
     this.canvas.on('mouse:move', (options: any) => {
-      // console.log('鼠标移动')
-      // console.log('鼠标移动的this', this)
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
         // 记录当前鼠标移动终点坐标 (减去画布在 x y轴的偏移，因为画布左上角坐标不一定在浏览器的窗口左上角)
@@ -125,7 +117,6 @@ export class BaseBoard {
           case 'line':
             // 当前绘制直线，初始化直线绘制
             this.initLine()
-            console.log('线段')
             break
           case 'rect':
             this.initRect()
@@ -150,8 +141,6 @@ export class BaseBoard {
     this.canvas.on('mouse:up', () => {
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
-        console.log('this.isDrawing', this.isDrawing)
-
         // 清空鼠标移动时保存的临时绘图对象
         this.drawingObject = null
         // 鼠标抬起是发送消息
@@ -159,18 +148,11 @@ export class BaseBoard {
         let sendObj = JSON.stringify(obj)
         this.ws.current?.send(sendObj)
         // 重置正在绘制图形标志
-        console.log('鼠标抬起发送的数据', sendObj)
-
         this.isDrawing = false
       } else {
-        // let sentObj = JSON.stringify(this.newestObj)
-        // console.log('发送的对象', sentObj)
-        // let obj = { object: [sentObj] }
-        // this.ws.current?.send(JSON.stringify(obj))
         let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
         let sendObj = JSON.stringify(obj)
         this.ws.current?.send(sendObj)
-        console.log('鼠标抬起发送的数据', sendObj)
       }
 
       if (!this.isRedoing) {
@@ -183,18 +165,14 @@ export class BaseBoard {
         recordTimer = setTimeout(() => {
           this.stateArr.push(JSON.stringify(this.canvas))
           this.stateIdx++
-          console.log('当前的指向', this.stateIdx)
         }, 100)
       } else {
-        console.log('监测到撤销')
-
         // 当前正在执行撤销或重做操作，不记录重新绘制的画布
         this.isRedoing = false
       }
     })
 
     this.canvas.on('object:added', (e) => {
-      console.log('画布对象被创建了', e.target)
       this.newestObj = e.target
     })
   }
@@ -206,7 +184,6 @@ export class BaseBoard {
     // 设置绘画模式 画笔颜色与画笔线条大小
     this.canvas.freeDrawingBrush.color = this.strokeColor
     this.canvas.freeDrawingBrush.width = this.lineSize
-    console.log('画笔设置执行了 ')
   }
   // 初始化文本工具
   initText() {
@@ -277,7 +254,6 @@ export class BaseBoard {
       angle: 0,
       opacity: 1,
     })
-    // console.log(toObject);
 
     // 绘制矩形
     this.drawingGraph(this.canvasObject)
@@ -377,8 +353,6 @@ export class BaseBoard {
   }
   // 删除当前选中图层对象
   deleteSelectObj() {
-    console.log('删除', this.selectedObj)
-
     this.selectedObj &&
       this.selectedObj.map((item) => {
         this.canvas.remove(item)
@@ -387,7 +361,6 @@ export class BaseBoard {
   // 清屏
   clearCanvas() {
     let children = this.canvas.getObjects()
-    console.log('清屏', children)
 
     if (children.length > 0) {
       this.canvas.remove(...children)

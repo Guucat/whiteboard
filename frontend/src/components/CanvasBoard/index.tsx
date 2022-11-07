@@ -32,17 +32,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     card.canvas.isDrawingMode = false
     // 禁止图形选择编辑
     let drawObjects = card.canvas.getObjects()
-    // if (drawObjects.length > 0) {
-    //   drawObjects.map((item: any) => {
-    //     item.set('selectable', false)
-    //   })
-    // }
-    console.log('画笔模式', card.canvas.isDrawingMode)
     switch (tool) {
       case 'brush':
         card.canvas.selection = false
         // 如果用户选择的是画笔工具，直接初始化，无需等待用户进行鼠标操作
-        console.log('画笔', card)
         card.initBrush()
         break
       case 'select':
@@ -60,11 +53,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const undoRef = useRef<HTMLElement | null>(null)
   const redoRef = useRef<HTMLElement | null>(null)
   function handleUndoRedo(flag: number, e: any) {
-    console.log('撤销重做触发了')
     const card = canvas.current!
     card.isRedoing = true
     let stateIdx = card.stateIdx + flag
-    console.log('当前的index撤销重做', stateIdx)
 
     if (
       undoRef.current!.classList.contains(styles['no-undo-redo']) ||
@@ -88,16 +79,12 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
     if (card.stateArr[stateIdx]) {
       e.target.classList.remove(styles['no-undo-redo'])
-      console.log('当前的画布渲染数组', card.stateArr[stateIdx])
-
       card.canvas.loadFromJSON(card.stateArr[stateIdx], () => {
         card.canvas.renderAll()
         card.isRedoing = false
       })
       let obj = { pageId: 0, seqData: card.stateArr[stateIdx] }
       let sendObj = JSON.stringify(obj)
-      console.log('啦啦啦啦啦', sendObj)
-
       card.ws.current?.send(sendObj)
       if (card.canvas.getObjects().length > 0) {
         card.canvas.getObjects().forEach((item: any) => {
@@ -124,16 +111,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }
     if (ws.current) {
       ws.current.onmessage = (e) => {
-        console.log(e.data)
         const data = JSON.parse(e.data)
-        console.log('hhhhh', data.data.seqData)
-
-        // if (data.seqData) {
-        //   const data1 = JSON.parse(data.seqData)
-        //   console.log('传递过来的数据data', data1)
-        // }
-
-        canvas.current!.canvas.loadFromJSON(data, () => {
+        const canvasData = data.data.seqData
+        canvas.current!.canvas.loadFromJSON(canvasData, () => {
           canvas.current!.canvas.renderAll()
         })
         canvas.current!.stateArr.push(JSON.stringify(canvas.current!.canvas))
@@ -142,6 +122,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }
   }, [ws])
   useEffect(() => {
+    setVisible(false)
     canvas.current = new BaseBoard({ type, curTools, ws })
     canvas.current.initCanvas()
     canvas.current.initCanvasEvent()
@@ -151,49 +132,38 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     // 监听选中对象
     const board = canvas.current!
     board.canvas.on('selection:created', (e) => {
-      console.log('点击当前元素', e.selected!)
       if (e.selected!.length == 1) {
         setIsSelect(true)
       }
 
       // // 选中图层事件触发时，动态更新赋值
       board.selectedObj = e.selected!
-      console.log('当前选中对象是', board.selectedObj)
       document.onkeydown = (e) => {
         if (e.key == 'Backspace' && board.selectTool !== 'text') {
-          console.log('删除案件执行', board.textObject)
-
           board.deleteSelectObj()
         }
       }
     })
 
     board.canvas.on('selection:updated', (e) => {
-      console.log('点击其他画布元素')
       if (e.selected!.length == 1) {
         setIsSelect(true)
       }
       board.selectedObj = e.selected!
       document.onkeydown = (e) => {
         if (e.key == 'Backspace' && board.selectTool !== 'text') {
-          console.log('删除案件执行', board.textObject)
-
           board.deleteSelectObj()
         }
       }
     })
 
     board.canvas.on('selection:cleared', (e) => {
-      console.log('点击其他空白区域')
       setIsSelect(false)
       board.selectedObj = null
     })
   }, [isSelect])
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   function handlePicker(e: any, id: number) {
-    console.log(e.target.value)
-    console.log(id)
-
     switch (id) {
       case 0:
         canvas.current!.strokeColor = e.target.value
@@ -217,43 +187,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current!.canvas.renderAll()
   }
   function editObj(type: any, e: any) {
-    console.log('type', type)
-    console.log('e', e)
-
-    console.log('hhhh', canvas.current!.selectedObj![0].stroke)
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
   const jsonData = useRef<string | null>(null)
-  function handleDownLoad() {
-    let card = canvas.current!
-    // const dataURL = card.canvas.toDataURL({
-    //   format: 'png',
-    //   multiplier: card.canvas.getZoom(),
-    //   left: 0,
-    //   top: 0,
-    //   width,
-    //   height,
-    // })
-    // const link = document.createElement('a')
-    // link.download = 'canvas.png'
-    // link.href = dataURL
-    // document.body.appendChild(link)
-    // link.click()
-    // document.body.removeChild(link)
 
-    // JSON
-    // jsonData.current = card.canvas.toJSON()
-    // setModalType('jsonModal')
-    // setVisible(true)
-
-    // console.log(jsonData.current)
-
-    // })
-
-    setModalType('downloadType')
-    setVisible(true)
-  }
   function handleCancle() {
     setIsDownload(false)
   }
