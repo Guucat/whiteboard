@@ -111,8 +111,6 @@ export class BaseBoard {
     })
     // 监听鼠标移动事件
     this.canvas.on('mouse:move', (options: any) => {
-      console.log('鼠标移动事件执行了', options)
-
       // 如果当前正在进行绘图或移动相关操作
       if (this.isDrawing) {
         // 记录当前鼠标移动终点坐标 (减去画布在 x y轴的偏移，因为画布左上角坐标不一定在浏览器的窗口左上角)

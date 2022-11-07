@@ -6,7 +6,7 @@ import styles from './index.module.css'
 
 const SelectBar: FC<SelectBarProps> = (props) => {
   const { canvas } = props
-  const [activeIndex, setActiveIndex] = useState(1)
+  const [activeIndex, setActiveIndex] = useState(0)
   console.log('侧边栏接收到的canvas', canvas)
   /**
    * @param id 画板工具的唯一id
@@ -84,9 +84,9 @@ const SelectBar: FC<SelectBarProps> = (props) => {
       card.stateIdx = stateIdx
     }
   }
-  useEffect(() => {
-    ClickTools(1, 'brush', canvas)
-  }, [])
+  //   useEffect(() => {
+  //     ClickTools(1, 'brush', canvas)
+  //   }, [])
   return (
     <div className={styles['selectBar']}>
       <div className={styles['tools']}>

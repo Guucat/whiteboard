@@ -8,13 +8,13 @@ import { ModalVisible } from '@/pages/Home'
 import Modal from '../Modal'
 import { CanvasBoardProps } from '@/type'
 import SelectBar from '../SelectBar'
+import FooterBar from '../FooterBar'
 
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   // 弹窗
   const [visibles, setVisible] = useRecoilState(ModalVisible)
-  const [modalType, setModalType] = useState('')
   const { width, height, type, boardId } = props
-  const [curTools, setCurTools] = useState('line')
+  const [curTools, setCurTools] = useState('select')
   const canvas = useRef<BaseBoard | null>(null)
   const [isSelect, setIsSelect] = useState(false)
   const [loading, setLoading] = useState(true)
@@ -94,115 +94,26 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     })
   }, [isSelect])
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
-  function handlePicker(e: any, id: number) {
-    switch (id) {
-      case 0:
-        canvas.current!.strokeColor = e.target.value
-        canvas.current!.canvas.renderAll()
-        break
-      case 1:
-        canvas.current!.fillColor = e.target.value
-        canvas.current!.canvas.renderAll()
-        break
-      case 2:
-        canvas.current!.canvas.backgroundColor = e.target.value
 
-        canvas.current!.canvas.renderAll()
-        break
-      default:
-        break
-    }
-  }
-  function handleSize(e: any) {
-    canvas.current!.fontSize = e.target.value
-    canvas.current!.canvas.renderAll()
-  }
   function editObj(type: any, e: any) {
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
-  const jsonData = useRef<string | null>(null)
 
-  function handleCancle() {
-    setIsDownload(false)
-  }
-  const [isDownload, setIsDownload] = useState(false)
-  function showDownload() {
-    setIsDownload(true)
-  }
-  function downloadPic() {
-    setIsDownload(false)
-    let card = canvas.current!
-    const dataURL = card.canvas.toDataURL({
-      format: 'png',
-      multiplier: card.canvas.getZoom(),
-      left: 0,
-      top: 0,
-      width,
-      height,
-    })
-    const link = document.createElement('a')
-    link.download = 'canvas.png'
-    link.href = dataURL
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-  }
-  function downloadJson() {
-    setIsDownload(false)
-    let card = canvas.current!
-    jsonData.current = card.canvas.toJSON()
-    setModalType('jsonModal')
-    setVisible(true)
-  }
   return (
     <div className={styles['canvas-wrapper']}>
       <Header></Header>
 
-      {loading ? <></> : <SelectBar canvas={canvas.current!}></SelectBar>}
+      {loading ? (
+        <></>
+      ) : (
+        <>
+          {' '}
+          <SelectBar canvas={canvas.current!}></SelectBar>
+          <FooterBar canvas={canvas.current!}></FooterBar>
+        </>
+      )}
 
-      <div className={styles['footer-wrapper']}>
-        <div className={styles['footer-container']}>
-          {color.map((item, index) => {
-            return (
-              <div className={styles['btn-color-wrapper']} key={index}>
-                <span className={styles['color-label']}>{item}</span>
-                <input
-                  type="color"
-                  className={styles['color-picker']}
-                  ref={pickerColorRef}
-                  onChange={(e) => handlePicker(e, index)}
-                ></input>
-              </div>
-            )
-          })}
-
-          <div className={styles['btn-size-wrapper']}>
-            <span className={styles['color-label']}>fontSize</span>
-            <input
-              type="range"
-              className={styles['size-picekr']}
-              ref={pickerColorRef}
-              onChange={(e) => handleSize(e)}
-              min="10"
-              max="40"
-            ></input>
-          </div>
-          <div className={styles['btn-size-wrapper']}>
-            <i className={`iconfont icon-shangchuan1`} />
-          </div>
-          <div className={`${styles['btn-size-wrapper']} ${styles['download']}`}>
-            <i className={`iconfont icon-xiazai2`} onClick={showDownload} />
-            <div className={styles['download-type']} style={isDownload ? { display: 'block' } : { display: 'none' }}>
-              <div className={styles['modal-delete']} onClick={handleCancle}>
-                ×
-              </div>
-              <p onClick={downloadPic}>导出为图片</p>
-              <p onClick={downloadJson}>导出为json</p>
-            </div>
-          </div>
-        </div>
-      </div>
       <div className={styles['select-edit-wrapper']}>
         <div className={styles['select-edit-container']} style={isSelect ? { display: 'block' } : { display: 'none' }}>
           <div className={styles['select-item-wrapper']}>
@@ -274,7 +185,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           </div>
         </div>
       </div>
-      <Modal visible={visibles} describe={modalType} jsonData={jsonData.current}></Modal>
 
       <canvas width={width} height={height} id={type}></canvas>
     </div>
