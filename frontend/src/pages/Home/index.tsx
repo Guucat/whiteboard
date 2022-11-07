@@ -1,8 +1,9 @@
 import Modal from '@/components/Modal'
-import { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { atom, useRecoilState } from 'recoil'
 import { useNavigate } from 'react-router-dom'
 import style from './index.module.css'
+import { judgeBoardId } from '@/service'
 export const ModalVisible = atom<boolean>({
   key: 'ModalVisible',
   default: false,
@@ -21,9 +22,9 @@ const Home: FC = () => {
       setModalType('login')
     }
   }
-
   function handleJoin() {
     setVisible(true)
+
     setModalType('joinBoard')
   }
 

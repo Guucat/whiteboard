@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { ModalVisible } from '@/pages/Home'
 import { useRecoilState } from 'recoil'
 import ReactJson from 'react-json-view'
+import { judgeBoardId } from '@/service'
 interface ModalProps {
   visible: boolean
   describe: string
@@ -21,11 +22,24 @@ const Modal: FC<ModalProps> = (ModalProps) => {
   function handleLogin() {
     navigate('/login')
   }
-  function handleJoinBoard() {
+  const judgeIdData = useRef<any>(null)
+  const [showErr, setShowErr] = useState(false)
+  async function handleJoinBoard() {
     if (BoardIdRef.current) {
       const boardId = BoardIdRef.current.value
-      console.log(boardId)
-      navigate('/joinBoard', { state: { boardId } })
+      judgeIdData.current = await judgeBoardId(boardId)
+      console.log(judgeIdData.current)
+
+      if (judgeIdData.current.code == 200) {
+        navigate('/joinBoard', { state: { boardId } })
+      } else {
+        setShowErr(true)
+        setTimeout(() => {
+          setShowErr(false)
+        }, 2000)
+      }
+
+      // navigate('/joinBoard', { state: { boardId } })
     }
   }
   function handleJson() {
@@ -77,6 +91,9 @@ const Modal: FC<ModalProps> = (ModalProps) => {
             <button className={style['modal-cancle']} onClick={handleCancle}>
               不了，谢谢
             </button>
+          </div>
+          <div className={style['error']} style={showErr ? { display: 'block' } : { display: 'none' }}>
+            {judgeIdData.current}
           </div>
         </>
       ) : describe == 'jsonModal' ? (

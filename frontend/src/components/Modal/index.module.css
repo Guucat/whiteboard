@@ -148,6 +148,13 @@
     font-size: 15px;
     letter-spacing: 2px;
   }
-
+  .error {
+    color: #ee0a0a;
+    font-size: 15px;
+   position: absolute;
+   bottom: 88px;
+   left: 108px;
+   text-align: center;
+  }
 
   
