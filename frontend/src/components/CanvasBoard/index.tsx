@@ -3,7 +3,11 @@ import Header from '../Header'
 import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
 import { color, size, tools } from './data'
-
+import { fabric } from 'fabric'
+import { useRecoilState } from 'recoil'
+import { ModalVisible } from '@/pages/Home'
+import Modal from '../Modal'
+import { Message, Popconfirm } from '@arco-design/web-react'
 interface CanvasBoardProps {
   width?: number
   height?: number
@@ -13,6 +17,9 @@ interface CanvasBoardProps {
   boardId?: number
 }
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
+  // 弹窗
+  const [visibles, setVisible] = useRecoilState(ModalVisible)
+  const [modalType, setModalType] = useState('')
   const { width, height, CanvasRef, type, boardId } = props
   const [curTools, setCurTools] = useState('line')
   const [activeIndex, setActiveIndex] = useState(1)
@@ -87,7 +94,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         card.canvas.renderAll()
         card.isRedoing = false
       })
-      card.ws.current?.send(card.stateArr[stateIdx])
+      let obj = { pageId: 0, seqData: card.stateArr[stateIdx] }
+      let sendObj = JSON.stringify(obj)
+      console.log('啦啦啦啦啦', sendObj)
+
+      card.ws.current?.send(sendObj)
       if (card.canvas.getObjects().length > 0) {
         card.canvas.getObjects().forEach((item: any) => {
           item.set('selectable', false)
@@ -113,8 +124,15 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }
     if (ws.current) {
       ws.current.onmessage = (e) => {
-        console.log('传递过来的数据data', e.data)
+        console.log(e.data)
         const data = JSON.parse(e.data)
+        console.log('hhhhh', data.data.seqData)
+
+        // if (data.seqData) {
+        //   const data1 = JSON.parse(data.seqData)
+        //   console.log('传递过来的数据data', data1)
+        // }
+
         canvas.current!.canvas.loadFromJSON(data, () => {
           canvas.current!.canvas.renderAll()
         })
@@ -173,22 +191,22 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   }, [isSelect])
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   function handlePicker(e: any, id: number) {
-    // setShowPicker(true)
-    // const pickerColorValue = pickerColorRef.current
-    // console.log('选择的颜色', pickerColorValue)
     console.log(e.target.value)
     console.log(id)
 
     switch (id) {
       case 0:
         canvas.current!.strokeColor = e.target.value
+        canvas.current!.canvas.renderAll()
         break
       case 1:
         canvas.current!.fillColor = e.target.value
+        canvas.current!.canvas.renderAll()
         break
       case 2:
         canvas.current!.canvas.backgroundColor = e.target.value
-        console.log('画布颜色', canvas.current!.bgColor)
+
+        canvas.current!.canvas.renderAll()
         break
       default:
         break
@@ -196,6 +214,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   }
   function handleSize(e: any) {
     canvas.current!.fontSize = e.target.value
+    canvas.current!.canvas.renderAll()
   }
   function editObj(type: any, e: any) {
     console.log('type', type)
@@ -204,6 +223,68 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     console.log('hhhh', canvas.current!.selectedObj![0].stroke)
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
+  }
+  const jsonData = useRef<string | null>(null)
+  function handleDownLoad() {
+    let card = canvas.current!
+    // const dataURL = card.canvas.toDataURL({
+    //   format: 'png',
+    //   multiplier: card.canvas.getZoom(),
+    //   left: 0,
+    //   top: 0,
+    //   width,
+    //   height,
+    // })
+    // const link = document.createElement('a')
+    // link.download = 'canvas.png'
+    // link.href = dataURL
+    // document.body.appendChild(link)
+    // link.click()
+    // document.body.removeChild(link)
+
+    // JSON
+    // jsonData.current = card.canvas.toJSON()
+    // setModalType('jsonModal')
+    // setVisible(true)
+
+    // console.log(jsonData.current)
+
+    // })
+
+    setModalType('downloadType')
+    setVisible(true)
+  }
+  function handleCancle() {
+    setIsDownload(false)
+  }
+  const [isDownload, setIsDownload] = useState(false)
+  function showDownload() {
+    setIsDownload(true)
+  }
+  function downloadPic() {
+    setIsDownload(false)
+    let card = canvas.current!
+    const dataURL = card.canvas.toDataURL({
+      format: 'png',
+      multiplier: card.canvas.getZoom(),
+      left: 0,
+      top: 0,
+      width,
+      height,
+    })
+    const link = document.createElement('a')
+    link.download = 'canvas.png'
+    link.href = dataURL
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+  function downloadJson() {
+    setIsDownload(false)
+    let card = canvas.current!
+    jsonData.current = card.canvas.toJSON()
+    setModalType('jsonModal')
+    setVisible(true)
   }
   return (
     <div className={styles['canvas-wrapper']}>
@@ -257,6 +338,19 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
               min="10"
               max="40"
             ></input>
+          </div>
+          <div className={styles['btn-size-wrapper']}>
+            <i className={`iconfont icon-shangchuan1`} />
+          </div>
+          <div className={`${styles['btn-size-wrapper']} ${styles['download']}`}>
+            <i className={`iconfont icon-xiazai2`} onClick={showDownload} />
+            <div className={styles['download-type']} style={isDownload ? { display: 'block' } : { display: 'none' }}>
+              <div className={styles['modal-delete']} onClick={handleCancle}>
+                ×
+              </div>
+              <p onClick={downloadPic}>导出为图片</p>
+              <p onClick={downloadJson}>导出为json</p>
+            </div>
           </div>
         </div>
       </div>
@@ -331,6 +425,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           </div>
         </div>
       </div>
+      <Modal visible={visibles} describe={modalType} jsonData={jsonData.current}></Modal>
 
       <canvas width={width} height={height} ref={CanvasRef} id={type}></canvas>
     </div>

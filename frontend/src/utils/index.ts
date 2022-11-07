@@ -10,7 +10,7 @@ interface BaseBoardProp {
 export class BaseBoard {
   canvas!: fabric.Canvas
   type: string
-  bgColor: string
+
   stateArr: string[]
   stateIdx: number
   strokeColor: string
@@ -36,7 +36,7 @@ export class BaseBoard {
     this.ws = props.ws
     // this.canvas = null
     this.selectedObj = null
-    this.bgColor = 'pink'
+
     this.stateArr = [] // 保存画布的操作记录
     this.stateIdx = 0 // 当前操作步数
     this.strokeColor = 'black'
@@ -68,6 +68,7 @@ export class BaseBoard {
       this.canvas.selection = false
       // 设置当前鼠标停留在
       this.canvas.hoverCursor = 'default'
+      // this.canvas.backgroundColor = this.bgColor
       // 重新渲染画布
       this.canvas.renderAll()
       // 记录画布原始状态
@@ -154,17 +155,22 @@ export class BaseBoard {
         // 清空鼠标移动时保存的临时绘图对象
         this.drawingObject = null
         // 鼠标抬起是发送消息
-        let sendObj = JSON.stringify(this.canvas.toJSON())
+        let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
+        let sendObj = JSON.stringify(obj)
         this.ws.current?.send(sendObj)
         // 重置正在绘制图形标志
+        console.log('鼠标抬起发送的数据', sendObj)
+
         this.isDrawing = false
       } else {
         // let sentObj = JSON.stringify(this.newestObj)
         // console.log('发送的对象', sentObj)
         // let obj = { object: [sentObj] }
         // this.ws.current?.send(JSON.stringify(obj))
-        let sendObj = JSON.stringify(this.canvas.toJSON())
+        let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
+        let sendObj = JSON.stringify(obj)
         this.ws.current?.send(sendObj)
+        console.log('鼠标抬起发送的数据', sendObj)
       }
 
       if (!this.isRedoing) {
