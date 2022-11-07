@@ -1,6 +1,5 @@
-import { ModalVisible } from '@/pages/Home'
 import { SelectBarProps } from '@/type'
-import { color } from '@/utils/data'
+import { color, ModalVisible } from '@/utils/data'
 import { FC, useRef, useState } from 'react'
 import { useRecoilState } from 'recoil'
 import Modal from '../Modal'
@@ -9,7 +8,7 @@ const FooterBar: FC<SelectBarProps> = (props) => {
   const { canvas } = props
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   const jsonData = useRef<string | null>(null)
-  const [visibles, setVisible] = useRecoilState(ModalVisible)
+  const [visiable, setVisiable] = useRecoilState(ModalVisible)
   const [modalType, setModalType] = useState('')
   const [isDownload, setIsDownload] = useState(false)
   /**
@@ -74,7 +73,7 @@ const FooterBar: FC<SelectBarProps> = (props) => {
     let card = canvas
     jsonData.current = card.canvas.toJSON()
     setModalType('jsonModal')
-    setVisible(true)
+    setVisiable(true)
   }
   function handleCancle() {
     setIsDownload(false)
@@ -127,7 +126,7 @@ const FooterBar: FC<SelectBarProps> = (props) => {
           </div>
         </div>
       </div>
-      <Modal visible={visibles} describe={modalType} jsonData={jsonData.current}></Modal>
+      <Modal visible={visiable} describe={modalType} jsonData={jsonData.current}></Modal>
     </>
   )
 }

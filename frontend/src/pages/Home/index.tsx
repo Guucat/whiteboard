@@ -3,11 +3,8 @@ import { FC, useEffect, useRef, useState } from 'react'
 import { atom, useRecoilState } from 'recoil'
 import { useNavigate } from 'react-router-dom'
 import style from './index.module.css'
-import { judgeBoardId } from '@/service'
-export const ModalVisible = atom<boolean>({
-  key: 'ModalVisible',
-  default: false,
-})
+import { ModalVisible } from '@/utils/data'
+
 const Home: FC = () => {
   const [visible, setVisible] = useRecoilState(ModalVisible)
   const [modalType, setModalType] = useState('')

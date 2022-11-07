@@ -1,10 +1,11 @@
 import { FC, useRef, useState } from 'react'
 import style from './index.module.css'
 import { useNavigate } from 'react-router-dom'
-import { ModalVisible } from '@/pages/Home'
+
 import { useRecoilState } from 'recoil'
 import ReactJson from 'react-json-view'
 import { judgeBoardId } from '@/service'
+import { ModalVisible } from '@/utils/data'
 interface ModalProps {
   visible: boolean
   describe: string
@@ -13,11 +14,11 @@ interface ModalProps {
 const Modal: FC<ModalProps> = (ModalProps) => {
   //  const [visible, setVisible] = useState(false)
   const { visible, describe, jsonData } = ModalProps
-  const [visibles, setVisible] = useRecoilState(ModalVisible)
+  const [visiblt, setVisiblt] = useRecoilState(ModalVisible)
   const BoardIdRef = useRef<HTMLInputElement>(null)
   const navigate = useNavigate()
   function handleCancle() {
-    setVisible(false)
+    setVisiblt(false)
   }
   function handleLogin() {
     navigate('/login')

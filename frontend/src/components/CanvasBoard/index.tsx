@@ -3,14 +3,13 @@ import Header from '../Header'
 import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
 import { useRecoilState } from 'recoil'
-import { ModalVisible } from '@/pages/Home'
 import { CanvasBoardProps } from '@/type'
 import SelectBar from '../SelectBar'
 import FooterBar from '../FooterBar'
+import { ModalVisible } from '@/utils/data'
 
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
-  // 弹窗
-  const [visibles, setVisible] = useRecoilState(ModalVisible)
+  const [visibles, setVisibles] = useRecoilState(ModalVisible)
   const { width, height, type, boardId } = props
   const [curTools, setCurTools] = useState('select')
   const canvas = useRef<BaseBoard | null>(null)
@@ -61,7 +60,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    */
   useEffect(() => {
     canvas.current = new BaseBoard({ type, curTools, ws })
-    setVisible(false)
+    setVisibles(false)
     setLoading(false)
   }, [])
   /**
