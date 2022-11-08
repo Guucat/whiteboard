@@ -13,7 +13,6 @@ import (
 	"whiteboard/model"
 	"whiteboard/service"
 	"whiteboard/utils/res"
-	"whiteboard/utils/validator"
 )
 
 func CreateBoard(c *gin.Context) {
@@ -87,23 +86,8 @@ func CreateBoard(c *gin.Context) {
 }
 
 func EnterBoard(c *gin.Context) {
-	tempId := c.Query("boardId")
+	boardId := c.GetInt("boardId")
 
-	err := validator.Validate.Var(tempId, "len=9,required,numeric")
-	if err != nil {
-		log.Println("boardId无效", err)
-		res.Fail(c, 400, "boardId无效", nil)
-		return
-	}
-	BoardId, _ := strconv.Atoi(tempId)
-	//判断board是否存在
-	boardAny, ok := local.Boards.Load(BoardId)
-	if !ok {
-		log.Println("查找board失败", err)
-		res.Fail(c, 400, "查找board失败", nil)
-		return
-	}
-	boardId := boardAny.(*model.Board).BoardId
 	timeSeq := strconv.Itoa(int(time.Now().Unix()))
 	userName := timeSeq[len(timeSeq)-6:]
 	mq, err := service.NewMQ(boardId)
@@ -153,24 +137,26 @@ func ValidateBoardId(c *gin.Context) {
 	_, ok := service.ValidateBoardId(boardId)
 	if !ok {
 		res.Fail(c, 400, "boardId无效", nil)
+		c.Abort()
 		return
 	}
-	res.Ok(c, 200, "boardId验证通过", nil)
+	if c.FullPath() == "/board/validate" {
+		res.Ok(c, 200, "boardId验证通过", nil)
+		return
+	}
+	Id, _ := strconv.Atoi(boardId)
+	c.Set("boardId", Id)
+	c.Next()
 }
 
 func GetOnlineUsers(c *gin.Context) {
-	boardId := c.Query("boardId")
-	_, ok := service.ValidateBoardId(boardId)
-	if !ok {
-		res.Fail(c, 400, "boardId无效", nil)
-		return
-	}
-	id, _ := strconv.Atoi(boardId)
-	users := service.GetUsers(id)
+	boardId := c.GetInt("boardId")
+	users := service.GetUsers(boardId)
 	res.Ok(c, 200, "success to get all online users of current whiteboard", gin.H{
 		"users": users,
 	})
 }
+
 
 func AddOnePage(c *gin.Context) {
 	boardId := c.PostForm("boardId")
@@ -236,4 +222,72 @@ func AddOnePage(c *gin.Context) {
 		"newPageId": curPage,
 		"seqData":   data,
 	})
+}
+func ExitBoard(c *gin.Context) {
+	boardId := c.GetInt("boardId")
+	userName := c.Query("userName") //校验？？？？？
+
+	mq, err := service.BindExchange(boardId)
+	if err != nil {
+		log.Println("退出房间时rabbitMq创建队列失败", err)
+		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		return
+	}
+	message := model.MqMessage{
+		MessageType: model.ExitBoardSign,
+		UserName:    userName,
+		DataType:    websocket.TextMessage,
+	}
+	j, err := json.Marshal(message)
+	if err != nil {
+		log.Println("Marshal message err:", err)
+		res.Fail(c, 500, "序列化消息失败", nil)
+		return
+	}
+	service.DeleteUser(boardId, userName)
+	err = mq.SendMessage(string(j)) //异步？？
+	if err != nil {
+		log.Println("mq消息发送失败") //轮询？？？？
+		res.Fail(c, 500, "消息发送失败", nil)
+		return
+	}
+
+	res.Ok(c, 200, "退出成功", nil)
+}
+
+func DissolveBoard(c *gin.Context) {
+	boardId := c.GetInt("boardId")
+	ownerName := c.Query("ownerName")
+	board, _ := local.Boards.Load(boardId)
+	if ownerName != board.(*model.Board).Owner {
+		res.Ok(c, 200, "无权限解散房间", nil)
+		return
+	}
+
+	mq, err := service.BindExchange(boardId)
+	if err != nil {
+		log.Println("退出房间时rabbitMq创建队列失败", err)
+		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		return
+	}
+	message := model.MqMessage{
+		MessageType: model.DissolveBoardSign,
+		UserName:    ownerName,
+		DataType:    websocket.TextMessage,
+	}
+	j, err := json.Marshal(message)
+	if err != nil {
+		log.Println("Marshal message err:", err)
+		res.Fail(c, 500, "序列化消息失败", nil)
+		return
+	}
+	service.DeleteAllUser(boardId)
+	err = mq.SendMessage(string(j)) //异步？？
+	if err != nil {
+		log.Println("mq消息发送失败") //轮询？？？？
+		res.Fail(c, 500, "消息发送失败", nil)
+		return
+	}
+
+	res.Ok(c, 200, "解散成功", nil)
 }

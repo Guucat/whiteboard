@@ -1,6 +1,8 @@
 package rabbitmq
 
-import "github.com/streadway/amqp"
+import (
+	"github.com/streadway/amqp"
+)
 
 type ExchangeInfo struct {
 	ExchangeName string
@@ -19,7 +21,6 @@ func (info *ExchangeInfo) NewPsExchange() error {
 		false,
 		nil,
 	)
-
 }
 
 func (info *ExchangeInfo) NewPsQueue() error {
@@ -27,7 +28,7 @@ func (info *ExchangeInfo) NewPsQueue() error {
 	que, err := Chan.QueueDeclare(
 		"",
 		false,
-		true,
+		false,
 		true, // When the connection that declared it closes, the queue will be deleted
 		false,
 		nil,
@@ -60,6 +61,11 @@ func (info *ExchangeInfo) NewPsQueue() error {
 		return err
 	}
 	return nil
+}
+
+func (info *ExchangeInfo) DeletePsQueue() error {
+	_, err := Chan.QueueDelete(info.queueName, false, false, false)
+	return err
 }
 
 func (info *ExchangeInfo) SendMessage(data string) error {

@@ -1,13 +1,13 @@
 package model
 
 const (
-	EnterBoardSign    = 1 // 进入房间
+	EnterBoardSign = 1 // 进入房间
 	SequenceBoardSign = 2 // 序列化消息
-
+	ExitBoardSign     = 3 //退出房间
+	DissolveBoardSign = 4 //解散房间
 	AddNewPageSign    = 5 //新增一页消息
-	dissolveBoardSign = 3 //解散房间
-	switchModeSign    = 4 //编辑模式切换
-	actionObjectSign  = 5 //操作对象
+	switchModeSign    = 6 //编辑模式切换
+	actionObjectSign  = 7 //操作对象
 )
 
 type Message struct {
@@ -28,6 +28,11 @@ type WebSocketMessage struct {
 	Data interface{}
 }
 
+type UserCountChangedMessage struct {
+	MessageType uint8       `json:"messageType"` //1进入房间	3退出房间
+	Data        interface{} `json:"data"`
+}
+
 type ReceiveWsMessage struct {
 	PageId  int    `json:"pageId"`
 	SeqData string `json:"seqData"`
@@ -36,7 +41,7 @@ type ReceiveWsMessage struct {
 type MqMessage struct {
 	//  序列化消息, 新增页消息
 	MessageType int         `json:"messageType"`
-	UserName    string      `json:"userId"`
+	UserName    string      `json:"userName"`
 	DataType    int         `json:"dataType"`
 	PageId      int         `json:"pageId"`
 	Data        interface{} `json:"data"`

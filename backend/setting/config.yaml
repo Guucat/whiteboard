@@ -25,4 +25,8 @@ token:
   secret: "just_a_test_key~"
   issuer: "CQUPT"
 
-rabbit:
+rabbitMQ:
+  host: "114.55.132.72"
+  port: 5672
+  root: "guest"
+  password: "guest"

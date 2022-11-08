@@ -12,7 +12,6 @@ import (
 var DB *gorm.DB
 
 func Init(cfg *setting.MySQLConfig) {
-	//dsn := "shengyi:123456@tsy@tcp(rm-2vc34w5spf5nm2992eo.mysql.cn-chengdu.rds.aliyuncs.com)/whiteboard?charset=utf8mb4&parseTime=True&loc=Local"
 	dsn := fmt.Sprintf("%s:%s@tcp(%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		cfg.Root,
 		cfg.Password,
