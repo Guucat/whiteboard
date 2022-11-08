@@ -17,3 +17,13 @@ func NewMQ(boardId int) (*rabbitmq.ExchangeInfo, error) {
 	}
 	return &mq, nil
 }
+
+func BindExchange(boardId int) (*rabbitmq.ExchangeInfo, error) {
+	mq := rabbitmq.ExchangeInfo{
+		ExchangeName: strconv.Itoa(boardId),
+	}
+	if err := mq.NewPsExchange(); err != nil {
+		return nil, err
+	}
+	return &mq, nil
+}
