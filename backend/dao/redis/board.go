@@ -35,6 +35,11 @@ func RemoveUserFromBoard(boardId int, userName string) error {
 	return DB.SRem(Ctx, key, userName).Err()
 }
 
+func RemoveAllUserFromBoard(boardId int) error {
+	key := strconv.Itoa(boardId) + "users"
+	return DB.Del(Ctx, key).Err() //unlink？？？
+}
+
 func GetUsersOfBoard(boarId int) []string {
 	key := strconv.Itoa(boarId) + "users"
 	return DB.SMembers(Ctx, key).Val()

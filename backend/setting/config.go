@@ -10,14 +10,15 @@ import (
 //命名的时候注意统一用驼命名法
 
 //tag字段统一小写加下划线分割
-type FileServerConfig struct {
-	MachineID    int64  `mapstructure:"machine_id" `
-	Port         int    `mapstructure:"port"`
-	StartTime    string `mapstructure:"start_time"`
-	*MySQLConfig `mapstructure:"mysql"`
-	*RedisConfig `mapstructure:"redis"`
-	*AESConfig   `mapstructure:"aes"`
-	*TokenConfig `mapstructure:"token"`
+type WhiteBoardConfig struct {
+	MachineID       int64  `mapstructure:"machine_id" `
+	Port            int    `mapstructure:"port"`
+	StartTime       string `mapstructure:"start_time"`
+	*MySQLConfig    `mapstructure:"mysql"`
+	*RedisConfig    `mapstructure:"redis"`
+	*AESConfig      `mapstructure:"aes"`
+	*TokenConfig    `mapstructure:"token"`
+	*RabbitMQConfig `mapstructure:"rabbitMQ"`
 }
 
 type MySQLConfig struct {
@@ -46,7 +47,14 @@ type TokenConfig struct {
 	Issuer string `mapstructure:"issuer"`
 }
 
-var Conf = new(FileServerConfig)
+type RabbitMQConfig struct {
+	Host     string `mapstructure:"host"`
+	Port     int    `mapstructure:"port"`
+	Root     string `mapstructure:"root"`
+	Password string `mapstructure:"password"`
+}
+
+var Conf = new(WhiteBoardConfig)
 
 func Init() (err error) {
 	viper.SetConfigName("config")    //配置文件名
