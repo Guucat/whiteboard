@@ -127,7 +127,10 @@ export class BaseBoard {
     // 监听鼠标松开事件
     let recordTimer: any
     // 鼠标抬起是发送消息
-    this.canvas.on('mouse:up', () => {
+    this.canvas.on('mouse:up', (e) => {
+      console.log('鼠标', e.target)
+      console.log(e.target?.toJSON())
+
       // 清空鼠标移动时保存的临时绘图对象
       this.drawingObject = null
       let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
@@ -149,6 +152,9 @@ export class BaseBoard {
       } else {
         this.isRedoing = false
       }
+    })
+    this.canvas.on('object:added', () => {
+      console.log('事物被添加了')
     })
   }
   initBrush() {

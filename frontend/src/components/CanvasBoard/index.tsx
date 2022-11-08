@@ -38,6 +38,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
         console.log('接收到的数据是', data)
+        console.log('llll', data.data.seqData)
+
         // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
         let canvasData
         if (data.type == 1) {
