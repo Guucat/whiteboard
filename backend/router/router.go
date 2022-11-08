@@ -20,6 +20,7 @@ func SetupRouter() *gin.Engine {
 		boardGroup.GET("/enter", controller.EnterBoard)
 		boardGroup.GET("/validate", controller.ValidateBoardId)
 		boardGroup.GET("/users", controller.GetOnlineUsers)
+		boardGroup.PUT("/page", controller.AddOnePage)
 	}
 	pprof.RouteRegister(boardGroup, "pprof")
 

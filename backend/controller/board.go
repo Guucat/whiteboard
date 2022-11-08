@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
@@ -149,7 +150,7 @@ func EnterBoard(c *gin.Context) {
 
 func ValidateBoardId(c *gin.Context) {
 	boardId := c.Query("boardId")
-	ok := service.ValidateBoardId(boardId)
+	_, ok := service.ValidateBoardId(boardId)
 	if !ok {
 		res.Fail(c, 400, "boardId无效", nil)
 		return
@@ -159,7 +160,7 @@ func ValidateBoardId(c *gin.Context) {
 
 func GetOnlineUsers(c *gin.Context) {
 	boardId := c.Query("boardId")
-	ok := service.ValidateBoardId(boardId)
+	_, ok := service.ValidateBoardId(boardId)
 	if !ok {
 		res.Fail(c, 400, "boardId无效", nil)
 		return
@@ -168,5 +169,71 @@ func GetOnlineUsers(c *gin.Context) {
 	users := service.GetUsers(id)
 	res.Ok(c, 200, "success to get all online users of current whiteboard", gin.H{
 		"users": users,
+	})
+}
+
+func AddOnePage(c *gin.Context) {
+	boardId := c.PostForm("boardId")
+	jsonFile, _ := c.FormFile("jsonFile")
+	board, v := service.ValidateBoardId(boardId)
+	if v == false {
+		res.Fail(c, 400, "boardId无效", nil)
+		return
+	}
+	board.(*model.Board).Mu.Lock()
+	defer board.(*model.Board).Mu.Unlock()
+	numBoardId, _ := strconv.Atoi(boardId)
+	curPage := board.(*model.Board).PageSum
+	data := ""
+	if jsonFile != nil {
+		// creat a json decoder
+		f, err := jsonFile.Open()
+		if err != nil {
+			res.Fail(c, 400, "json文件无效", nil)
+			return
+		}
+		defer f.Close()
+		decoder := json.NewDecoder(f)
+		err = decoder.Decode(&data)
+		if err != nil {
+			res.Fail(c, 400, "json无法被解析", nil)
+		}
+	}
+	err := service.AddPage(numBoardId, curPage, data)
+	if err != nil {
+		res.Fail(c, 400, "添加新页失败", nil)
+		return
+	}
+	board.(*model.Board).PageSum += 1
+	//pageInfo := gin.H{
+	//	"type": model.AddNewPageSign,
+	//	"data": gin.H{
+	//		"newPageId": curPage,
+	//		"seqData":   data,
+	//	},
+	//}
+	mq, err := service.BindExchange(numBoardId)
+	if err != nil {
+		res.Fail(c, 500, "rabbitMQ绑定失败", nil)
+	}
+	mqMessage := model.MqMessage{
+		MessageType: model.AddNewPageSign,
+		UserName:    "",
+		DataType:    websocket.TextMessage,
+		PageId:      curPage,
+		Data:        data,
+	}
+	m, err := json.Marshal(mqMessage)
+	if err != nil {
+		res.Fail(c, 500, "mq消息序列化失败", nil)
+	}
+	err = mq.SendMessage(string(m))
+	if err != nil {
+		res.Fail(c, 500, "mq消息发送失败", nil)
+		return
+	}
+	res.Ok(c, 200, "新建页成功", gin.H{
+		"newPageId": curPage,
+		"seqData":   data,
 	})
 }

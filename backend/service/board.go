@@ -92,7 +92,7 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 			//	continue
 			//}
 			sendDate := gin.H{
-				"type": model.SequenceBoardSign,
+				"type": mqMessage.MessageType,
 				"data": gin.H{
 					"pageId":  mqMessage.PageId,
 					"seqData": mqMessage.Data,
@@ -167,17 +167,17 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 	//}
 }
 
-func ValidateBoardId(boardId string) bool {
+func ValidateBoardId(boardId string) (any, bool) {
 	err := validator.Validate.Var(boardId, "len=9,required,numeric")
 	if err != nil {
-		return false
+		return nil, false
 	}
 	id, _ := strconv.Atoi(boardId)
-	_, ok := local.Boards.Load(id)
+	v, ok := local.Boards.Load(id)
 	if !ok {
-		return false
+		return nil, false
 	}
-	return true
+	return v, true
 }
 
 func AddUser(boardId int, userName string) error {

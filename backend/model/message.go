@@ -1,9 +1,10 @@
 package model
 
 const (
-	EnterBoardSign = 1 // 进入房间
-
+	EnterBoardSign    = 1 // 进入房间
 	SequenceBoardSign = 2 // 序列化消息
+
+	AddNewPageSign    = 5 //新增一页消息
 	dissolveBoardSign = 3 //解散房间
 	switchModeSign    = 4 //编辑模式切换
 	actionObjectSign  = 5 //操作对象
@@ -33,7 +34,7 @@ type ReceiveWsMessage struct {
 }
 
 type MqMessage struct {
-	//  序列化消息
+	//  序列化消息, 新增页消息
 	MessageType int         `json:"messageType"`
 	UserName    string      `json:"userId"`
 	DataType    int         `json:"dataType"`
