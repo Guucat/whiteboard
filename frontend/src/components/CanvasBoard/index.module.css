@@ -1,73 +1,120 @@
-/* .canvas-wrapper{
-    background-color: #f2f2f2;
-} */
 
 
-/* 侧边栏选择 */
-.selectBar {
-    position: absolute;
-    z-index: 3;
-  }
-  .tools {
-    position: fixed;
-    left: 25px;
-    top: 110px;
-    width: 50px;
-    /* height: 40px; */
-    display: flex;
-    flex-direction: column;
-    justify-self: start;
-    /* text-align: center; */
-    /* line-height: 40px; */
-  }
-  .tools .container {
-    /* height: 70px; */
-    padding: 8px 10px;
-    border-radius: 20px;
-    box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
-    background: #fff;
-    display: flex;
-    flex-direction: column;
-    justify-self: start;
-    /* height: 40px;
-    line-height: 40px; */
-  }
-  .tools button {
-    width: 30px;
-    height: 50px;
-    /* height: 30px;
-    line-height: 20px; */
-    border: none;
-    outline: none;
-    /* background-size: 20px 20px; */
-    background-position: center center;
-    background-repeat: no-repeat;
-    background-color: #fff;
-    /* margin: 0 6px; */
-    transition: 0.3s;
-    cursor: pointer;
-    border: 2px solid transparent;
-  }
-  .active,.undoRedoActive {
-    border-radius: 5px;
-    border: 1px solid #1398e6;
-    /* border-color: ; */
-    color: #1398e6;
+.select-edit-wrapper {
+
+  position: absolute;
+  z-index: 3;
+}
+
+
+/* 选中修改 */
+.select-edit-container {
+  animation: fadeInRight 0.5s;
+  animation-fill-mode: both !important;
+  -webkit-animation-fill-mode: both !important;
+  position: fixed;
+  right: 35px;
+  top: 110px;
+  width: 250px;
+  height: 380px;
+  background-color: #fff;
+  padding: 10px 15px;
+  border-radius: 10px;
+  box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58);
+}
+
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    -webkit-transform: translate(1000px, 0);
+    transform: stranslate(1000px, 0);
   }
 
-  .UndoRedo-wrapper{
-    position: fixed;
-    left: 25px;
-    bottom: 75px;
-    width: 50px;
-    background-color: #fff;
-    border-radius: 18px;
-    box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+  to {
+    opacity: 1;
+    -webkit-transform: translate(10px, 0);
+    transform: stranslate(10px, 0);
   }
-  .undo,.redo{
-    width: 100%;
-    height: 30px;
-    margin-top: 10px;
-    text-align: center;
-    font-weight: bold;
-  }
+}
+
+.select-item-wrapper{
+  margin-bottom: 10px;
+}
+.select-item-title{
+  color: #343a40;
+    font-size: 16px;
+    margin-bottom: 10px;
+}
+.select-item-desc{
+ display: flex;
+ justify-content: start;
+}
+.select-color{
+  outline: none;
+  border: none;
+  padding: 0;
+  width: 36px;
+  height: 40px;
+  margin-right: 8px;
+}
+.show-color{
+  display: flex;
+  justify-content: start;
+  width: 90%;
+  margin-top: 3px;
+}
+.detail-color-title{
+  background-color: #f5f7fa;
+  color:#909399;
+ 
+  border-radius: 4px;
+  font-size: 16px;
+  width: 30%;
+  height: 35px;
+  line-height: 35px;
+  text-align: center;
+  white-space: nowrap;
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+  border-right: 0px;
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+}
+.detail-color{
+  padding: 0px 10px;
+border-radius: 4px;
+  border-left: 0px;
+  width: 60%;
+  height: 35px;
+  line-height: 35px;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  box-shadow: 0 0 0 1px #dcdfe6 inset;
+}
+.size-width{
+  width: 100%;
+
+}
+.show-line{
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  display: flex;
+  justify-content: start;
+  font-size: 16px;
+ width: 100%;
+ height: 35px;
+ line-height: 35px;
+}
+.detail-line,.detail-line1,.detail-line2{
+  width: 30%;
+  text-align: center;
+}
+.detail-line,.detail-line1{
+  border-right: 1px solid #dcdfe6;
+}
+::-webkit-color-swatch-wrapper {
+  background-color: #ffffff;
+}
+
+::-webkit-color-swatch {
+  position: relative;
+}

@@ -1,6 +1,5 @@
 import { register } from '@/service'
-import { AxiosResponse } from 'axios'
-import React, { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import style from './index.module.css'
 export default function Register() {
@@ -8,6 +7,8 @@ export default function Register() {
 
   const userNameRef = useRef<HTMLInputElement>(null)
   const pwdRef = useRef<HTMLInputElement>(null)
+  const getData = useRef<any>(null)
+  const [showErr, setShowErr] = useState(false)
   const handleRegist = async () => {
     const username = userNameRef.current!.value
     const password = pwdRef.current!.value
@@ -16,12 +17,21 @@ export default function Register() {
     formData.append('name', username)
     formData.append('pwd', password)
 
-    const getData: any = await register(formData)
+    getData.current = await register(formData)
+    console.log('register', getData)
 
-    if (getData.msg === '注册成功') {
+    if (getData.current.msg === '注册成功') {
       navigate('/login', { state: { username, password } })
+    } else if (getData.current.includes('注册失败')) {
+      setShowErr(true)
+      setTimeout(() => {
+        setShowErr(false)
+      }, 2000)
     }
   }
+  useEffect(() => {
+    setShowErr(false)
+  }, [])
   return (
     <div className={style['container']}>
       <div className={style['login-wrapper']}>
@@ -53,6 +63,9 @@ export default function Register() {
         <div className={style['msg']}>
           已有帐号？
           <Link to={'/login'}>登录</Link>
+        </div>
+        <div className={style['error']} style={showErr ? { display: 'block' } : { display: 'none' }}>
+          {getData.current}
         </div>
       </div>
     </div>

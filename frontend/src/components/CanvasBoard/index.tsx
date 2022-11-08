@@ -1,80 +1,25 @@
-import React, { FC, useRef, useEffect, useState, useCallback } from 'react'
+import { FC, useRef, useEffect, useState } from 'react'
 import Header from '../Header'
-import style from './index.module.css'
+import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
-import { tools } from './data'
-import { fabric } from 'fabric'
-interface CanvasBoardProps {
-  width?: number
-  height?: number
-  type: string
-  CanvasRef?: React.RefObject<HTMLCanvasElement>
-  ws?: React.MutableRefObject<WebSocket | null>
-  boardId?: any
-}
+import { useRecoilState } from 'recoil'
+import { CanvasBoardProps } from '@/type'
+import SelectBar from '../SelectBar'
+import FooterBar from '../FooterBar'
+import { ModalVisible } from '@/utils/data'
+
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
-  const { width, height, CanvasRef, type, boardId } = props
-  const [curTools, setCurTools] = useState('line')
-  const [activeIndex, setActiveIndex] = useState(1)
-  // const [undoRedoIndex,setUndoRedoIndex]=useState()
+  const [visibles, setVisibles] = useRecoilState(ModalVisible)
+  const { width, height, type, boardId } = props
+  const [curTools, setCurTools] = useState('select')
   const canvas = useRef<BaseBoard | null>(null)
-
-  function ClickTools(id: number, tool: string, card: any) {
-    setActiveIndex(id)
-    console.log('id', id)
-    // if (curTools == type) return
-    // 保存当前选中的绘图工具
-    // setCurTools(tool)
-    canvas.current!.selectTool = tool
-    // this.selectTool = tool;
-    // 选择任何工具前进行一些重置工作
-    // 禁用画笔模式
-    card.canvas.isDrawingMode = false
-    // 禁止图形选择编辑
-    let drawObjects = card.canvas.getObjects()
-    if (drawObjects.length > 0) {
-      drawObjects.map((item: any) => {
-        item.set('selectable', false)
-      })
-    }
-    console.log('画笔模式', card.canvas.isDrawingMode)
-    // console.log(type)
-
-    if (tool == 'brush') {
-      // 如果用户选择的是画笔工具，直接初始化，无需等待用户进行鼠标操作
-      console.log('画笔', card)
-      card.initBruch()
-    }
-    // else if (type == 'eraser') {
-    //   // 如果用户选择的是橡皮擦工具，直接初始化，无需等待用户进行鼠标操作
-    //   card.initEraser()
-    // }
-  }
-
-  function handleUndoRedo(flag: number, e: any) {
-    console.log('撤销重做触发了')
-    console.log(e.target)
-    // e.target.classList.add(style['undoRedoActive'])
-    const card = canvas.current!
-    card.isRedoing = true
-    let stateIdx = card.stateIdx + flag
-    // 判断是否已经到了第一步操作
-    if (stateIdx < 0) return
-    // 判断是否已经到了最后一步操作
-    if (stateIdx >= card.stateArr.length) return
-    if (card.stateArr[stateIdx]) {
-      card.canvas.loadFromJSON(card.stateArr[stateIdx])
-      // let sendObj = JSON.stringify(this.canvas.toJSON())
-      card.ws.current?.send(card.stateArr[stateIdx])
-      if (card.canvas.getObjects().length > 0) {
-        card.canvas.getObjects().forEach((item: any) => {
-          item.set('selectable', false)
-        })
-      }
-      card.stateIdx = stateIdx
-    }
-  }
+  const [isSelect, setIsSelect] = useState(false)
+  const [loading, setLoading] = useState(true)
   const ws = useRef<WebSocket | null>(null)
+  const pickerColorRef = useRef<HTMLInputElement | null>(null)
+  /**
+   * @des 初始化websocket
+   */
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
@@ -90,56 +35,164 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       alert('当前浏览器 Not support websocket')
     }
     if (ws.current) {
-      console.log('lllllllll')
-
       ws.current.onmessage = (e) => {
-        console.log('传递过来的数据data', e.data)
         const data = JSON.parse(e.data)
-        // if (e.data.login_name == cache_name) return;
-        // 如果是画笔模式
-        // if (canvas.current!.canvas.isDrawingMode) {
-        canvas.current!.canvas.loadFromJSON(data)
-        // }else{
-        //   canvas.current!.canvasObject.loadFromJSON()
-        // }
+        console.log('接收到的数据是', data)
+        // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
+        let canvasData
+        if (data.type == 1) {
+          canvasData = data.data.history[0]
+          console.log('history', canvasData)
+        } else {
+          canvasData = data.data.seqData
+        }
+        //  = data.data.seqData
+        canvas.current!.canvas.loadFromJSON(canvasData, () => {
+          canvas.current!.canvas.renderAll()
+        })
+        canvas.current!.stateArr.push(JSON.stringify(canvas.current!.canvas))
+        canvas.current!.stateIdx++
       }
     }
   }, [ws])
+  /**
+   * @des 初始化白板类
+   */
   useEffect(() => {
     canvas.current = new BaseBoard({ type, curTools, ws })
-    canvas.current.initCanvas()
-    canvas.current.initCanvasEvent()
-    ClickTools(1, 'brush', canvas.current)
+    setVisibles(false)
+    setLoading(false)
   }, [])
+  /**
+   * @des 监听是否选中当前图形
+   */
+  useEffect(() => {
+    // 监听选中对象
+    const board = canvas.current!
+    board.canvas.on('selection:created', (e) => {
+      if (e.selected!.length == 1) {
+        setIsSelect(true)
+      }
+
+      // // 选中图层事件触发时，动态更新赋值
+      board.selectedObj = e.selected!
+      document.onkeydown = (e) => {
+        if (e.key == 'Backspace' && board.selectTool !== 'text') {
+          board.deleteSelectObj()
+        }
+      }
+    })
+
+    board.canvas.on('selection:updated', (e) => {
+      if (e.selected!.length == 1) {
+        setIsSelect(true)
+      }
+      board.selectedObj = e.selected!
+      document.onkeydown = (e) => {
+        if (e.key == 'Backspace' && board.selectTool !== 'text') {
+          board.deleteSelectObj()
+        }
+      }
+    })
+
+    board.canvas.on('selection:cleared', (e) => {
+      setIsSelect(false)
+      board.selectedObj = null
+    })
+  }, [isSelect])
+
+  function editObj(type: any, e: React.ChangeEvent<HTMLInputElement>) {
+    canvas.current!.selectedObj![0].set(type, e.target.value)
+    canvas.current!.canvas.renderAll()
+  }
+
   return (
-    <div className={style['canvas-wrapper']}>
+    <div className={styles['canvas-wrapper']}>
       <Header></Header>
-      <div className={style['selectBar']}>
-        <div className={style['tools']}>
-          <div className={style['container']}>
-            {tools.map((item) => (
-              <button
-                key={item.id}
-                onClick={() => ClickTools(item.id, item.type, canvas.current)}
-                className={item.id == activeIndex ? style['active'] : style['']}
-              >
-                <i className={`iconfont ${item.value}`} />
-              </button>
-            ))}
+
+      {loading ? (
+        <></>
+      ) : (
+        <>
+          {' '}
+          <SelectBar canvas={canvas.current!}></SelectBar>
+          <FooterBar canvas={canvas.current!}></FooterBar>
+        </>
+      )}
+
+      <div className={styles['select-edit-wrapper']}>
+        <div className={styles['select-edit-container']} style={isSelect ? { display: 'block' } : { display: 'none' }}>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>描边</div>
+            <div className={styles['select-item-desc']}>
+              <input
+                type="color"
+                className={styles['select-color']}
+                onChange={(e) => {
+                  editObj('stroke', e)
+                }}
+              />
+              <div className={styles['show-color']}>
+                <div className={styles['detail-color-title']}>颜色</div>
+                <div className={styles['detail-color']}>#ffffff</div>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className={style['UndoRedo-wrapper']}>
-          <div className={style['undo']} onClick={(e) => handleUndoRedo(-1, e)}>
-            <i className={`iconfont icon-undo`} />
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>填充</div>
+            <div className={styles['select-item-desc']}>
+              <input
+                type="color"
+                className={styles['select-color']}
+                onChange={(e) => {
+                  editObj('fill', e)
+                }}
+              />
+              <div className={styles['show-color']}>
+                <div className={styles['detail-color-title']}>颜色</div>
+                <div className={styles['detail-color']}>#ffffff</div>
+              </div>
+            </div>
           </div>
-          <div className={style['redo']} onClick={(e) => handleUndoRedo(1, e)}>
-            <i className={`iconfont icon-redo`} />
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>边框样式</div>
+            <div className={styles['select-item-desc']}>
+              <div className={styles['show-line']}>
+                <div className={styles['detail-line']}>实线</div>
+                <div className={styles['detail-line1']}>大虚线</div>
+                <div className={styles['detail-line2']}>小虚线</div>
+              </div>
+            </div>
+          </div>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>透明度</div>
+            <input
+              type="range"
+              className={styles['size-width']}
+              ref={pickerColorRef}
+              onChange={(e) => {
+                editObj('opacity', e)
+              }}
+              min="0"
+              max="1"
+              step="0.01"
+            ></input>
+          </div>
+          <div className={styles['select-item-wrapper']}>
+            <div className={styles['select-item-title']}>角度 </div>
+            <input
+              type="range"
+              className={styles['size-width']}
+              ref={pickerColorRef}
+              onChange={(e) => {
+                editObj('angle', e)
+              }}
+            ></input>
           </div>
         </div>
       </div>
 
-      {/* <SelectBar getActive={getCurTools} card={card}></SelectBar> */}
-      <canvas width={width} height={height} ref={CanvasRef} id={type}></canvas>
+      <canvas width={width} height={height} id={type}></canvas>
     </div>
   )
 }

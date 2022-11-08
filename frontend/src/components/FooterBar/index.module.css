@@ -1,0 +1,85 @@
+/* 底部 */
+.footer-wrapper {
+    position: absolute;
+    z-index: 3;
+
+}
+
+.footer-container {
+    position: fixed;
+    left: 200px;
+    bottom: 40px;
+    display: flex;
+    justify-content: start;
+    border-radius: 20px;
+    box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.28);
+    background: #fff;
+}
+
+.btn-color-wrapper,
+.btn-size-wrapper {
+    margin: 10px 15px;
+    display: flex;
+    justify-content: start;
+    height: 25px;
+    line-height: 25px;
+}
+
+.btn-color-wrapper:hover,
+.color-picker:hover {
+    cursor: pointer;
+    color: #1398e6;
+}
+
+.color-picker {
+    width: 20px;
+    height: 25px;
+    outline: none;
+    border: none;
+    padding: 0;
+}
+
+.color-label {
+    margin-right: 3px;
+}
+
+.btn-size-wrapper i {
+    font-weight: bold;
+}
+
+.btn-size-wrapper i:hover {
+    color: #1398e6;
+    cursor: pointer;
+}
+
+.download-type {
+    position: absolute;
+    bottom: 50px;
+    padding: 10px;
+    text-align: center;
+    transition: 0.37s ease;
+    right: -21px;
+    border: 1px solid transparent;
+    transition: 0.37 ease;
+    background-color: #fff;
+    border-radius: 4px;
+    box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;
+}
+
+.modal-delete {
+    position: absolute;
+    right: -5px;
+    color: #909399;
+    top: -13px;
+    font-size: 16px;
+}
+
+.modal-delete:hover {
+    cursor: pointer;
+    color: #1398e6;
+}
+
+.download-type p:hover {
+    color: #1398e6;
+    cursor: pointer;
+}

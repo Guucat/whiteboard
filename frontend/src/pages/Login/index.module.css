@@ -63,3 +63,11 @@ a {
   color: #abc1ee;
   caret-color: transparent;
 }
+.error {
+  color: #ee0a0a;
+  font-size: 15px;
+ position: absolute;
+ bottom: 172px;
+ left: 105px;
+ text-align: center;
+}
