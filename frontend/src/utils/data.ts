@@ -1,3 +1,18 @@
+import { atom } from 'recoil'
+
+export const toolTypes = [
+  'select',
+  'brush',
+  'line',
+  'rect',
+  'circle',
+  'triangle',
+  'ellipse',
+  'rhombus',
+  'text',
+  'clear',
+]
+
 export const tools = [
   {
     id: 0,
@@ -53,3 +68,7 @@ export const tools = [
 
 export const color = ['strokeColor', 'fillColor', 'bgColor']
 export const size = ['lineSize', 'fontSize']
+export const ModalVisible = atom<boolean>({
+  key: 'ModalVisibles',
+  default: false,
+})

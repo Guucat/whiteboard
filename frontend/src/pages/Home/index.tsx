@@ -1,16 +1,15 @@
 import Modal from '@/components/Modal'
-import React, { FC, useEffect, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import { atom, useRecoilState } from 'recoil'
 import { useNavigate } from 'react-router-dom'
 import style from './index.module.css'
-export const ModalVisible = atom<boolean>({
-  key: 'ModalVisible',
-  default: false,
-})
+import { ModalVisible } from '@/utils/data'
+
 const Home: FC = () => {
   const [visible, setVisible] = useRecoilState(ModalVisible)
   const [modalType, setModalType] = useState('')
   const navigate = useNavigate()
+
   function handleCreate() {
     const token = localStorage.getItem('token')
     if (token) {
@@ -20,11 +19,12 @@ const Home: FC = () => {
       setModalType('login')
     }
   }
-
   function handleJoin() {
     setVisible(true)
+
     setModalType('joinBoard')
   }
+
   useEffect(() => {
     setVisible(false)
   }, [])
@@ -50,6 +50,7 @@ const Home: FC = () => {
           Board
         </button>
       </div>
+
       <Modal visible={visible} describe={modalType}></Modal>
     </div>
   )

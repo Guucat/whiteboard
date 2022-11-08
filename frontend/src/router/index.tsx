@@ -1,7 +1,6 @@
 import JoinBoard from '@/pages/JoinBoard'
 import { Navigate } from 'react-router-dom'
 import CreateBoard from '../pages/CreateBoard'
-import CanvasBoard from '../pages/CreateBoard'
 import Home from '../pages/Home'
 import Login from '../pages/Login'
 import Register from '../pages/register'

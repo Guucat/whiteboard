@@ -7,4 +7,9 @@ const register = (obj: FormData) => {
   return instance.post('/register', obj)
 }
 
-export { login, register }
+const judgeBoardId = (obj: any) => {
+  console.log(obj)
+
+  return instance.get(`/board/validate?boardId=${obj}`)
+}
+export { login, register, judgeBoardId }

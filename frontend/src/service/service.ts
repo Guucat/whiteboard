@@ -21,9 +21,7 @@ instance.interceptors.response.use(
     if (err && err.response) {
       switch (err.response.status) {
         case 400:
-          window.location.hash = '/wrong'
-          Promise.reject('请求错误')
-          break
+          return err.response.data.msg
         case 401:
           window.location.hash = '/wrong'
           Promise.reject('未授权')
