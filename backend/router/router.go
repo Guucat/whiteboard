@@ -17,9 +17,13 @@ func SetupRouter() *gin.Engine {
 	boardGroup := r.Group("/board")
 	{
 		boardGroup.GET("/create", middleware.JWTAuthMiddleware(), controller.CreateBoard)
-		boardGroup.GET("/enter", controller.EnterBoard)
-		boardGroup.GET("/validate", controller.ValidateBoardId)
-		boardGroup.GET("/users", controller.GetOnlineUsers)
+		boardGroup.GET("/enter", controller.ValidateBoardId, controller.EnterBoard)
+
+		boardGroup.GET("/users", controller.ValidateBoardId, controller.GetOnlineUsers)
+		boardGroup.DELETE("/exit", controller.ValidateBoardId, controller.ExitBoard)
+		boardGroup.DELETE("/dissolve", controller.ValidateBoardId, controller.DissolveBoard)
+
+		boardGroup.GET("/validate", controller.ValidateBoardId) //转成中间件？？？？
 	}
 	pprof.RouteRegister(boardGroup, "pprof")
 

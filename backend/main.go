@@ -20,9 +20,10 @@ func init() {
 	mysql.Init(setting.Conf.MySQLConfig)
 	//初始化Reids数据库
 	redis.Init(setting.Conf.RedisConfig)
+	//初始化RabbitMQ
+	rabbitmq.Init(setting.Conf.RabbitMQConfig)
 	//初始化Validate
 	validator.Init()
-	rabbitmq.Init()
 }
 
 func main() {
