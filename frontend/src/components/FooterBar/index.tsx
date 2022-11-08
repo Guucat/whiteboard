@@ -72,6 +72,8 @@ const FooterBar: FC<SelectBarProps> = (props) => {
     setIsDownload(false)
     let card = canvas
     jsonData.current = card.canvas.toJSON()
+    console.log('导出的内容', jsonData.current)
+
     setModalType('jsonModal')
     setVisiable(true)
   }

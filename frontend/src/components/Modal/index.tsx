@@ -46,7 +46,9 @@ const Modal: FC<ModalProps> = (ModalProps) => {
   function handleJson() {
     let link = document.createElement('a')
     link.download = 'config.json'
-    link.href = 'data:text/plain,' + JSON.stringify(jsonData)
+    console.log('xxxx', JSON.stringify(jsonData))
+    var blob = new Blob([JSON.stringify(jsonData)])
+    link.href = URL.createObjectURL(blob)
     link.click()
   }
   return (

@@ -60,9 +60,11 @@ const Login: FC = () => {
           Don't have account?
           <Link to={'/register'}>Sign up</Link>
         </div>
-        <div className={style['error']} style={showErr ? { display: 'block' } : { display: 'none' }}>
-          {getLoginData.current.msg}
-        </div>
+        {getLoginData.current && (
+          <div className={style['error']} style={showErr ? { display: 'block' } : { display: 'none' }}>
+            {getLoginData.current.msg}
+          </div>
+        )}
       </div>
     </div>
   )
