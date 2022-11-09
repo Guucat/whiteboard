@@ -1,4 +1,4 @@
-import instance from './service'
+import { instance, instance1 } from './service'
 
 const login = (obj: FormData) => {
   return instance.post('/login', obj)
@@ -7,9 +7,12 @@ const register = (obj: FormData) => {
   return instance.post('/register', obj)
 }
 
-const judgeBoardId = (obj: any) => {
+const judgeBoardId = (obj: number) => {
   console.log(obj)
 
-  return instance.get(`/board/validate?boardId=${obj}`)
+  return instance1.get(`/board/validate?boardId=${obj}`)
 }
-export { login, register, judgeBoardId }
+const exitBoard = (obj: any) => {
+  return instance1.delete(`/board/exit?boardId=${obj.boardId}&userName=${obj.curUser}`)
+}
+export { login, register, judgeBoardId, exitBoard }

@@ -24,3 +24,12 @@ export interface BaseBoardProp {
   curTools: string
   ws: React.MutableRefObject<WebSocket | null>
 }
+
+export interface HeaderProps {
+  canvas: BaseBoard
+  userList: string[]
+  curUser: string
+  boardId: number
+  ws: WebSocket
+  isOwner: boolean
+}

@@ -72,3 +72,7 @@ export const ModalVisible = atom<boolean>({
   key: 'ModalVisibles',
   default: false,
 })
+export const userLists = atom<string[]>({
+  key: 'userList',
+  default: [],
+})

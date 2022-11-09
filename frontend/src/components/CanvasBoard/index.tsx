@@ -6,7 +6,7 @@ import { useRecoilState } from 'recoil'
 import { CanvasBoardProps } from '@/type'
 import SelectBar from '../SelectBar'
 import FooterBar from '../FooterBar'
-import { ModalVisible } from '@/utils/data'
+import { ModalVisible, userLists } from '@/utils/data'
 
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [visibles, setVisibles] = useRecoilState(ModalVisible)
@@ -17,6 +17,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [loading, setLoading] = useState(true)
   const ws = useRef<WebSocket | null>(null)
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
+  const canvasData = useRef<string | null>(null)
+  const [curUserList, setCurUserList] = useRecoilState(userLists)
+  const curUser = useRef(null)
+  const ReboardId = useRef(null)
+  const [isOwner, setIsOwner] = useState(true)
   /**
    * @des 初始化websocket
    */
@@ -39,17 +44,26 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         const data = JSON.parse(e.data)
         console.log('接收到的数据是', data)
         console.log('llll', data.data.seqData)
-
+        console.log('shibuhi', data.isOwner)
         // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
-        let canvasData
-        if (data.type == 1) {
-          canvasData = data.data.history[0]
-          console.log('history', canvasData)
-        } else {
-          canvasData = data.data.seqData
+        // let canvasData
+        switch (data.type) {
+          case 1:
+            canvasData.current = data.data.history[0]
+            console.log('history', canvasData)
+            curUser.current = data.data.userName
+            ReboardId.current = data.data.boardId
+            setIsOwner(data.isOwner)
+            break
+          case 2:
+            canvasData.current = data.data.seqData
+          case 7:
+            setCurUserList(data.data.users)
+          default:
+            break
         }
-        //  = data.data.seqData
-        canvas.current!.canvas.loadFromJSON(canvasData, () => {
+
+        canvas.current!.canvas.loadFromJSON(canvasData.current, () => {
           canvas.current!.canvas.renderAll()
         })
         canvas.current!.stateArr.push(JSON.stringify(canvas.current!.canvas))
@@ -63,6 +77,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   useEffect(() => {
     canvas.current = new BaseBoard({ type, curTools, ws })
     setVisibles(false)
+    console.log('loading')
     setLoading(false)
   }, [])
   /**
@@ -107,10 +122,20 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
+  console.log('loading', userLists)
 
   return (
     <div className={styles['canvas-wrapper']}>
-      <Header></Header>
+      {userLists && (
+        <Header
+          userList={curUserList}
+          canvas={canvas.current!}
+          curUser={curUser.current!}
+          boardId={ReboardId.current!}
+          ws={ws.current!}
+          isOwner={isOwner}
+        ></Header>
+      )}
 
       {loading ? (
         <></>
@@ -193,7 +218,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           </div>
         </div>
       </div>
-
       <canvas width={width} height={height} id={type}></canvas>
     </div>
   )
