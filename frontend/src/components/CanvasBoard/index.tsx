@@ -6,11 +6,13 @@ import { useRecoilState } from 'recoil'
 import { CanvasBoardProps } from '@/type'
 import SelectBar from '../SelectBar'
 import FooterBar from '../FooterBar'
-import { ModalVisible, userLists } from '@/utils/data'
-
+import { boardSize, ModalVisible, userLists } from '@/utils/data'
+import { Message, Modal } from '@arco-design/web-react'
+import './index.css'
+import { useNavigate } from 'react-router-dom'
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [visibles, setVisibles] = useRecoilState(ModalVisible)
-  const { width, height, type, boardId } = props
+  const { type, boardId } = props
   const [curTools, setCurTools] = useState('select')
   const canvas = useRef<BaseBoard | null>(null)
   const [isSelect, setIsSelect] = useState(false)
@@ -21,10 +23,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [curUserList, setCurUserList] = useRecoilState(userLists)
   const curUser = useRef(null)
   const ReboardId = useRef(null)
-  const [isOwner, setIsOwner] = useState(true)
+  const [isOwner, setIsOwner] = useState(false)
+  const isCreate = useRef(null)
+  const [boardsize, setBoardsize] = useRecoilState(boardSize)
+  const navigate = useNavigate()
   /**
    * @des 初始化websocket
    */
+
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
@@ -47,6 +53,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         console.log('shibuhi', data.isOwner)
         // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
         // let canvasData
+
         switch (data.type) {
           case 1:
             canvasData.current = data.data.history[0]
@@ -54,11 +61,33 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             curUser.current = data.data.userName
             ReboardId.current = data.data.boardId
             setIsOwner(data.isOwner)
+            isCreate.current = data.isOwner
             break
           case 2:
             canvasData.current = data.data.seqData
+            break
+          case 4:
+            data.isOwner
+              ? null
+              : Modal.info({
+                  title: '退出白板',
+                  content: '创建者解散了该白板，点击确认返回首页',
+                  onOk: () => {
+                    navigate('/home')
+                  },
+                })
+            break
           case 7:
+            console.log('isOwner', isCreate.current)
+
+            Message.success({
+              content: `用户${data.data.user}${
+                data.data.inOrOut == 1 ? (isCreate.current ? '创建' : '进入') : '离开'
+              }了白板`,
+              duration: 2000,
+            })
             setCurUserList(data.data.users)
+            break
           default:
             break
         }
@@ -122,18 +151,26 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
-  console.log('loading', userLists)
-
+  const [update, isUpdate] = useState(false)
+  function updateCanvas(x: any) {
+    canvas.current = x
+    isUpdate(true)
+  }
+  const canvasBoardRef = useRef<HTMLDivElement | null>(null)
   return (
     <div className={styles['canvas-wrapper']}>
       {userLists && (
         <Header
           userList={curUserList}
-          canvas={canvas.current!}
+          canvas={canvas}
           curUser={curUser.current!}
           boardId={ReboardId.current!}
-          ws={ws.current!}
+          ws={ws}
           isOwner={isOwner}
+          curTools={curTools}
+          type={type}
+          canvasBoardRef={canvasBoardRef.current!}
+          currentCanvas={updateCanvas}
         ></Header>
       )}
 
@@ -218,12 +255,15 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           </div>
         </div>
       </div>
-      <canvas width={width} height={height} id={type}></canvas>
+      <div className={styles['canvasBoard']} ref={canvasBoardRef}>
+        {}
+        <canvas width={boardsize.width} height={boardsize.height} id={type}></canvas>
+      </div>
     </div>
   )
 }
-CanvasBoard.defaultProps = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-}
+// CanvasBoard.defaultProps = {
+//   width: window.innerWidth,
+//   height: window.innerHeight,
+// }
 export default CanvasBoard

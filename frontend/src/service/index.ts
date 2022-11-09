@@ -15,4 +15,12 @@ const judgeBoardId = (obj: number) => {
 const exitBoard = (obj: any) => {
   return instance1.delete(`/board/exit?boardId=${obj.boardId}&userName=${obj.curUser}`)
 }
-export { login, register, judgeBoardId, exitBoard }
+
+const deleteBoard = (obj: number) => {
+  return instance.delete(`/board/dissolve?boardId=${obj}`)
+}
+
+const addNewPage = (obj: FormData) => {
+  return instance.put(`/board/page`, obj)
+}
+export { login, register, judgeBoardId, exitBoard, deleteBoard, addNewPage }

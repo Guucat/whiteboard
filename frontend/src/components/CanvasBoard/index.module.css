@@ -118,3 +118,15 @@ border-radius: 4px;
 ::-webkit-color-swatch {
   position: relative;
 }
+
+.canvasBoard{
+  float: left;
+}
+
+
+/* 新增新页 */
+.canvasBoard{
+  position: absolute;
+  left: 0;
+  width: 1000%;
+}

@@ -1,4 +1,5 @@
 import { atom } from 'recoil'
+import { BaseBoard } from './index'
 
 export const toolTypes = [
   'select',
@@ -75,4 +76,16 @@ export const ModalVisible = atom<boolean>({
 export const userLists = atom<string[]>({
   key: 'userList',
   default: [],
+})
+
+// export const canvasBoard = atom<BaseBoard>({
+//   key: 'canvas',
+//   default: null,
+// })
+export const boardSize = atom({
+  key: 'boardSize',
+  default: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  },
 })

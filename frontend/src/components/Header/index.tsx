@@ -1,15 +1,20 @@
 import { FC } from 'react'
 import style from './index.module.css'
-import { Avatar, Message } from '@arco-design/web-react'
+import { Avatar, Message, Pagination } from '@arco-design/web-react'
 import { HeaderProps } from '@/type'
-import { exitBoard } from '@/service'
+import { addNewPage, deleteBoard, exitBoard } from '@/service'
 import { useRecoilState } from 'recoil'
-import { ModalVisible, userLists } from '@/utils/data'
+import { boardSize, ModalVisible, userLists } from '@/utils/data'
+import { useNavigate } from 'react-router-dom'
+import { BaseBoard } from '@/utils'
+
 const Header: FC<HeaderProps> = (props) => {
-  const { canvas, userList, curUser, boardId, ws, isOwner } = props
+  const { canvas, userList, curUser, boardId, ws, isOwner, curTools, type, canvasBoardRef, currentCanvas } = props
   console.log('props', props)
   const [curUserList, setCurUserList] = useRecoilState(userLists)
   const AvatarGroup = Avatar.Group
+  const navigate = useNavigate()
+  const [boardsize, setBoardsize] = useRecoilState(boardSize)
   /**
    * @des 退出白板
    */
@@ -19,21 +24,10 @@ const Header: FC<HeaderProps> = (props) => {
     console.log(getExitData)
     if (getExitData.msg == '退出成功') {
       // 先全局提示一下谁退出房间了，然后再刷新一下用户列表
-      Message.success(`用户${curUser}退出了白板`)
-      ws.onmessage = (e) => {
-        const data = JSON.parse(e.data)
-        console.log('接收到的数据是', data)
-        console.log('llll', data.data.seqData)
-
-        // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
-        // let canvasData
-        switch (data.type) {
-          case 7:
-            setCurUserList(data.data.users)
-          default:
-            break
-        }
-      }
+      Message.success({ content: `用户${curUser}退出了白板`, duration: 2000 })
+      setTimeout(() => {
+        navigate('/home')
+      }, 2500)
     }
     console.log('当前用户列表', curUserList)
   }
@@ -41,13 +35,65 @@ const Header: FC<HeaderProps> = (props) => {
   /**
    * @des 添加新页
    */
-  function handleNewPage() {}
+  async function handleNewPage() {
+    let formData = new FormData()
+    // const boardIds=new Blob(boardId)
+    formData.append('boardId', `${boardId}`)
+    const addnewPage = await addNewPage(formData)
+    console.log(addnewPage)
+    const pageId = addnewPage.data.pageId
+    const newCanvas = document.createElement('canvas')
+    const width = JSON.stringify(window.innerWidth)
+    const height = JSON.stringify(canvas.current!.canvas.height)
+    const id: string = JSON.stringify(pageId)
+    newCanvas.setAttribute('width', width)
+    newCanvas.setAttribute('height', height)
+    newCanvas.setAttribute('id', id)
+    canvasBoardRef.appendChild(newCanvas)
+
+    const x = new BaseBoard({ type: id, curTools, ws })
+    console.log(x)
+    currentCanvas(x)
+    canvas.current = x
+  }
+  /**
+   * @des 解散白板
+   */
+
+  async function handleDeleteBoard() {
+    const getDeleteData: any = await deleteBoard(boardId)
+    console.log(getDeleteData)
+    if (getDeleteData.msg == '解散成功') {
+      Message.success({ content: '解散成功', duration: 2000 })
+      setTimeout(() => {
+        navigate('/home')
+      }, 2500)
+    }
+  }
+
+  function handleSwitchPage(page: number) {
+    canvasBoardRef.style.left = `-${window.innerWidth * (page - 1)}px`
+  }
   return (
     <div className={style['container']}>
       <div className={style['head-wrapper']}>
-        <div className={style['add-new-page']} onClick={handleNewPage}>
-          Add new Page
+        <div className={style['head-left']}>
+          <div className={style['add-new-page']} style={{ marginRight: '16px' }}>
+            白板Id:{boardId}
+          </div>
+          <div className={style['add-new-page']} onClick={handleNewPage}>
+            Add new Page
+          </div>
+          {canvasBoardRef && (
+            <Pagination
+              total={canvasBoardRef.childNodes.length}
+              pageSize={1}
+              onChange={(page) => handleSwitchPage(page)}
+              hideOnSinglePage={true}
+            />
+          )}
         </div>
+
         <div className={style['head-right']}>
           {isOwner ? (
             <div className={style['selectMode']}>
@@ -64,7 +110,7 @@ const Header: FC<HeaderProps> = (props) => {
             退出白板
           </button>
           {isOwner ? (
-            <button className={style['exit-board']} onClick={handleExitBoard}>
+            <button className={style['exit-board']} onClick={handleDeleteBoard}>
               解散白板
             </button>
           ) : (
@@ -72,13 +118,14 @@ const Header: FC<HeaderProps> = (props) => {
           )}
 
           <AvatarGroup size={38} maxCount={2} className={style['avatar-group']}>
-            {userList.map((item, index) => {
-              return (
-                <Avatar style={{ backgroundColor: '#168CFF' }} key={index}>
-                  {item}
-                </Avatar>
-              )
-            })}
+            {userList &&
+              userList.map((item, index) => {
+                return (
+                  <Avatar style={{ backgroundColor: '#168CFF' }} key={index}>
+                    {item}
+                  </Avatar>
+                )
+              })}
           </AvatarGroup>
         </div>
       </div>

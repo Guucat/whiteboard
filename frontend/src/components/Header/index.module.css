@@ -27,9 +27,9 @@
 }
 .add-new-page:hover{
     cursor: pointer;
-   
+   color: #1398e6;
 }
-.head-right{
+.head-right,.head-left{
      display: flex;
     justify-content: start;
 }

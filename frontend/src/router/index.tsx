@@ -1,3 +1,4 @@
+import AddNewPage from '@/pages/AddNewPage'
 import JoinBoard from '@/pages/JoinBoard'
 import { Navigate } from 'react-router-dom'
 import CreateBoard from '../pages/CreateBoard'
@@ -29,5 +30,9 @@ export default [
   {
     path: 'joinboard',
     element: <JoinBoard></JoinBoard>,
+  },
+  {
+    path: 'page:id',
+    element: <AddNewPage></AddNewPage>,
   },
 ]
