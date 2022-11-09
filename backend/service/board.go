@@ -73,6 +73,21 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			// 清理rabbitMq的exchange和queue?
 			return
 		}
+		//判断是否可协作
+		board, _ := local.Boards.Load(boardId)
+		boardInfo := board.(*model.Board)
+		if boardInfo.EditType == model.ReadMode {
+			message := gin.H{
+				"type": model.ForbiddenWrite,
+			}
+			m, _ := json.Marshal(message)
+			if err := webConn.WriteMessage(websocket.TextMessage, m); err != nil {
+				log.Println("断开连接, 进入房间时消息写入websocket失败：", err)
+				return
+			}
+			continue
+		}
+
 		recData := model.ReceiveWsMessage{}
 		err = json.Unmarshal(data, &recData)
 		if err != nil {
@@ -129,14 +144,17 @@ func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			sendData = gin.H{
 				"type": model.UserCountChangedSign,
 				"data": gin.H{
-					"users": redis.GetUsersOfBoard(boardId),
+					"users":   redis.GetUsersOfBoard(boardId),
+					"user":    mqMessage.UserName,
+					"inOrOut": mqMessage.MessageType,
 				},
 			}
 		} else if mqMessage.MessageType == model.DissolveBoardSign {
 			isDissolve = true
 			sendData = gin.H{
-				"type": model.DissolveBoardSign,
-				"data": "",
+				"type":    model.DissolveBoardSign,
+				"data":    "",
+				"isOwner": mqMessage.UserName == userName,
 			}
 		} else if mqMessage.MessageType == model.ExitBoardSign {
 			log.Println(userName + "退出房间中")
@@ -145,6 +163,13 @@ func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 				log.Println("删除队列错误", err)
 			}
 			return
+		} else if mqMessage.MessageType == model.SwitchModeSign {
+			sendData = gin.H{
+				"type": model.SwitchModeSign,
+				"data": gin.H{
+					"newMode": mqMessage.Data,
+				},
+			}
 		} else {
 			continue //忽略自己的消息
 		}

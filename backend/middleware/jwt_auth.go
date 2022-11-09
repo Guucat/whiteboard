@@ -2,12 +2,12 @@ package middleware
 
 import (
 	"github.com/gin-gonic/gin"
-	"net/http"
 	"strings"
 	"whiteboard/utils/jwt"
+	"whiteboard/utils/res"
 )
 
-// JWT认证中间件
+// JWTAuthMiddleware JWT认证中间件
 func JWTAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
 		// websocket token 验证
@@ -15,10 +15,7 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 		if protocolToken != "" {
 			mes, err := jwt.ParseToken(protocolToken)
 			if err != nil {
-				c.JSON(http.StatusForbidden, gin.H{
-					"code": 400,
-					"mag":  "token无效",
-				})
+				res.Fail(c, 400, "token无效", nil)
 				c.Abort()
 				return
 			}
@@ -31,29 +28,20 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 
 		header := c.Request.Header.Get("Authorization")
 		if header == "" {
-			c.JSON(http.StatusForbidden, gin.H{
-				"code": 400,
-				"msg":  "token为空",
-			})
+			res.Fail(c, 400, "token为空", nil)
 			c.Abort()
 			return
 		}
 		// 按空格分割
 		parts := strings.SplitN(header, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			c.JSON(http.StatusForbidden, gin.H{
-				"code": 200,
-				"msg":  "请求头中auth格式有误",
-			})
+			res.Fail(c, 400, "请求头中auth格式有误", nil)
 			c.Abort()
 			return
 		}
 		mes, err := jwt.ParseToken(parts[1])
 		if err != nil {
-			c.JSON(http.StatusForbidden, gin.H{
-				"code": 200,
-				"mag":  "token无效",
-			})
+			res.Fail(c, 400, "token无效", nil)
 			c.Abort()
 			return
 		}
