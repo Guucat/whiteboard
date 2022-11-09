@@ -8,7 +8,7 @@ const (
 	AddNewPageSign       = 5 //新增一页消息	-> front
 	SwitchModeSign       = 6 //编辑模式切换	-> front
 	UserCountChangedSign = 7 //用户数改变		-> front
-
+	ForbiddenWrite       = 8 //禁止写入				-> front
 	//ActionObjectSign     = 8 //操作对象
 )
 
@@ -28,11 +28,6 @@ type WebSocketMessage struct {
 	// 1 进入房间   2 房主解散房间	3 编辑模式切换 	4 对象操作 	5 修改对象操作
 	//BasicData
 	Data interface{}
-}
-
-type UserCountChangedMessage struct {
-	MessageType uint8       `json:"messageType"` //1进入房间	3退出房间
-	Data        interface{} `json:"data"`
 }
 
 type ReceiveWsMessage struct {

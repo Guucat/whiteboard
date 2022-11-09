@@ -13,6 +13,7 @@ import (
 	"whiteboard/local"
 	"whiteboard/model"
 	"whiteboard/service"
+	"whiteboard/utils/jwt"
 	"whiteboard/utils/res"
 )
 
@@ -89,8 +90,20 @@ func CreateBoard(c *gin.Context) {
 func EnterBoard(c *gin.Context) {
 	boardId := c.GetInt("boardId")
 
-	timeSeq := strconv.Itoa(int(time.Now().Unix()))
-	userName := timeSeq[len(timeSeq)-6:]
+	protocolToken := c.Request.Header.Get("Sec-WebSocket-Protocol")
+	var userName string
+	if protocolToken == "" {
+		timeSeq := strconv.Itoa(int(time.Now().Unix()))
+		userName = timeSeq[len(timeSeq)-6:]
+	} else {
+		mes, err := jwt.ParseToken(protocolToken)
+		if err != nil {
+			res.Fail(c, 400, "token无效", nil)
+			return
+		}
+		userName = mes.Name
+	}
+
 	mq, err := service.NewMQ(boardId)
 	if err != nil {
 		log.Println("rabbitMq创建队列失败", err)
@@ -135,6 +148,7 @@ func EnterBoard(c *gin.Context) {
 
 func ValidateBoardId(c *gin.Context) {
 	boardId := c.Query("boardId")
+	log.Println(boardId)
 	_, ok := service.ValidateBoardId(boardId)
 	if !ok {
 		res.Fail(c, 400, "boardId无效", nil)
@@ -298,4 +312,54 @@ func DissolveBoard(c *gin.Context) {
 	}
 
 	res.Ok(c, 200, "解散成功", nil)
+}
+
+func SwitchMode(c *gin.Context) {
+	boardId := c.PostForm("boardId")
+	board, v := service.ValidateBoardId(boardId)
+	if v == false {
+		res.Fail(c, 400, "boardId无效", nil)
+		return
+	}
+	userName := c.GetString("name")
+	Mode := c.PostForm("newMode")
+	if Mode != "1" && Mode != "0" {
+		res.Fail(c, 400, "切换模式无效", nil)
+		return
+	}
+	newMode, _ := strconv.Atoi(Mode)
+
+	boardInfo := board.(*model.Board)
+	if userName != boardInfo.Owner {
+		res.Ok(c, 200, "无权限切换模式", nil)
+		return
+	}
+
+	boardInfo.EditType = newMode
+
+	mq, err := service.BindExchange(boardInfo.BoardId)
+	if err != nil {
+		log.Println("模式转换时rabbitMq创建队列失败", err)
+		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		return
+	}
+	message := model.MqMessage{
+		MessageType: model.SwitchModeSign,
+		UserName:    userName,
+		DataType:    websocket.TextMessage,
+		Data:        newMode,
+	}
+	m, err := json.Marshal(message)
+	if err != nil {
+		log.Println("Marshal message err:", err)
+		res.Fail(c, 500, "序列化消息失败", nil)
+		return
+	}
+	err = mq.SendMessage(string(m)) //异步？？
+	if err != nil {
+		log.Println("mq消息发送失败") //轮询？？？？
+		res.Fail(c, 500, "消息发送失败", nil)
+		return
+	}
+	res.Ok(c, 200, "切换成功", nil)
 }
