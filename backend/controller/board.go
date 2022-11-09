@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 	"whiteboard/dao/redis"
 	"whiteboard/local"
@@ -157,7 +158,6 @@ func GetOnlineUsers(c *gin.Context) {
 	})
 }
 
-
 func AddOnePage(c *gin.Context) {
 	boardId := c.PostForm("boardId")
 	jsonFile, _ := c.FormFile("jsonFile")
@@ -179,11 +179,19 @@ func AddOnePage(c *gin.Context) {
 			return
 		}
 		defer f.Close()
-		decoder := json.NewDecoder(f)
-		err = decoder.Decode(&data)
+		var info = make([]byte, jsonFile.Size)
+		_, err = f.Read(info)
 		if err != nil {
-			res.Fail(c, 400, "json无法被解析", nil)
+			res.Fail(c, 400, "json文件无法读取", nil)
+			return
 		}
+		data = strings.Trim(string(info), "/")
+		//decoder := json.NewDecoder(f)
+		//err = decoder.Decode(&data)
+		//if err != nil {
+		//	res.Fail(c, 400, "json无法被解析", nil)
+		//	return
+		//}
 	}
 	err := service.AddPage(numBoardId, curPage, data)
 	if err != nil {
@@ -219,8 +227,8 @@ func AddOnePage(c *gin.Context) {
 		return
 	}
 	res.Ok(c, 200, "新建页成功", gin.H{
-		"newPageId": curPage,
-		"seqData":   data,
+		"pageId":  curPage,
+		"seqData": data,
 	})
 }
 func ExitBoard(c *gin.Context) {
@@ -257,7 +265,7 @@ func ExitBoard(c *gin.Context) {
 
 func DissolveBoard(c *gin.Context) {
 	boardId := c.GetInt("boardId")
-	ownerName := c.Query("ownerName")
+	ownerName := c.GetString("name")
 	board, _ := local.Boards.Load(boardId)
 	if ownerName != board.(*model.Board).Owner {
 		res.Ok(c, 200, "无权限解散房间", nil)

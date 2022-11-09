@@ -47,68 +47,7 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 	go readMessage(webConn, mq, boardId, userName)
 	// send websocketMessage
 	go sendMessage(webConn, mq, boardId, userName)
-
-	//for {
-	//	messageType, p, err := webConn.ReadMessage()
-	//	if err != nil {
-	//		log.Println("读取websocket消息失败, 退出连接:"+userName, err)
-	//		// 判断board是否存在,
-	//		board, _ := local.Boards.Load(boardId)
-	//		if board == nil {
-	//			return
-	//		}
-	//		// 房主清理board
-	//		if board.(*model.Board).Owner == userName {
-	//			local.Boards.Delete(boardId)
-	//			return
-	//		}
-	//
-	//		// 清理redis的users和pages键值？
-	//		// 清理rabbitMq的exchange和queue?
-	//		return
-	//		//websockets := board.(*model.Board).Websockets
-	//		//for index, conn := range websockets {
-	//		//	if conn == webConn {
-	//		//		websockets = append(websockets[:index], websockets[index+1:]...)
-	//		//		break
-	//		//	}
-	//		//}
-	//		//board.(*model.Board).Websockets = websockets
-	//
-	//		//users := board.(*model.Board).Users
-	//		//for index, user := range users {
-	//		//	if user == userName {
-	//		//		users = append(users[:index], users[index+1:]...)
-	//		//		break
-	//		//	}
-	//		//}
-	//		//board.(*model.Board).Users = users
-	//
-	//	}
-	//
-	//	if !ok {
-	//		log.Println("房主解散白板")
-	//		webConn.Close()
-	//		return
-	//		//是否需要关闭ws连接？？
-	//	}
-	//
-	//	if err := webConn.WriteMessage(messageType, p); err != nil {
-	//		log.Println("写入websocket消息失败: ", err)
-	//	}
-	//
-	//	//board := b.(*model.Board)
-	//	//for _, conn := range board.Websockets {
-	//	//	if conn == webConn {
-	//	//		continue
-	//	//	}
-	//	//	if err := conn.WriteMessage(messageType, p); err != nil {
-	//	//		log.Println("写入websocket消息失败: ", err)
-	//	//	}
-	//	//}
-	//}
 }
-
 
 func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int, userName string) {
 	for {
@@ -155,6 +94,7 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 
 func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int, userName string) {
 	for msg := range mq.ReceiveMessage() {
+		isDissolve := false
 		mqMessage := model.MqMessage{}
 		err := json.Unmarshal(msg.Body, &mqMessage)
 		if err != nil {
@@ -170,28 +110,34 @@ func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 					"seqData": mqMessage.Data,
 				},
 			}
-		} else if mqMessage.MessageType == model.EnterBoardSign {
+		} else if mqMessage.MessageType == model.AddNewPageSign {
 			sendData = gin.H{
-				"type": model.EnterBoardSign,
+				"type": model.AddNewPageSign,
+				"data": gin.H{
+					"pageId":  mqMessage.PageId,
+					"seqData": mqMessage.Data,
+				},
+			}
+		} else if mqMessage.MessageType == model.EnterBoardSign || (mqMessage.MessageType == model.ExitBoardSign && mqMessage.UserName != userName) {
+			sendData = gin.H{
+				"type": model.UserCountChangedSign,
 				"data": gin.H{
 					"users": redis.GetUsersOfBoard(boardId),
 				},
 			}
-		} else if mqMessage.MessageType == model.DissolveBoardSign || mqMessage.MessageType == model.ExitBoardSign {
-			if mqMessage.MessageType == model.ExitBoardSign && userName == mqMessage.UserName {
-				log.Println(userName + "退出房间中")
-				webConn.Close()
-				if err = mq.DeletePsQueue(); err != nil {
-					log.Println("删除队列错误", err)
-				}
-				return
-			}
+		} else if mqMessage.MessageType == model.DissolveBoardSign {
+			isDissolve = true
 			sendData = gin.H{
-				"type": model.ExitBoardSign,
-				"data": gin.H{
-					"users": redis.GetUsersOfBoard(boardId),
-				},
+				"type": model.DissolveBoardSign,
+				"data": "",
 			}
+		} else if mqMessage.MessageType == model.ExitBoardSign {
+			log.Println(userName + "退出房间中")
+			webConn.Close()
+			if err = mq.DeletePsQueue(); err != nil {
+				log.Println("删除队列错误", err)
+			}
+			return
 		} else {
 			continue //忽略自己的消息
 		}
@@ -201,10 +147,13 @@ func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			log.Println("fail to write back websocket message, goroutine exits")
 			return
 		}
+		if isDissolve {
+			return
+		}
 	}
 }
 
-func ValidateBoardId(boardId string) bool {
+func ValidateBoardId(boardId string) (any, bool) {
 	err := validator.Validate.Var(boardId, "len=9,required,numeric")
 	if err != nil {
 		return nil, false

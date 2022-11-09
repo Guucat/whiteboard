@@ -1,13 +1,15 @@
 package model
 
 const (
-	EnterBoardSign = 1 // 进入房间
-	SequenceBoardSign = 2 // 序列化消息
-	ExitBoardSign     = 3 //退出房间
-	DissolveBoardSign = 4 //解散房间
-	AddNewPageSign    = 5 //新增一页消息
-	switchModeSign    = 6 //编辑模式切换
-	actionObjectSign  = 7 //操作对象
+	EnterBoardSign       = 1 // 进入房间     	-> front
+	SequenceBoardSign    = 2 // 序列化消息	-> front
+	ExitBoardSign        = 3 //退出房间
+	DissolveBoardSign    = 4 //解散房间      	-> front
+	AddNewPageSign       = 5 //新增一页消息	-> front
+	SwitchModeSign       = 6 //编辑模式切换	-> front
+	UserCountChangedSign = 7 //用户数改变		-> front
+
+	//ActionObjectSign     = 8 //操作对象
 )
 
 type Message struct {

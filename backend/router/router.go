@@ -21,7 +21,7 @@ func SetupRouter() *gin.Engine {
 
 		boardGroup.GET("/users", controller.ValidateBoardId, controller.GetOnlineUsers)
 		boardGroup.DELETE("/exit", controller.ValidateBoardId, controller.ExitBoard)
-		boardGroup.DELETE("/dissolve", controller.ValidateBoardId, controller.DissolveBoard)
+		boardGroup.DELETE("/dissolve", middleware.JWTAuthMiddleware(), controller.ValidateBoardId, controller.DissolveBoard)
 
 		boardGroup.GET("/validate", controller.ValidateBoardId) //转成中间件？？？？
 		boardGroup.PUT("/page", controller.AddOnePage)
