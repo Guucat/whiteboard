@@ -16,6 +16,12 @@ import (
 func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int, userName string) {
 	// 历史序列化数据
 	history := GetAllPages(boardId)
+	board, _ := local.Boards.Load(boardId)
+	owner := board.(*model.Board).Owner
+	isOwner := false
+	if owner == userName {
+		isOwner = true
+	}
 	boardInfo := gin.H{
 		"type": model.EnterBoardSign,
 		"data": gin.H{
@@ -23,6 +29,7 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 			"history":  history,
 			"userName": userName,
 		},
+		"isOwner": isOwner,
 	}
 	j, _ := json.Marshal(boardInfo)
 	if err := webConn.WriteMessage(websocket.TextMessage, j); err != nil {
