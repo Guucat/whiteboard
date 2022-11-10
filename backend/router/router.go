@@ -25,7 +25,7 @@ func SetupRouter() *gin.Engine {
 
 		boardGroup.GET("/validate", controller.ValidateBoardId) //转成中间件？？？？
 		boardGroup.PUT("/page", controller.AddOnePage)
-		boardGroup.PUT("switchMode", middleware.JWTAuthMiddleware(), controller.SwitchMode)
+		boardGroup.PUT("/switchMode", middleware.JWTAuthMiddleware(), controller.SwitchMode)
 	}
 	pprof.RouteRegister(boardGroup, "pprof")
 

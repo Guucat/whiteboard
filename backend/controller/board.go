@@ -10,7 +10,6 @@ import (
 	"strings"
 	"time"
 	"whiteboard/dao/redis"
-	"whiteboard/local"
 	"whiteboard/model"
 	"whiteboard/service"
 	"whiteboard/utils/jwt"
@@ -28,31 +27,33 @@ func CreateBoard(c *gin.Context) {
 
 	// 初始化白板信息
 	userName := c.GetString("name")
-	err = service.AddUser(boardId, userName)
+	err = service.AddBoard(boardId, userName, model.EditMode, 1)
 	if err != nil {
-		log.Println("redis添加协作用户失败", err)
-		res.Fail(c, 500, "服务器添加协作用户失败", nil)
+		log.Println("redis添加白板失败", err)
+		res.Fail(c, 500, "服务器添加白板失败", nil)
 		return
 	}
+	//添加用户
+	err = service.AddUser(boardId, userName)
+	if err != nil {
+		log.Println("redis添加用户失败", err)
+		res.Fail(c, 500, "服务器添加用户失败", nil)
+		return
+	}
+	//mongodb修改
 	err = service.AddPage(boardId, 0, "")
 	if err != nil {
 		log.Println("redis添加协作用户失败", err)
 		res.Fail(c, 500, "服务器添加协作用户失败", nil)
 		return
 	}
+
 	mq, err := service.NewMQ(boardId)
 	if err != nil {
 		log.Println("rabbitMq创建队列失败", err)
 		res.Fail(c, 500, "服务器添创建mq失败", nil)
 		return
 	}
-	local.Boards.Store(boardId, &model.Board{
-		BoardId:  boardId,
-		Owner:    userName,
-		EditType: model.EditMode,
-		PageSum:  1,
-	})
-
 	// 升级为websocket协议
 	c.Writer.Header().Set("Sec-WebSocket-Protocol", c.GetString("token"))
 	webConn, err := (&websocket.Upgrader{
@@ -284,8 +285,13 @@ func ExitBoard(c *gin.Context) {
 func DissolveBoard(c *gin.Context) {
 	boardId := c.GetInt("boardId")
 	ownerName := c.GetString("name")
-	board, _ := local.Boards.Load(boardId)
-	if ownerName != board.(*model.Board).Owner {
+	board, err := service.GetBoardInfo(strconv.Itoa(boardId))
+	if err != nil {
+		log.Println("获取board信息错误, err:", err)
+		res.Fail(c, 400, "获取board信息错误", nil)
+		return
+	}
+	if ownerName != board.Owner {
 		res.Ok(c, 200, "无权限解散房间", nil)
 		return
 	}
@@ -326,6 +332,7 @@ func SwitchMode(c *gin.Context) {
 		return
 	}
 	userName := c.GetString("name")
+
 	Mode := c.PostForm("newMode")
 	if Mode != "1" && Mode != "0" {
 		res.Fail(c, 400, "切换模式无效", nil)
@@ -339,7 +346,12 @@ func SwitchMode(c *gin.Context) {
 		return
 	}
 
-	boardInfo.EditType = newMode
+	err := service.PutNewMode(boardId, newMode)
+	if err != nil {
+		log.Println("模式转换失败", err)
+		res.Fail(c, 500, "模式转换失败", nil)
+		return
+	}
 
 	mq, err := service.BindExchange(boardInfo.BoardId)
 	if err != nil {
