@@ -99,6 +99,7 @@ func EnterBoard(c *gin.Context) {
 		mes, err := jwt.ParseToken(protocolToken)
 		if err != nil {
 			res.Fail(c, 400, "token无效", nil)
+			c.Abort()
 			return
 		}
 		userName = mes.Name
@@ -122,13 +123,14 @@ func EnterBoard(c *gin.Context) {
 	//	return
 	//}
 	//升级ws协议
+	c.Writer.Header().Set("Sec-WebSocket-Protocol", protocolToken)
 	webConn, err := (&websocket.Upgrader{
 		ReadBufferSize:  1024,
 		WriteBufferSize: 1024,
 		CheckOrigin: func(r *http.Request) bool {
 			return true
 		},
-	}).Upgrade(c.Writer, c.Request, nil)
+	}).Upgrade(c.Writer, c.Request, c.Writer.Header())
 	if err != nil {
 		res.Fail(c, 400, "fail to upgrade websocket protocol", nil)
 		return
@@ -148,7 +150,9 @@ func EnterBoard(c *gin.Context) {
 
 func ValidateBoardId(c *gin.Context) {
 	boardId := c.Query("boardId")
-	log.Println(boardId)
+	if boardId == "" {
+		boardId = c.PostForm("boardId")
+	}
 	_, ok := service.ValidateBoardId(boardId)
 	if !ok {
 		res.Fail(c, 400, "boardId无效", nil)
@@ -247,7 +251,7 @@ func AddOnePage(c *gin.Context) {
 }
 func ExitBoard(c *gin.Context) {
 	boardId := c.GetInt("boardId")
-	userName := c.Query("userName") //校验？？？？？
+	userName := c.PostForm("userName") //校验？？？？？
 
 	mq, err := service.BindExchange(boardId)
 	if err != nil {

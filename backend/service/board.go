@@ -28,8 +28,8 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 			"boardId":  boardId,
 			"history":  history,
 			"userName": userName,
+			"isOwner":  isOwner,
 		},
-		"isOwner": isOwner,
 	}
 	j, _ := json.Marshal(boardInfo)
 	if err := webConn.WriteMessage(websocket.TextMessage, j); err != nil {
@@ -62,16 +62,17 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 		if err != nil {
 			log.Println("读取websocket消息失败, 退出连接:"+userName, err)
 			// 判断board是否存在,
-			board, _ := local.Boards.Load(boardId)
-			// 房主清理board
-			if board != nil && board.(*model.Board).Owner == userName {
-				local.Boards.Delete(boardId)
-				return
-			}
+			//board, _ := local.Boards.Load(boardId)
+			//// 房主清理board
+			//if board != nil && board.(*model.Board).Owner == userName {
+			//	local.Boards.Delete(boardId)
+			//	return
+			//}
 			// 清理redis的users和pages键值？
 			_ = redis.RemoveUserFromBoard(boardId, userName)
 			// 清理rabbitMq的exchange和queue?
-			return
+			//return
+			break
 		}
 		//判断是否可协作
 		board, _ := local.Boards.Load(boardId)
@@ -225,13 +226,20 @@ func GetPage(boardId int, pageId int) string {
 	return data
 }
 
-func GetAllPages(boardId int) map[int]string {
+func GetAllPages(boardId int) []string {
 	board, _ := local.Boards.Load(boardId)
 	pageSum := board.(*model.Board).PageSum
 
-	history := make(map[int]string)
+	history := make([]string, pageSum)
 	for i := 0; i < pageSum; i++ {
-		history[i] = GetPage(boardId, i)
+		o := gin.H{
+			strconv.Itoa(i): GetPage(boardId, i),
+		}
+		page, err := json.Marshal(o)
+		if err != nil {
+			log.Println("history序列化失败", err)
+		}
+		history[i] = string(page)
 	}
 	return history
 }
