@@ -7,7 +7,6 @@ import (
 	"log"
 	"strconv"
 	"whiteboard/dao/redis"
-	"whiteboard/local"
 	"whiteboard/middleware/rabbitmq"
 	"whiteboard/model"
 	"whiteboard/utils/validator"
@@ -15,9 +14,8 @@ import (
 
 func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int, userName string) {
 	// 历史序列化数据
-	history := GetAllPages(boardId)
-	board, _ := local.Boards.Load(boardId)
-	owner := board.(*model.Board).Owner
+	history, board := GetAllPages(boardId)
+	owner := board.Owner
 	isOwner := false
 	if owner == userName {
 		isOwner = true
@@ -74,10 +72,14 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			//return
 			break
 		}
+
+		board, err := GetBoardInfo(strconv.Itoa(boardId))
+		if err != nil {
+			log.Println("获取board错误, err", err)
+			return
+		}
 		//判断是否可协作
-		board, _ := local.Boards.Load(boardId)
-		boardInfo := board.(*model.Board)
-		if boardInfo.EditType == model.ReadMode {
+		if board.EditType == model.ReadMode {
 			message := gin.H{
 				"type": model.ForbiddenWrite,
 			}
@@ -181,6 +183,7 @@ func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			return
 		}
 		if isDissolve {
+			webConn.Close()
 			return
 		}
 	}
@@ -191,12 +194,23 @@ func ValidateBoardId(boardId string) (any, bool) {
 	if err != nil {
 		return nil, false
 	}
-	id, _ := strconv.Atoi(boardId)
-	v, ok := local.Boards.Load(id)
-	if !ok {
+	board, err := GetBoardInfo(boardId)
+	if err != nil {
+		log.Println("获取board信息错误，err:", err)
 		return nil, false
 	}
-	return v, true
+	if board == nil {
+		return nil, false
+	}
+	return board, true
+}
+
+func GetBoardInfo(boardId string) (*model.Board, error) {
+	return redis.GetBoard(boardId)
+}
+
+func AddBoard(boardId int, owner string, editType int, pageSum int) error {
+	return redis.AddBoard(boardId, owner, editType, pageSum)
 }
 
 func AddUser(boardId int, userName string) error {
@@ -226,12 +240,14 @@ func GetPage(boardId int, pageId int) string {
 	return data
 }
 
-func GetAllPages(boardId int) []string {
-	board, _ := local.Boards.Load(boardId)
-	pageSum := board.(*model.Board).PageSum
-
-	history := make([]string, pageSum)
-	for i := 0; i < pageSum; i++ {
+func GetAllPages(boardId int) ([]string, *model.Board) {
+	board, err := GetBoardInfo(strconv.Itoa(boardId))
+	if err != nil {
+		log.Println("获取board信息失败")
+		return nil, nil
+	}
+	history := make([]string, board.PageSum)
+	for i := 0; i < board.PageSum; i++ {
 		o := gin.H{
 			strconv.Itoa(i): GetPage(boardId, i),
 		}
@@ -241,5 +257,9 @@ func GetAllPages(boardId int) []string {
 		}
 		history[i] = string(page)
 	}
-	return history
+	return history, board
+}
+
+func PutNewMode(boardId string, newMode int) error {
+	return redis.PutNewMode(boardId, newMode)
 }
