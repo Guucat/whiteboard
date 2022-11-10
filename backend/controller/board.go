@@ -251,7 +251,7 @@ func AddOnePage(c *gin.Context) {
 }
 func ExitBoard(c *gin.Context) {
 	boardId := c.GetInt("boardId")
-	userName := c.PostForm("userName") //校验？？？？？
+	userName := c.Query("userName") //校验？？？？？
 
 	mq, err := service.BindExchange(boardId)
 	if err != nil {
