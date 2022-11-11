@@ -24,6 +24,10 @@ const Header: FC<HeaderProps> = (props) => {
     receiveArr,
     boardMode,
   } = props
+  console.log('headerProps', props)
+  if (canvasBoardRef) {
+    console.log('画布长度', canvasBoardRef.childNodes.length)
+  }
 
   const [curUserList, setCurUserList] = useRecoilState(userLists)
   const AvatarGroup = Avatar.Group

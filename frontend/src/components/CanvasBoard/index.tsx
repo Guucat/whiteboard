@@ -30,7 +30,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const BaseBoardArr = useRef<BaseBoard[]>([])
   const [update, isUpdate] = useState(false)
   const receieveDataType = useRef(0)
-  const pageID = useRef(0)
+  const [pageID, setPageId] = useState(-1)
   // const boardMode = useRef<number>(0)
   const [boardMode, setBoardMode] = useState(0)
   /**
@@ -63,6 +63,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           case 1:
             data.data.history.map((item: any, index: number) => {
               let x = JSON.parse(item)
+              setPageId(index)
               receieveFullArr.current.push(x[index])
             })
             receieveDataType.current = data.type
@@ -72,10 +73,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             setIsOwner(data.data.isOwner)
             isCreate.current = data.data.isOwner
 
-            isUpdate(true)
-            setTimeout(() => {
-              isUpdate(false)
-            })
+            // isUpdate(true)
+            // setTimeout(() => {
+            //   isUpdate(false)
+            // })
             break
           case 2:
             receieveFullArr.current.splice(data.data.pageId, data.data.pageId, data.data.seqData)
@@ -95,11 +96,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             receieveFullArr.current.push(data.data.seqData)
             receiveArr.current = receieveFullArr.current.slice(1)
             receieveDataType.current = data.type
-            pageID.current = data.data.pageId
-            isUpdate(true)
-            setTimeout(() => {
-              isUpdate(false)
-            })
+            setPageId(data.data.pageId)
+            // isUpdate(true)
+            // setTimeout(() => {
+            //   isUpdate(false)
+            // })
             break
           case 6:
             setBoardMode(data.data.newMode)
@@ -125,6 +126,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             item.stateIdx++
           })
         })
+        isUpdate(true)
+        setTimeout(() => {
+          isUpdate(false)
+        }, 500)
       }
     }
   }, [ws])
@@ -139,9 +144,13 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     setLoading(false)
   }, [])
   useEffect(() => {
+    console.log('湖北')
+
     switch (receieveDataType.current) {
       case 1:
         if (receiveArr.current.length) {
+          console.log('hhhhhhhhhhh')
+
           receiveArr.current.map((item, index) => {
             canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
             BaseBoardArr.current.push(canvas.current)
@@ -149,15 +158,15 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         }
         break
       case 5:
-        console.log('新增数据', pageID.current)
+        console.log('新增数据', pageID)
 
-        canvas.current = new BaseBoard({ type: `${pageID.current}`, curTools, ws })
+        canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
         BaseBoardArr.current.push(canvas.current)
         break
       default:
         break
     }
-  }, [receieveDataType.current, pageID.current])
+  }, [pageID])
 
   /**
    * @des 监听是否选中当前图形
