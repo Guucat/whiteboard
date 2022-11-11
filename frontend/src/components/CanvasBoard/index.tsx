@@ -3,14 +3,15 @@ import Header from '../Header'
 import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
 import { useRecoilState } from 'recoil'
-import { CanvasBoardProps } from '@/type'
+import { CanvasBoardProps, Type1DataType } from '@/type'
 import SelectBar from '../SelectBar'
 import FooterBar from '../FooterBar'
-import { boardSize, ModalVisible, userLists } from '@/utils/data'
+import { ModalVisible, userLists } from '@/utils/data'
 import { Message, Modal } from '@arco-design/web-react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
+  const { width, height } = props
   const [visibles, setVisibles] = useRecoilState(ModalVisible)
   const { type, boardId } = props
   const [curTools, setCurTools] = useState('select')
@@ -20,23 +21,21 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const ws = useRef<WebSocket | null>(null)
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   const [curUserList, setCurUserList] = useRecoilState(userLists)
-  const curUser = useRef(null)
-  const ReboardId = useRef(null)
-  const [isOwner, setIsOwner] = useState(false)
-  const isCreate = useRef(null)
-  const [boardsize, setBoardsize] = useRecoilState(boardSize)
   const navigate = useNavigate()
   const BaseBoardArr = useRef<BaseBoard[]>([])
   const [update, isUpdate] = useState(false)
   const receieveDataType = useRef(0)
   const [pageID, setPageId] = useState(-1)
   const [boardMode, setBoardMode] = useState(0)
+  const type1Data = useRef<Type1DataType>({ curUser: '', ReboardId: 0, isOwner: true })
   /**
    * @des 初始化websocket
    */
   const receiveArr = useRef<any[]>([])
   const receieveFullArr = useRef<any[]>([])
   useEffect(() => {
+    console.log('websocket')
+
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
       if (type == 'create') {
@@ -63,10 +62,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             })
             receieveDataType.current = data.type
             receiveArr.current = receieveFullArr.current.slice(1)
-            curUser.current = data.data.userName
-            ReboardId.current = data.data.boardId
-            setIsOwner(data.data.isOwner)
-            isCreate.current = data.data.isOwner
+            type1Data.current!.curUser = data.data.userName
+            type1Data.current!.ReboardId = data.data.boardId
+            type1Data.current!.isOwner = data.data.isOwner
             break
           case 2:
             receieveFullArr.current.splice(data.data.pageId, data.data.pageId, data.data.seqData)
@@ -121,13 +119,16 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    * @des 初始化白板类
    */
   useEffect(() => {
+    console.log('初始化白板')
+
     canvas.current = new BaseBoard({ type, curTools, ws })
     BaseBoardArr.current.push(canvas.current)
     setVisibles(false)
-    // isUpdate(false)
     setLoading(false)
   }, [])
   useEffect(() => {
+    console.log('新增一页数据')
+
     switch (receieveDataType.current) {
       case 1:
         if (receiveArr.current.length) {
@@ -151,6 +152,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    */
 
   useEffect(() => {
+    console.log('监听选中图形')
+
     // 监听选中对象
     const board = canvas.current!
     board.canvas.on('selection:created', (e) => {
@@ -197,6 +200,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }, 500)
   }
   const canvasBoardRef = useRef<HTMLDivElement | null>(null)
+  console.log('组件被渲染')
 
   return (
     <div className={styles['canvas-wrapper']}>
@@ -204,10 +208,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         <Header
           userList={curUserList}
           canvas={canvas}
-          curUser={curUser.current!}
-          boardId={ReboardId.current!}
           ws={ws}
-          isOwner={isOwner}
+          type1Data={type1Data.current!}
           curTools={curTools}
           canvasBoardRef={canvasBoardRef.current!}
           currentCanvas={updateCanvas}
@@ -224,7 +226,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           <SelectBar canvas={canvas.current!} boardMode={boardMode}></SelectBar>
           <FooterBar
             canvas={canvas}
-            boardId={ReboardId.current!}
+            type1Data={type1Data.current!}
             curTools={curTools}
             currentCanvas={updateCanvas}
             ws={ws}
@@ -306,10 +308,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         </div>
       </div>
       <div className={styles['canvasBoard']} ref={canvasBoardRef}>
-        <canvas width={boardsize.width} height={boardsize.height} id={type}></canvas>
+        <canvas width={width} height={height} id={type}></canvas>
         {receiveArr.current.length != 0 ? (
           receiveArr.current.map((item, index) => {
-            return <canvas width={boardsize.width} height={boardsize.height} id={`${index + 1}`} key={index}></canvas>
+            return <canvas width={width} height={height} id={`${index + 1}`} key={index}></canvas>
           })
         ) : (
           <></>
@@ -317,5 +319,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       </div>
     </div>
   )
+}
+CanvasBoard.defaultProps = {
+  width: window.innerWidth,
+  height: window.innerHeight,
 }
 export default CanvasBoard

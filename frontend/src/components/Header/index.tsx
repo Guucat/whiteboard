@@ -3,27 +3,11 @@ import style from './index.module.css'
 import { Avatar, Message, Pagination } from '@arco-design/web-react'
 import { HeaderProps } from '@/type'
 import { addNewPage, deleteBoard, exitBoard, switchMode } from '@/service'
-import { useRecoilState } from 'recoil'
-import { boardSize, color, ModalVisible, userLists } from '@/utils/data'
 import { useNavigate } from 'react-router-dom'
 import { BaseBoard } from '@/utils'
 
 const Header: FC<HeaderProps> = (props) => {
-  const {
-    canvas,
-    userList,
-    curUser,
-    boardId,
-    ws,
-    isOwner,
-    curTools,
-    canvasBoardRef,
-    currentCanvas,
-    baseBoardArr,
-    boardMode,
-  } = props
-  console.log('headerProps', props)
-
+  const { canvas, userList, ws, type1Data, curTools, canvasBoardRef, currentCanvas, baseBoardArr, boardMode } = props
   const AvatarGroup = Avatar.Group
   const navigate = useNavigate()
 
@@ -31,6 +15,8 @@ const Header: FC<HeaderProps> = (props) => {
    * @des 退出白板
    */
   async function handleExitBoard() {
+    const boardId = type1Data.ReboardId
+    const curUser = type1Data.curUser
     const obj = { boardId, curUser }
     const getExitData: any = await exitBoard(obj)
 
@@ -52,7 +38,7 @@ const Header: FC<HeaderProps> = (props) => {
   const [curPage, setCurPage] = useState(1)
   async function handleNewPage() {
     let formData = new FormData()
-    formData.append('boardId', `${boardId}`)
+    formData.append('boardId', `${type1Data.ReboardId}`)
     const addnewPage = await addNewPage(formData)
     const pageId = addnewPage.data.pageId
     const id: string = JSON.stringify(pageId)
@@ -67,7 +53,7 @@ const Header: FC<HeaderProps> = (props) => {
    */
 
   async function handleDeleteBoard() {
-    const getDeleteData: any = await deleteBoard(boardId)
+    const getDeleteData: any = await deleteBoard(type1Data.ReboardId)
     if (getDeleteData.msg == '解散成功') {
       Message.success({ content: '解散成功', duration: 2000 })
       setTimeout(() => {
@@ -90,7 +76,7 @@ const Header: FC<HeaderProps> = (props) => {
   const [isReadOnly, setIsReadOnly] = useState(false)
   async function handleMode(e: any, mode: number) {
     let formData = new FormData()
-    formData.append('boardId', `${boardId}`)
+    formData.append('boardId', `${type1Data.ReboardId}`)
     formData.append('newMode', `${mode}`)
     const getSwitchData: any = await switchMode(formData)
 
@@ -103,7 +89,7 @@ const Header: FC<HeaderProps> = (props) => {
       <div className={style['head-wrapper']}>
         <div className={style['head-left']}>
           <div className={style['add-new-page']} style={{ marginRight: '16px' }}>
-            白板Id:{boardId}
+            白板Id:{type1Data.ReboardId}
           </div>
           {boardMode ? (
             <></>
@@ -125,7 +111,7 @@ const Header: FC<HeaderProps> = (props) => {
         </div>
 
         <div className={style['head-right']}>
-          {isOwner ? (
+          {type1Data.isOwner ? (
             <div className={style['selectMode']}>
               {' '}
               <button
@@ -151,7 +137,7 @@ const Header: FC<HeaderProps> = (props) => {
           <button className={style['exit-board']} onClick={handleExitBoard}>
             退出白板
           </button>
-          {isOwner ? (
+          {type1Data.isOwner ? (
             <button className={style['exit-board']} onClick={handleDeleteBoard}>
               解散白板
             </button>

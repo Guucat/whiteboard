@@ -7,7 +7,7 @@ import Modal from '../Modal'
 import { BaseBoard } from '@/utils'
 import styles from './index.module.css'
 const FooterBar: FC<FooterBarProps> = (props) => {
-  const { canvas, boardId, canvasBoardRef, ws, curTools, currentCanvas, boardMode } = props
+  const { canvas, type1Data, canvasBoardRef, ws, curTools, currentCanvas, boardMode } = props
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   const jsonData = useRef<string | null>(null)
   const [visiable, setVisiable] = useRecoilState(ModalVisible)
@@ -94,7 +94,7 @@ const FooterBar: FC<FooterBarProps> = (props) => {
 
     const formdata = new FormData()
     formdata.append('jsonFile', file)
-    formdata.append('boardId', `${boardId}`)
+    formdata.append('boardId', `${type1Data.ReboardId}`)
     const getUploadFileData = await addNewPage(formdata)
 
     const pageId = getUploadFileData.data.pageId

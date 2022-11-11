@@ -21,14 +21,19 @@ export interface SelectBarProps {
 }
 export interface FooterBarProps {
   canvas: React.MutableRefObject<BaseBoard | null>
-  boardId: number
+  // boardId: number
   canvasBoardRef: HTMLDivElement
   ws: React.MutableRefObject<WebSocket | null>
   curTools: string
   currentCanvas: any
   boardMode: any
+  type1Data: Type1DataType
 }
-
+export interface Type1DataType {
+  curUser: string
+  ReboardId: number
+  isOwner: boolean
+}
 export interface BaseBoardProp {
   type: string
   curTools: string
@@ -38,15 +43,15 @@ export interface BaseBoardProp {
 export interface HeaderProps {
   canvas: React.MutableRefObject<BaseBoard | null>
   userList: string[]
-  curUser: string
-  boardId: number
+  // curUser: string
+  // boardId: number
   ws: React.MutableRefObject<WebSocket | null>
-  isOwner: boolean
+  // isOwner: boolean
 
   curTools: string
   canvasBoardRef: HTMLDivElement
   currentCanvas: any
   baseBoardArr: BaseBoard[]
-
+  type1Data: Type1DataType
   boardMode: any
 }
