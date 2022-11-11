@@ -12,7 +12,6 @@ interface ModalProps {
   jsonData?: any | null
 }
 const Modal: FC<ModalProps> = (ModalProps) => {
-  //  const [visible, setVisible] = useState(false)
   const { visible, describe, jsonData } = ModalProps
   const [visiblt, setVisiblt] = useRecoilState(ModalVisible)
   const BoardIdRef = useRef<HTMLInputElement>(null)
@@ -27,7 +26,7 @@ const Modal: FC<ModalProps> = (ModalProps) => {
   const [showErr, setShowErr] = useState(false)
   async function handleJoinBoard() {
     if (BoardIdRef.current) {
-      const boardId = BoardIdRef.current.value
+      const boardId = parseInt(BoardIdRef.current.value)
       judgeIdData.current = await judgeBoardId(boardId)
       console.log(judgeIdData.current)
 
@@ -39,8 +38,6 @@ const Modal: FC<ModalProps> = (ModalProps) => {
           setShowErr(false)
         }, 2000)
       }
-
-      // navigate('/joinBoard', { state: { boardId } })
     }
   }
   function handleJson() {

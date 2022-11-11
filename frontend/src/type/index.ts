@@ -1,5 +1,3 @@
-import FooterBar from '@/components/FooterBar'
-import { instance } from '@/service/service'
 import { BaseBoard } from '@/utils'
 
 export interface CanvasProps {
@@ -44,11 +42,11 @@ export interface HeaderProps {
   boardId: number
   ws: React.MutableRefObject<WebSocket | null>
   isOwner: boolean
-  type: string
+
   curTools: string
   canvasBoardRef: HTMLDivElement
   currentCanvas: any
   baseBoardArr: BaseBoard[]
-  receiveArr: any
+
   boardMode: any
 }

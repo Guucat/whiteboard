@@ -19,7 +19,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [loading, setLoading] = useState(true)
   const ws = useRef<WebSocket | null>(null)
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
-  const canvasData = useRef<string | null>(null)
   const [curUserList, setCurUserList] = useRecoilState(userLists)
   const curUser = useRef(null)
   const ReboardId = useRef(null)
@@ -31,7 +30,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [update, isUpdate] = useState(false)
   const receieveDataType = useRef(0)
   const [pageID, setPageId] = useState(-1)
-  // const boardMode = useRef<number>(0)
   const [boardMode, setBoardMode] = useState(0)
   /**
    * @des 初始化websocket
@@ -56,9 +54,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
         console.log('接收到的数据是', data)
-        // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
-        // let canvasData
-
         switch (data.type) {
           case 1:
             data.data.history.map((item: any, index: number) => {
@@ -72,11 +67,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             ReboardId.current = data.data.boardId
             setIsOwner(data.data.isOwner)
             isCreate.current = data.data.isOwner
-
-            // isUpdate(true)
-            // setTimeout(() => {
-            //   isUpdate(false)
-            // })
             break
           case 2:
             receieveFullArr.current.splice(data.data.pageId, data.data.pageId, data.data.seqData)
@@ -97,10 +87,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             receiveArr.current = receieveFullArr.current.slice(1)
             receieveDataType.current = data.type
             setPageId(data.data.pageId)
-            // isUpdate(true)
-            // setTimeout(() => {
-            //   isUpdate(false)
-            // })
             break
           case 6:
             setBoardMode(data.data.newMode)
@@ -116,8 +102,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           default:
             break
         }
-        console.log('接收的画布', BaseBoardArr)
-        console.log('数据', receieveFullArr.current)
 
         BaseBoardArr.current.map((item, index) => {
           item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
@@ -144,13 +128,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     setLoading(false)
   }, [])
   useEffect(() => {
-    console.log('湖北')
-
     switch (receieveDataType.current) {
       case 1:
         if (receiveArr.current.length) {
-          console.log('hhhhhhhhhhh')
-
           receiveArr.current.map((item, index) => {
             canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
             BaseBoardArr.current.push(canvas.current)
@@ -158,8 +138,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         }
         break
       case 5:
-        console.log('新增数据', pageID)
-
         canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
         BaseBoardArr.current.push(canvas.current)
         break
@@ -231,11 +209,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           ws={ws}
           isOwner={isOwner}
           curTools={curTools}
-          type={type}
           canvasBoardRef={canvasBoardRef.current!}
           currentCanvas={updateCanvas}
           baseBoardArr={BaseBoardArr.current!}
-          receiveArr={receiveArr.current}
           boardMode={boardMode}
         ></Header>
       )}
@@ -342,8 +318,4 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     </div>
   )
 }
-// CanvasBoard.defaultProps = {
-//   width: window.innerWidth,
-//   height: window.innerHeight,
-// }
 export default CanvasBoard

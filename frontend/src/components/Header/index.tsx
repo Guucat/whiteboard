@@ -17,22 +17,16 @@ const Header: FC<HeaderProps> = (props) => {
     ws,
     isOwner,
     curTools,
-    type,
     canvasBoardRef,
     currentCanvas,
     baseBoardArr,
-    receiveArr,
     boardMode,
   } = props
   console.log('headerProps', props)
-  if (canvasBoardRef) {
-    console.log('画布长度', canvasBoardRef.childNodes.length)
-  }
 
-  const [curUserList, setCurUserList] = useRecoilState(userLists)
   const AvatarGroup = Avatar.Group
   const navigate = useNavigate()
-  const [boardsize, setBoardsize] = useRecoilState(boardSize)
+
   /**
    * @des 退出白板
    */
@@ -58,7 +52,6 @@ const Header: FC<HeaderProps> = (props) => {
   const [curPage, setCurPage] = useState(1)
   async function handleNewPage() {
     let formData = new FormData()
-    // const boardIds=new Blob(boardId)
     formData.append('boardId', `${boardId}`)
     const addnewPage = await addNewPage(formData)
     const pageId = addnewPage.data.pageId
@@ -67,7 +60,6 @@ const Header: FC<HeaderProps> = (props) => {
     index.current = pageId + 1
     setCurPage(index.current)
     handleSwitchPage(index.current)
-
     currentCanvas()
   }
   /**
@@ -86,7 +78,6 @@ const Header: FC<HeaderProps> = (props) => {
 
   function handleSwitchPage(page: number) {
     setCurPage(page)
-    console.log('画布', baseBoardArr)
 
     canvasBoardRef.style.left = `-${window.innerWidth * (page - 1)}px`
     baseBoardArr.map((item, index) => {

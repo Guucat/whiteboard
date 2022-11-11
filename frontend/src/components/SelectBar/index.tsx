@@ -1,7 +1,7 @@
 import { SelectBarProps } from '@/type'
 import { BaseBoard } from '@/utils'
 import { tools } from '@/utils/data'
-import { FC, useEffect, useRef, useState } from 'react'
+import { FC, useRef, useState } from 'react'
 import styles from './index.module.css'
 
 const SelectBar: FC<SelectBarProps> = (props) => {
@@ -83,9 +83,7 @@ const SelectBar: FC<SelectBarProps> = (props) => {
       card.stateIdx = stateIdx
     }
   }
-  //   useEffect(() => {
-  //     ClickTools(1, 'brush', canvas)
-  //   }, [])
+
   return (
     <div>
       {!boardMode ? (
