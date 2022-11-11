@@ -225,6 +225,13 @@ func AddOnePage(c *gin.Context) {
 		return
 	}
 	board.(*model.Board).PageSum += 1
+
+	id, _ := strconv.Atoi(boardId)
+	err = service.AddBoard(id, board.(*model.Board).Owner, board.(*model.Board).EditType, board.(*model.Board).PageSum)
+	if err != nil {
+		log.Println("fail to fresh board info: ", err)
+		return
+	}
 	//pageInfo := gin.H{
 	//	"type": model.AddNewPageSign,
 	//	"data": gin.H{
