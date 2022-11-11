@@ -27,10 +27,15 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const isCreate = useRef(null)
   const [boardsize, setBoardsize] = useRecoilState(boardSize)
   const navigate = useNavigate()
+  const BaseBoardArr = useRef<BaseBoard[]>([])
+  const [update, isUpdate] = useState(false)
+  const receieveDataType = useRef(0)
+  const pageID = useRef(0)
   /**
    * @des 初始化websocket
    */
-
+  const receiveArr = useRef<any[]>([])
+  const receieveFullArr = useRef<any[]>([])
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
@@ -49,22 +54,36 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
         console.log('接收到的数据是', data)
-        console.log('llll', data.data.seqData)
-        console.log('shibuhi', data.isOwner)
         // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
         // let canvasData
 
         switch (data.type) {
           case 1:
-            canvasData.current = data.data.history[0]
-            console.log('history', canvasData)
+            data.data.history.map((item: any, index: number) => {
+              let x = JSON.parse(item)
+              receieveFullArr.current.push(x[index])
+            })
+            receieveDataType.current = data.type
+            receiveArr.current = receieveFullArr.current.slice(1)
             curUser.current = data.data.userName
             ReboardId.current = data.data.boardId
-            setIsOwner(data.isOwner)
-            isCreate.current = data.isOwner
+            setIsOwner(data.data.isOwner)
+            isCreate.current = data.data.isOwner
+            // if (receiveArr.current.length) {
+            //   receiveArr.current.map((item, index) => {
+            //     canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
+            //     BaseBoardArr.current.push(canvas.current)
+            //   })
+            // }
+
+            isUpdate(true)
+            setTimeout(() => {
+              isUpdate(false)
+              // setReceieveUpdate(false)
+            })
             break
           case 2:
-            canvasData.current = data.data.seqData
+            receieveFullArr.current.splice(data.data.pageId, data.data.pageId, data.data.seqData)
             break
           case 4:
             data.isOwner
@@ -77,26 +96,38 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
                   },
                 })
             break
-          case 7:
-            console.log('isOwner', isCreate.current)
+          case 5:
+            receieveFullArr.current.push(data.data.seqData)
+            receiveArr.current = receieveFullArr.current.slice(1)
+            receieveDataType.current = data.type
+            // canvas.current = new BaseBoard({ type: `${data.data.pageId}`, curTools, ws })
+            // BaseBoardArr.current.push(canvas.current)
 
+            pageID.current = data.data.pageId
+            isUpdate(true)
+            setTimeout(() => {
+              isUpdate(false)
+              // setReceieveUpdate(false)
+            })
+            break
+          case 7:
             Message.success({
-              content: `用户${data.data.user}${
-                data.data.inOrOut == 1 ? (isCreate.current ? '创建' : '进入') : '离开'
-              }了白板`,
+              content: `用户${data.data.user}${data.data.inOrOut == 1 ? '进入' : '离开'}了白板`,
               duration: 2000,
             })
+
             setCurUserList(data.data.users)
             break
           default:
             break
         }
-
-        canvas.current!.canvas.loadFromJSON(canvasData.current, () => {
-          canvas.current!.canvas.renderAll()
+        BaseBoardArr.current.map((item, index) => {
+          item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
+            item.canvas.renderAll()
+            item.stateArr.push(JSON.stringify(item.canvas))
+            item.stateIdx++
+          })
         })
-        canvas.current!.stateArr.push(JSON.stringify(canvas.current!.canvas))
-        canvas.current!.stateIdx++
       }
     }
   }, [ws])
@@ -105,13 +136,41 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    */
   useEffect(() => {
     canvas.current = new BaseBoard({ type, curTools, ws })
+    BaseBoardArr.current.push(canvas.current)
     setVisibles(false)
-    console.log('loading')
+    // isUpdate(false)
     setLoading(false)
   }, [])
+  useEffect(() => {
+    switch (receieveDataType.current) {
+      case 1:
+        if (receiveArr.current.length) {
+          receiveArr.current.map((item, index) => {
+            canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
+            BaseBoardArr.current.push(canvas.current)
+          })
+        }
+        break
+      case 5:
+        canvas.current = new BaseBoard({ type: `${pageID.current}`, curTools, ws })
+        BaseBoardArr.current.push(canvas.current)
+        break
+      default:
+        break
+    }
+  }, [receieveDataType.current])
+  // useEffect(() => {
+  //   if (receiveArr.current.length) {
+  //     receiveArr.current.map((item, index) => {
+  //       canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
+  //       BaseBoardArr.current.push(canvas.current)
+  //     })
+  //   }
+  // }, [isUpdate])
   /**
    * @des 监听是否选中当前图形
    */
+
   useEffect(() => {
     // 监听选中对象
     const board = canvas.current!
@@ -147,16 +206,21 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     })
   }, [isSelect])
 
+  // setBaseBoardArr([999])
   function editObj(type: any, e: React.ChangeEvent<HTMLInputElement>) {
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
-  const [update, isUpdate] = useState(false)
+
   function updateCanvas(x: any) {
-    canvas.current = x
+    // canvas.current = x
     isUpdate(true)
+    setTimeout(() => {
+      isUpdate(false)
+    }, 500)
   }
   const canvasBoardRef = useRef<HTMLDivElement | null>(null)
+
   return (
     <div className={styles['canvas-wrapper']}>
       {userLists && (
@@ -171,6 +235,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           type={type}
           canvasBoardRef={canvasBoardRef.current!}
           currentCanvas={updateCanvas}
+          baseBoardArr={BaseBoardArr.current!}
+          receiveArr={receiveArr.current}
         ></Header>
       )}
 
@@ -180,7 +246,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         <>
           {' '}
           <SelectBar canvas={canvas.current!}></SelectBar>
-          <FooterBar canvas={canvas.current!}></FooterBar>
+          <FooterBar
+            canvas={canvas}
+            boardId={ReboardId.current!}
+            curTools={curTools}
+            currentCanvas={updateCanvas}
+            ws={ws}
+            canvasBoardRef={canvasBoardRef.current!}
+          ></FooterBar>
         </>
       )}
 
@@ -256,8 +329,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         </div>
       </div>
       <div className={styles['canvasBoard']} ref={canvasBoardRef}>
-        {}
         <canvas width={boardsize.width} height={boardsize.height} id={type}></canvas>
+        {receiveArr.current.length != 0 ? (
+          receiveArr.current.map((item, index) => {
+            return <canvas width={boardsize.width} height={boardsize.height} id={`${index + 1}`} key={index}></canvas>
+          })
+        ) : (
+          <></>
+        )}
       </div>
     </div>
   )

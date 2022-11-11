@@ -23,4 +23,8 @@ const deleteBoard = (obj: number) => {
 const addNewPage = (obj: FormData) => {
   return instance.put(`/board/page`, obj)
 }
+
+const uploadJsonFile = (obj: FormData) => {
+  return instance.put(`/board/page`, obj)
+}
 export { login, register, judgeBoardId, exitBoard, deleteBoard, addNewPage }

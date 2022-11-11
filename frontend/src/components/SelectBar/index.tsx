@@ -7,7 +7,8 @@ import styles from './index.module.css'
 const SelectBar: FC<SelectBarProps> = (props) => {
   const { canvas } = props
   const [activeIndex, setActiveIndex] = useState(0)
-  console.log('侧边栏接收到的canvas', canvas)
+  console.log('侧边栏实时接收到的canvas', canvas)
+
   /**
    * @param id 画板工具的唯一id
    * @param tool 画板工具名称

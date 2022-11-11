@@ -1,3 +1,5 @@
+import FooterBar from '@/components/FooterBar'
+import { instance } from '@/service/service'
 import { BaseBoard } from '@/utils'
 
 export interface CanvasProps {
@@ -18,6 +20,14 @@ export interface CanvasBoardProps {
 export interface SelectBarProps {
   canvas: BaseBoard
 }
+export interface FooterBarProps {
+  canvas: React.MutableRefObject<BaseBoard | null>
+  boardId: number
+  canvasBoardRef: HTMLDivElement
+  ws: React.MutableRefObject<WebSocket | null>
+  curTools: string
+  currentCanvas: any
+}
 
 export interface BaseBoardProp {
   type: string
@@ -36,4 +46,6 @@ export interface HeaderProps {
   curTools: string
   canvasBoardRef: HTMLDivElement
   currentCanvas: any
+  baseBoardArr: BaseBoard[]
+  receiveArr: any
 }

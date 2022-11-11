@@ -1,4 +1,4 @@
-import { FC } from 'react'
+import { FC, useRef, useState } from 'react'
 import style from './index.module.css'
 import { Avatar, Message, Pagination } from '@arco-design/web-react'
 import { HeaderProps } from '@/type'
@@ -9,8 +9,21 @@ import { useNavigate } from 'react-router-dom'
 import { BaseBoard } from '@/utils'
 
 const Header: FC<HeaderProps> = (props) => {
-  const { canvas, userList, curUser, boardId, ws, isOwner, curTools, type, canvasBoardRef, currentCanvas } = props
-  console.log('props', props)
+  const {
+    canvas,
+    userList,
+    curUser,
+    boardId,
+    ws,
+    isOwner,
+    curTools,
+    type,
+    canvasBoardRef,
+    currentCanvas,
+    baseBoardArr,
+    receiveArr,
+  } = props
+
   const [curUserList, setCurUserList] = useRecoilState(userLists)
   const AvatarGroup = Avatar.Group
   const navigate = useNavigate()
@@ -21,7 +34,7 @@ const Header: FC<HeaderProps> = (props) => {
   async function handleExitBoard() {
     const obj = { boardId, curUser }
     const getExitData: any = await exitBoard(obj)
-    console.log(getExitData)
+
     if (getExitData.msg == '退出成功') {
       // 先全局提示一下谁退出房间了，然后再刷新一下用户列表
       Message.success({ content: `用户${curUser}退出了白板`, duration: 2000 })
@@ -29,32 +42,39 @@ const Header: FC<HeaderProps> = (props) => {
         navigate('/home')
       }, 2500)
     }
-    console.log('当前用户列表', curUserList)
   }
 
   /**
    * @des 添加新页
    */
+  //let index: number = 1
+  const index = useRef(1)
+  const newBoardRef = useRef<BaseBoard | null>(null)
+  const [curPage, setCurPage] = useState(1)
   async function handleNewPage() {
     let formData = new FormData()
     // const boardIds=new Blob(boardId)
     formData.append('boardId', `${boardId}`)
     const addnewPage = await addNewPage(formData)
-    console.log(addnewPage)
-    const pageId = addnewPage.data.pageId
-    const newCanvas = document.createElement('canvas')
-    const width = JSON.stringify(window.innerWidth)
-    const height = JSON.stringify(canvas.current!.canvas.height)
-    const id: string = JSON.stringify(pageId)
-    newCanvas.setAttribute('width', width)
-    newCanvas.setAttribute('height', height)
-    newCanvas.setAttribute('id', id)
-    canvasBoardRef.appendChild(newCanvas)
 
-    const x = new BaseBoard({ type: id, curTools, ws })
-    console.log(x)
-    currentCanvas(x)
-    canvas.current = x
+    const pageId = addnewPage.data.pageId
+    // const newCanvas = document.createElement('canvas')
+    // const width = JSON.stringify(window.innerWidth)
+    // const height = JSON.stringify(window.innerHeight)
+    const id: string = JSON.stringify(pageId)
+    // newCanvas.setAttribute('width', width)
+    // newCanvas.setAttribute('height', height)
+    // newCanvas.setAttribute('id', id)
+    // canvasBoardRef.appendChild(newCanvas)
+    // receiveArr.push(addnewPage.data.seqData)
+    newBoardRef.current = new BaseBoard({ type: id, curTools, ws })
+
+    // baseBoardArr.push(newBoardRef.current)
+    index.current = pageId + 1
+    setCurPage(index.current)
+    handleSwitchPage(index.current)
+
+    currentCanvas()
   }
   /**
    * @des 解散白板
@@ -62,7 +82,6 @@ const Header: FC<HeaderProps> = (props) => {
 
   async function handleDeleteBoard() {
     const getDeleteData: any = await deleteBoard(boardId)
-    console.log(getDeleteData)
     if (getDeleteData.msg == '解散成功') {
       Message.success({ content: '解散成功', duration: 2000 })
       setTimeout(() => {
@@ -72,7 +91,15 @@ const Header: FC<HeaderProps> = (props) => {
   }
 
   function handleSwitchPage(page: number) {
+    setCurPage(page)
+
     canvasBoardRef.style.left = `-${window.innerWidth * (page - 1)}px`
+    baseBoardArr.map((item, index) => {
+      if (page == index + 1) {
+        canvas.current = item
+        currentCanvas()
+      }
+    })
   }
   return (
     <div className={style['container']}>
@@ -90,6 +117,7 @@ const Header: FC<HeaderProps> = (props) => {
               pageSize={1}
               onChange={(page) => handleSwitchPage(page)}
               hideOnSinglePage={true}
+              current={curPage}
             />
           )}
         </div>

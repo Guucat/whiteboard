@@ -1,11 +1,13 @@
-import { SelectBarProps } from '@/type'
+import { addNewPage } from '@/service'
+import { FooterBarProps } from '@/type'
 import { color, ModalVisible } from '@/utils/data'
 import { FC, useRef, useState } from 'react'
 import { useRecoilState } from 'recoil'
 import Modal from '../Modal'
+import { BaseBoard } from '@/utils'
 import styles from './index.module.css'
-const FooterBar: FC<SelectBarProps> = (props) => {
-  const { canvas } = props
+const FooterBar: FC<FooterBarProps> = (props) => {
+  const { canvas, boardId, canvasBoardRef, ws, curTools, currentCanvas } = props
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   const jsonData = useRef<string | null>(null)
   const [visiable, setVisiable] = useRecoilState(ModalVisible)
@@ -19,17 +21,17 @@ const FooterBar: FC<SelectBarProps> = (props) => {
   function handlePicker(e: React.ChangeEvent<HTMLInputElement>, id: number) {
     switch (id) {
       case 0:
-        canvas.strokeColor = e.target.value
-        canvas.canvas.renderAll()
+        canvas.current!.strokeColor = e.target.value
+        canvas.current!.canvas.renderAll()
         break
       case 1:
-        canvas.fillColor = e.target.value
-        canvas.canvas.renderAll()
+        canvas.current!.fillColor = e.target.value
+        canvas.current!.canvas.renderAll()
         break
       case 2:
-        canvas.canvas.backgroundColor = e.target.value
+        canvas.current!.canvas.backgroundColor = e.target.value
 
-        canvas.canvas.renderAll()
+        canvas.current!.canvas.renderAll()
         break
       default:
         break
@@ -41,8 +43,8 @@ const FooterBar: FC<SelectBarProps> = (props) => {
    * @param e
    */
   function handleSize(e: React.ChangeEvent<HTMLInputElement>) {
-    canvas.fontSize = parseInt(e.target.value)
-    canvas.canvas.renderAll()
+    canvas.current!.fontSize = parseInt(e.target.value)
+    canvas.current!.canvas.renderAll()
   }
   // 导出类型弹窗出现
   function showDownload() {
@@ -51,7 +53,7 @@ const FooterBar: FC<SelectBarProps> = (props) => {
   // 导出为图片类型
   function downloadPic() {
     setIsDownload(false)
-    let card = canvas
+    let card = canvas.current!
     const dataURL = card.canvas.toDataURL({
       format: 'png',
       multiplier: card.canvas.getZoom(),
@@ -70,9 +72,8 @@ const FooterBar: FC<SelectBarProps> = (props) => {
   // 导出为json类型
   function downloadJson() {
     setIsDownload(false)
-    let card = canvas
+    let card = canvas.current!
     jsonData.current = card.canvas.toJSON()
-    console.log('导出的内容', jsonData.current)
 
     setModalType('jsonModal')
     setVisiable(true)
@@ -81,8 +82,37 @@ const FooterBar: FC<SelectBarProps> = (props) => {
     setIsDownload(false)
   }
 
+  const uploadIconRef = useRef<HTMLElement | null>(null)
+  const fileRef = useRef<HTMLInputElement>(null)
   //上传json文件到白板
-  function uploadJson() {}
+  function uploadJson() {
+    fileRef.current?.click()
+  }
+  // input变化时
+  async function uploadFile(e: any) {
+    let file = e.target.files[0]
+
+    const formdata = new FormData()
+    formdata.append('jsonFile', file)
+    formdata.append('boardId', `${boardId}`)
+    const getUploadFileData = await addNewPage(formdata)
+
+    const pageId = getUploadFileData.data.pageId
+    const newCanvas = document.createElement('canvas')
+    const width = JSON.stringify(window.innerWidth)
+    const height = JSON.stringify(window.innerHeight)
+    const id: string = JSON.stringify(pageId)
+    newCanvas.setAttribute('width', width)
+    newCanvas.setAttribute('height', height)
+    newCanvas.setAttribute('id', id)
+    canvasBoardRef.appendChild(newCanvas)
+
+    const x = new BaseBoard({ type: id, curTools, ws })
+
+    currentCanvas(x)
+    canvas.current = x
+    fileRef.current!.value = ''
+  }
   return (
     <>
       {' '}
@@ -114,7 +144,15 @@ const FooterBar: FC<SelectBarProps> = (props) => {
             ></input>
           </div>
           <div className={styles['btn-size-wrapper']}>
-            <i className={`iconfont icon-shangchuan1`} onClick={uploadJson} />
+            <i className={`iconfont icon-shangchuan1`} onClick={uploadJson} ref={uploadIconRef} />
+            <input
+              type="file"
+              id="myFile"
+              hidden
+              ref={fileRef}
+              accept="application/json"
+              onChange={(e) => uploadFile(e)}
+            />
           </div>
           <div className={`${styles['btn-size-wrapper']} ${styles['download']}`}>
             <i className={`iconfont icon-xiazai2`} onClick={showDownload} />
