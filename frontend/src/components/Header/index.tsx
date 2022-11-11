@@ -2,9 +2,9 @@ import { FC, useRef, useState } from 'react'
 import style from './index.module.css'
 import { Avatar, Message, Pagination } from '@arco-design/web-react'
 import { HeaderProps } from '@/type'
-import { addNewPage, deleteBoard, exitBoard } from '@/service'
+import { addNewPage, deleteBoard, exitBoard, switchMode } from '@/service'
 import { useRecoilState } from 'recoil'
-import { boardSize, ModalVisible, userLists } from '@/utils/data'
+import { boardSize, color, ModalVisible, userLists } from '@/utils/data'
 import { useNavigate } from 'react-router-dom'
 import { BaseBoard } from '@/utils'
 
@@ -22,6 +22,7 @@ const Header: FC<HeaderProps> = (props) => {
     currentCanvas,
     baseBoardArr,
     receiveArr,
+    boardMode,
   } = props
 
   const [curUserList, setCurUserList] = useRecoilState(userLists)
@@ -56,20 +57,9 @@ const Header: FC<HeaderProps> = (props) => {
     // const boardIds=new Blob(boardId)
     formData.append('boardId', `${boardId}`)
     const addnewPage = await addNewPage(formData)
-
     const pageId = addnewPage.data.pageId
-    // const newCanvas = document.createElement('canvas')
-    // const width = JSON.stringify(window.innerWidth)
-    // const height = JSON.stringify(window.innerHeight)
     const id: string = JSON.stringify(pageId)
-    // newCanvas.setAttribute('width', width)
-    // newCanvas.setAttribute('height', height)
-    // newCanvas.setAttribute('id', id)
-    // canvasBoardRef.appendChild(newCanvas)
-    // receiveArr.push(addnewPage.data.seqData)
     newBoardRef.current = new BaseBoard({ type: id, curTools, ws })
-
-    // baseBoardArr.push(newBoardRef.current)
     index.current = pageId + 1
     setCurPage(index.current)
     handleSwitchPage(index.current)
@@ -92,6 +82,7 @@ const Header: FC<HeaderProps> = (props) => {
 
   function handleSwitchPage(page: number) {
     setCurPage(page)
+    console.log('画布', baseBoardArr)
 
     canvasBoardRef.style.left = `-${window.innerWidth * (page - 1)}px`
     baseBoardArr.map((item, index) => {
@@ -101,6 +92,17 @@ const Header: FC<HeaderProps> = (props) => {
       }
     })
   }
+  const [isReadOnly, setIsReadOnly] = useState(false)
+  async function handleMode(e: any, mode: number) {
+    let formData = new FormData()
+    formData.append('boardId', `${boardId}`)
+    formData.append('newMode', `${mode}`)
+    const getSwitchData: any = await switchMode(formData)
+
+    if (getSwitchData.msg == '切换成功') {
+      mode ? setIsReadOnly(true) : setIsReadOnly(false)
+    }
+  }
   return (
     <div className={style['container']}>
       <div className={style['head-wrapper']}>
@@ -108,9 +110,14 @@ const Header: FC<HeaderProps> = (props) => {
           <div className={style['add-new-page']} style={{ marginRight: '16px' }}>
             白板Id:{boardId}
           </div>
-          <div className={style['add-new-page']} onClick={handleNewPage}>
-            Add new Page
-          </div>
+          {boardMode ? (
+            <></>
+          ) : (
+            <div className={style['add-new-page']} onClick={handleNewPage}>
+              Add new Page
+            </div>
+          )}
+
           {canvasBoardRef && (
             <Pagination
               total={canvasBoardRef.childNodes.length}
@@ -126,9 +133,21 @@ const Header: FC<HeaderProps> = (props) => {
           {isOwner ? (
             <div className={style['selectMode']}>
               {' '}
-              <button className={style['readOnly']}>只读</button>
+              <button
+                className={style['readOnly']}
+                style={isReadOnly ? { color: '#1398e6' } : { color: 'black' }}
+                onClick={(e) => handleMode(e, 1)}
+              >
+                只读
+              </button>
               <span className={style['division']}>|</span>
-              <button className={style['edit']}>编辑</button>
+              <button
+                className={style['edit']}
+                style={!isReadOnly ? { color: '#1398e6' } : { color: 'black' }}
+                onClick={(e) => handleMode(e, 0)}
+              >
+                编辑
+              </button>
             </div>
           ) : (
             <></>

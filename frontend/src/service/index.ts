@@ -27,4 +27,8 @@ const addNewPage = (obj: FormData) => {
 const uploadJsonFile = (obj: FormData) => {
   return instance.put(`/board/page`, obj)
 }
-export { login, register, judgeBoardId, exitBoard, deleteBoard, addNewPage }
+
+const switchMode = (obj: FormData) => {
+  return instance.put(`/board/switchMode`, obj)
+}
+export { login, register, judgeBoardId, exitBoard, deleteBoard, addNewPage, switchMode }

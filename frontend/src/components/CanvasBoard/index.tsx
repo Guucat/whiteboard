@@ -31,6 +31,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const [update, isUpdate] = useState(false)
   const receieveDataType = useRef(0)
   const pageID = useRef(0)
+  // const boardMode = useRef<number>(0)
+  const [boardMode, setBoardMode] = useState(0)
   /**
    * @des 初始化websocket
    */
@@ -69,17 +71,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             ReboardId.current = data.data.boardId
             setIsOwner(data.data.isOwner)
             isCreate.current = data.data.isOwner
-            // if (receiveArr.current.length) {
-            //   receiveArr.current.map((item, index) => {
-            //     canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
-            //     BaseBoardArr.current.push(canvas.current)
-            //   })
-            // }
 
             isUpdate(true)
             setTimeout(() => {
               isUpdate(false)
-              // setReceieveUpdate(false)
             })
             break
           case 2:
@@ -100,15 +95,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             receieveFullArr.current.push(data.data.seqData)
             receiveArr.current = receieveFullArr.current.slice(1)
             receieveDataType.current = data.type
-            // canvas.current = new BaseBoard({ type: `${data.data.pageId}`, curTools, ws })
-            // BaseBoardArr.current.push(canvas.current)
-
             pageID.current = data.data.pageId
             isUpdate(true)
             setTimeout(() => {
               isUpdate(false)
-              // setReceieveUpdate(false)
             })
+            break
+          case 6:
+            setBoardMode(data.data.newMode)
             break
           case 7:
             Message.success({
@@ -121,6 +115,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           default:
             break
         }
+        console.log('接收的画布', BaseBoardArr)
+        console.log('数据', receieveFullArr.current)
+
         BaseBoardArr.current.map((item, index) => {
           item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
             item.canvas.renderAll()
@@ -152,21 +149,16 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         }
         break
       case 5:
+        console.log('新增数据', pageID.current)
+
         canvas.current = new BaseBoard({ type: `${pageID.current}`, curTools, ws })
         BaseBoardArr.current.push(canvas.current)
         break
       default:
         break
     }
-  }, [receieveDataType.current])
-  // useEffect(() => {
-  //   if (receiveArr.current.length) {
-  //     receiveArr.current.map((item, index) => {
-  //       canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
-  //       BaseBoardArr.current.push(canvas.current)
-  //     })
-  //   }
-  // }, [isUpdate])
+  }, [receieveDataType.current, pageID.current])
+
   /**
    * @des 监听是否选中当前图形
    */
@@ -206,14 +198,12 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     })
   }, [isSelect])
 
-  // setBaseBoardArr([999])
   function editObj(type: any, e: React.ChangeEvent<HTMLInputElement>) {
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
 
   function updateCanvas(x: any) {
-    // canvas.current = x
     isUpdate(true)
     setTimeout(() => {
       isUpdate(false)
@@ -237,6 +227,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           currentCanvas={updateCanvas}
           baseBoardArr={BaseBoardArr.current!}
           receiveArr={receiveArr.current}
+          boardMode={boardMode}
         ></Header>
       )}
 
@@ -245,7 +236,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       ) : (
         <>
           {' '}
-          <SelectBar canvas={canvas.current!}></SelectBar>
+          <SelectBar canvas={canvas.current!} boardMode={boardMode}></SelectBar>
           <FooterBar
             canvas={canvas}
             boardId={ReboardId.current!}
@@ -253,6 +244,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             currentCanvas={updateCanvas}
             ws={ws}
             canvasBoardRef={canvasBoardRef.current!}
+            boardMode={boardMode}
           ></FooterBar>
         </>
       )}

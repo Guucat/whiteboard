@@ -19,6 +19,7 @@ export interface CanvasBoardProps {
 
 export interface SelectBarProps {
   canvas: BaseBoard
+  boardMode: any
 }
 export interface FooterBarProps {
   canvas: React.MutableRefObject<BaseBoard | null>
@@ -27,6 +28,7 @@ export interface FooterBarProps {
   ws: React.MutableRefObject<WebSocket | null>
   curTools: string
   currentCanvas: any
+  boardMode: any
 }
 
 export interface BaseBoardProp {
@@ -48,4 +50,5 @@ export interface HeaderProps {
   currentCanvas: any
   baseBoardArr: BaseBoard[]
   receiveArr: any
+  boardMode: any
 }

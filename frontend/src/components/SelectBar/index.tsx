@@ -5,9 +5,8 @@ import { FC, useEffect, useRef, useState } from 'react'
 import styles from './index.module.css'
 
 const SelectBar: FC<SelectBarProps> = (props) => {
-  const { canvas } = props
+  const { canvas, boardMode } = props
   const [activeIndex, setActiveIndex] = useState(0)
-  console.log('侧边栏实时接收到的canvas', canvas)
 
   /**
    * @param id 画板工具的唯一id
@@ -18,7 +17,6 @@ const SelectBar: FC<SelectBarProps> = (props) => {
     setActiveIndex(id)
     canvas.selectTool = tool
     // 禁用画笔模式
-    console.log('当前的工具', canvas.selectTool)
 
     card.canvas.isDrawingMode = false
     // 禁止图形选择编辑
@@ -89,28 +87,34 @@ const SelectBar: FC<SelectBarProps> = (props) => {
   //     ClickTools(1, 'brush', canvas)
   //   }, [])
   return (
-    <div className={styles['selectBar']}>
-      <div className={styles['tools']}>
-        <div className={styles['container']}>
-          {tools.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => ClickTools(item.id, item.type, canvas)}
-              className={item.id == activeIndex ? styles['active'] : styles['']}
-            >
-              <i className={`iconfont ${item.value}`} />
-            </button>
-          ))}
+    <div>
+      {!boardMode ? (
+        <div className={styles['selectBar']}>
+          <div className={styles['tools']}>
+            <div className={styles['container']}>
+              {tools.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => ClickTools(item.id, item.type, canvas)}
+                  className={item.id == activeIndex ? styles['active'] : styles['']}
+                >
+                  <i className={`iconfont ${item.value}`} />
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className={styles['UndoRedo-wrapper']}>
+            <div className={styles['undo']} onClick={(e) => handleUndoRedo(-1, e)}>
+              <i className={`iconfont icon-undo`} ref={undoRef} />
+            </div>
+            <div className={styles['redo']} onClick={(e) => handleUndoRedo(1, e)}>
+              <i className={`iconfont icon-redo`} ref={redoRef} />
+            </div>
+          </div>
         </div>
-      </div>
-      <div className={styles['UndoRedo-wrapper']}>
-        <div className={styles['undo']} onClick={(e) => handleUndoRedo(-1, e)}>
-          <i className={`iconfont icon-undo`} ref={undoRef} />
-        </div>
-        <div className={styles['redo']} onClick={(e) => handleUndoRedo(1, e)}>
-          <i className={`iconfont icon-redo`} ref={redoRef} />
-        </div>
-      </div>
+      ) : (
+        <></>
+      )}
     </div>
   )
 }
