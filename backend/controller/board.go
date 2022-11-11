@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"context"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -14,6 +15,7 @@ import (
 	"whiteboard/service"
 	"whiteboard/utils/jwt"
 	"whiteboard/utils/res"
+	"whiteboard/utils/uuid"
 )
 
 func CreateBoard(c *gin.Context) {
@@ -185,9 +187,13 @@ func AddOnePage(c *gin.Context) {
 		res.Fail(c, 400, "boardId无效", nil)
 		return
 	}
-	board.(*model.Board).Mu.Lock()
-	defer board.(*model.Board).Mu.Unlock()
-	numBoardId, _ := strconv.Atoi(boardId)
+	// redis 分布式锁
+	key := "boardLock" + boardId
+	threadId := uuid.Get()
+	ctx, cancel := context.WithCancel(context.Background())
+	redis.Lock(ctx, key, threadId)
+	defer redis.Unlock(cancel, key, threadId)
+
 	curPage := board.(*model.Board).PageSum
 	data := ""
 	if jsonFile != nil {
@@ -212,6 +218,7 @@ func AddOnePage(c *gin.Context) {
 		//	return
 		//}
 	}
+	numBoardId, _ := strconv.Atoi(boardId)
 	err := service.AddPage(numBoardId, curPage, data)
 	if err != nil {
 		res.Fail(c, 400, "添加新页失败", nil)
