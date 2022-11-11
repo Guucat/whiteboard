@@ -285,7 +285,7 @@ func ExitBoard(c *gin.Context) {
 		res.Fail(c, 500, "序列化消息失败", nil)
 		return
 	}
-	service.DeleteUser(boardId, userName)
+	_ = service.DeleteUser(boardId, userName)
 	err = mq.SendMessage(string(j)) //异步？？
 	if err != nil {
 		log.Println("mq消息发送失败") //轮询？？？？
@@ -327,7 +327,7 @@ func DissolveBoard(c *gin.Context) {
 		res.Fail(c, 500, "序列化消息失败", nil)
 		return
 	}
-	service.DeleteAllUser(boardId)
+	_ = service.DeleteAllUser(boardId)
 	err = mq.SendMessage(string(j)) //异步？？
 	if err != nil {
 		log.Println("mq消息发送失败") //轮询？？？？

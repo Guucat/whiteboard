@@ -69,6 +69,7 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			// 清理redis的users和pages键值？
 			_ = redis.RemoveUserFromBoard(boardId, userName)
 			// 清理rabbitMq的exchange和queue?
+			_ = mq.DeletePsQueue()
 			//return
 			break
 		}
