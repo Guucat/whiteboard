@@ -35,6 +35,7 @@ export interface Type1DataType {
   curUser: string
   ReboardId: number
   isOwner: boolean
+  boardMode: number
 }
 export interface BaseBoardProp {
   type: string

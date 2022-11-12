@@ -9,7 +9,6 @@ import styles from './index.module.css'
 const FooterBar: FC<FooterBarProps> = (props) => {
   const { canvas, type1Data, canvasBoardRef, ws, curTools, currentCanvas, boardMode, baseBoardArr, canvasCurrent } =
     props
-  console.log('footter', props)
 
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   const jsonData = useRef<string | null>(null)

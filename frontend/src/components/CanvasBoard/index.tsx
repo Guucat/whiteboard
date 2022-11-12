@@ -27,15 +27,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const receieveDataType = useRef(0)
   const [pageID, setPageId] = useState(-1)
   const [boardMode, setBoardMode] = useState(0)
-  const type1Data = useRef<Type1DataType>({ curUser: '', ReboardId: 0, isOwner: true })
+  const type1Data = useRef<Type1DataType>({ curUser: '', ReboardId: 0, isOwner: true, boardMode: 0 })
+  const [boardUpdate, setBoardUpdate] = useState(false)
   /**
    * @des 初始化websocket
    */
   const receiveArr = useRef<any[]>([])
   const receieveFullArr = useRef<any[]>([])
   useEffect(() => {
-    console.log('websocket')
-
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
       if (type == 'create') {
@@ -52,7 +51,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     if (ws.current) {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        console.log('接收到的数据是', data)
+
         switch (data.type) {
           case 1:
             data.data.history.map((item: any, index: number) => {
@@ -65,9 +64,12 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             type1Data.current!.curUser = data.data.userName
             type1Data.current!.ReboardId = data.data.boardId
             type1Data.current!.isOwner = data.data.isOwner
+            // type1Data.current!.boardMode = data.data.boardMode
+            setBoardMode(data.data.boardMode)
             break
           case 2:
             receieveFullArr.current.splice(data.data.pageId, data.data.pageId, data.data.seqData)
+
             break
           case 4:
             data.isOwner
@@ -100,10 +102,22 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           default:
             break
         }
-        isUpdate(true)
-        setTimeout(() => {
-          isUpdate(false)
-        }, 500)
+
+        setBoardUpdate(true)
+        // setTimeout(() => {
+        //   isUpdate(false)
+        // }, 500)
+        // BaseBoardArr.current.map((item, index) => {
+        //   item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
+        //     item.canvas.renderAll()
+        //     item.stateArr.push(JSON.stringify(item.canvas))
+        //     item.stateIdx++
+        //   })
+        // })
+        // isUpdate(true)
+        // setTimeout(() => {
+        //   isUpdate(false)
+        // }, 500)
       }
     }
   }, [ws])
@@ -111,16 +125,12 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    * @des 初始化白板类
    */
   useEffect(() => {
-    console.log('初始化白板')
-
     canvas.current = new BaseBoard({ type, curTools, ws })
     BaseBoardArr.current.push(canvas.current)
     setVisibles(false)
     setLoading(false)
   }, [])
   useEffect(() => {
-    console.log('新增一页数据')
-
     switch (receieveDataType.current) {
       case 1:
         if (receiveArr.current.length) {
@@ -131,11 +141,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         }
         break
       case 5:
-        console.log('case5执行了')
-
         canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
         BaseBoardArr.current.push(canvas.current)
-        console.log('现在的arr', BaseBoardArr.current)
 
         break
       default:
@@ -144,8 +151,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   }, [pageID])
 
   useEffect(() => {
-    console.log('渲染画布时的arr', BaseBoardArr.current)
-    console.log('现在接收到的所有数据', receieveFullArr.current)
     BaseBoardArr.current.map((item, index) => {
       item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
         item.canvas.renderAll()
@@ -153,18 +158,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         item.stateIdx++
       })
     })
-    isUpdate(true)
-    setTimeout(() => {
-      isUpdate(false)
-    }, 500)
-  }, [pageID])
+    setBoardUpdate(false)
+  }, [boardUpdate])
+
   /**
    * @des 监听是否选中当前图形
    */
 
   useEffect(() => {
-    console.log('监听选中图形')
-
     // 监听选中对象
     const board = canvas.current!
     board.canvas.on('selection:created', (e) => {
@@ -211,7 +212,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     }, 500)
   }
   const canvasBoardRef = useRef<HTMLDivElement | null>(null)
-  console.log('组件被渲染')
 
   return (
     <div className={styles['canvas-wrapper']}>
