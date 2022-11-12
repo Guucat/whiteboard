@@ -102,22 +102,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           default:
             break
         }
-
         setBoardUpdate(true)
-        // setTimeout(() => {
-        //   isUpdate(false)
-        // }, 500)
-        // BaseBoardArr.current.map((item, index) => {
-        //   item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
-        //     item.canvas.renderAll()
-        //     item.stateArr.push(JSON.stringify(item.canvas))
-        //     item.stateIdx++
-        //   })
-        // })
-        // isUpdate(true)
-        // setTimeout(() => {
-        //   isUpdate(false)
-        // }, 500)
       }
     }
   }, [ws])
@@ -130,6 +115,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     setVisibles(false)
     setLoading(false)
   }, [])
+  /**
+   * @des 监听新增白板，实例化新增的白板类
+   */
   useEffect(() => {
     switch (receieveDataType.current) {
       case 1:
@@ -143,13 +131,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       case 5:
         canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
         BaseBoardArr.current.push(canvas.current)
-
         break
       default:
         break
     }
   }, [pageID])
-
+  /**
+   * @des 渲染数据生成画布
+   */
   useEffect(() => {
     BaseBoardArr.current.map((item, index) => {
       item.canvas.loadFromJSON(receieveFullArr.current[index], () => {

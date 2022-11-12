@@ -1,2 +1,0 @@
-# whiteboard
-diu diu diu ..
