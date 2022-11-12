@@ -1,8 +1,9 @@
-.container{
+.container {
     position: absolute;
     z-index: 3;
 }
-.head-wrapper{
+
+.head-wrapper {
     display: flex;
     justify-content: space-between;
     padding-top: 25px;
@@ -13,8 +14,8 @@
     width: 100%;
 
 }
-.add-new-page{
-    color: #636262;
+
+.add-new-page {
     background-color: #fff;
     padding: 5px 8px;
     height: 30px;
@@ -23,47 +24,61 @@
     box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58);
     transition: ease 1s;
 
-   
+
 }
-.add-new-page:hover{
+
+.add-new-page:hover {
     cursor: pointer;
-   
+    color: #1398e6;
 }
-.head-right{
-     display: flex;
+
+.head-right,
+.head-left {
+    display: flex;
     justify-content: start;
 }
-.selectMode{
-   margin-right: 18px;
-   /* background-image:linear-gradient(315deg, #96c8fb 0%, #ddbdfc 74%); */
-   box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58); height: 30px;
+
+.selectMode {
+    margin-right: 18px;
+    box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58);
+    height: 30px;
     line-height: 30px;
     padding: 5px 8px;
     border-radius: 10px;
     background-color: #fff;
 }
-.selectMode button{
+
+.selectMode button {
     border: none;
-    outline: none;  
-    /* background-size: 20px 20px; */
+    outline: none;
     background-position: center center;
     background-repeat: no-repeat;
     background: transparent;
     width: 40px;
-    
+
     transition: ease 0.37s;
-   
+
 }
-.selectMode button:hover{
+
+.selectMode button:hover,
+.exit-board:hover {
     color: #1398e6;
 }
-/* .division{
-    color: #fff;
-} */
-.user{
-    margin-right: 50px;
-    width: 40px;
+
+.exit-board {
+    border: none;
+    outline: none;
+    background-color: #fff;
+    box-shadow: 0 1px 2px 0 rgba(32, 33, 36, 0.58);
     height: 40px;
-    background-color: pink;
-    border-radius: 20px;
+    width: 70px;
+    letter-spacing: 1px;
+    padding: 0px 5px;
+    border-radius: 10px;
+    transition: ease 0.37s;
+    margin-right: 18px;
+}
+
+.avatar-group {
+    margin-right: 100px;
 }

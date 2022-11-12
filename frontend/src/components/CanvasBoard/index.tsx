@@ -3,23 +3,37 @@ import Header from '../Header'
 import styles from './index.module.css'
 import { BaseBoard } from '@/utils'
 import { useRecoilState } from 'recoil'
-import { CanvasBoardProps } from '@/type'
+import { CanvasBoardProps, Type1DataType } from '@/type'
 import SelectBar from '../SelectBar'
 import FooterBar from '../FooterBar'
-import { ModalVisible } from '@/utils/data'
-
+import { ModalVisible, userLists } from '@/utils/data'
+import { Message, Modal } from '@arco-design/web-react'
+import './index.css'
+import { useNavigate } from 'react-router-dom'
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
+  const { width, height } = props
   const [visibles, setVisibles] = useRecoilState(ModalVisible)
-  const { width, height, type, boardId } = props
+  const { type, boardId } = props
   const [curTools, setCurTools] = useState('select')
   const canvas = useRef<BaseBoard | null>(null)
   const [isSelect, setIsSelect] = useState(false)
   const [loading, setLoading] = useState(true)
   const ws = useRef<WebSocket | null>(null)
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
+  const [curUserList, setCurUserList] = useRecoilState(userLists)
+  const navigate = useNavigate()
+  const BaseBoardArr = useRef<BaseBoard[]>([])
+  const [update, isUpdate] = useState(false)
+  const receieveDataType = useRef(0)
+  const [pageID, setPageId] = useState(-1)
+  const [boardMode, setBoardMode] = useState(0)
+  const type1Data = useRef<Type1DataType>({ curUser: '', ReboardId: 0, isOwner: true, boardMode: 0 })
+  const [boardUpdate, setBoardUpdate] = useState(false)
   /**
    * @des 初始化websocket
    */
+  const receiveArr = useRef<any[]>([])
+  const receieveFullArr = useRef<any[]>([])
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
@@ -37,21 +51,73 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     if (ws.current) {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        console.log('接收到的数据是', data)
-        // 有两种情况，type=1,得到最开始的历史记录  type=2,有人修改后传递过来的数据
-        let canvasData
-        if (data.type == 1) {
-          canvasData = data.data.history[0]
-          console.log('history', canvasData)
-        } else {
-          canvasData = data.data.seqData
+
+        switch (data.type) {
+          case 1:
+            data.data.history.map((item: any, index: number) => {
+              let x = JSON.parse(item)
+              setPageId(index)
+              receieveFullArr.current.push(x[index])
+            })
+            receieveDataType.current = data.type
+            receiveArr.current = receieveFullArr.current.slice(1)
+            type1Data.current!.curUser = data.data.userName
+            type1Data.current!.ReboardId = data.data.boardId
+            type1Data.current!.isOwner = data.data.isOwner
+            // type1Data.current!.boardMode = data.data.boardMode
+            setBoardMode(data.data.boardMode)
+            break
+          case 2:
+            receieveFullArr.current.splice(data.data.pageId, data.data.pageId, data.data.seqData)
+
+            break
+          case 4:
+            data.isOwner
+              ? null
+              : Modal.info({
+                  title: '退出白板',
+                  content: '创建者解散了该白板，点击确认返回首页',
+                  onOk: () => {
+                    navigate('/home')
+                  },
+                })
+            break
+          case 5:
+            receieveFullArr.current.push(data.data.seqData)
+            receiveArr.current = receieveFullArr.current.slice(1)
+            receieveDataType.current = data.type
+            setPageId(data.data.pageId)
+            break
+          case 6:
+            setBoardMode(data.data.newMode)
+            break
+          case 7:
+            Message.success({
+              content: `用户${data.data.user}${data.data.inOrOut == 1 ? '进入' : '离开'}了白板`,
+              duration: 2000,
+            })
+
+            setCurUserList(data.data.users)
+            break
+          default:
+            break
         }
-        //  = data.data.seqData
-        canvas.current!.canvas.loadFromJSON(canvasData, () => {
-          canvas.current!.canvas.renderAll()
-        })
-        canvas.current!.stateArr.push(JSON.stringify(canvas.current!.canvas))
-        canvas.current!.stateIdx++
+
+        setBoardUpdate(true)
+        // setTimeout(() => {
+        //   isUpdate(false)
+        // }, 500)
+        // BaseBoardArr.current.map((item, index) => {
+        //   item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
+        //     item.canvas.renderAll()
+        //     item.stateArr.push(JSON.stringify(item.canvas))
+        //     item.stateIdx++
+        //   })
+        // })
+        // isUpdate(true)
+        // setTimeout(() => {
+        //   isUpdate(false)
+        // }, 500)
       }
     }
   }, [ws])
@@ -60,12 +126,45 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    */
   useEffect(() => {
     canvas.current = new BaseBoard({ type, curTools, ws })
+    BaseBoardArr.current.push(canvas.current)
     setVisibles(false)
     setLoading(false)
   }, [])
+  useEffect(() => {
+    switch (receieveDataType.current) {
+      case 1:
+        if (receiveArr.current.length) {
+          receiveArr.current.map((item, index) => {
+            canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
+            BaseBoardArr.current.push(canvas.current)
+          })
+        }
+        break
+      case 5:
+        canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
+        BaseBoardArr.current.push(canvas.current)
+
+        break
+      default:
+        break
+    }
+  }, [pageID])
+
+  useEffect(() => {
+    BaseBoardArr.current.map((item, index) => {
+      item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
+        item.canvas.renderAll()
+        item.stateArr.push(JSON.stringify(item.canvas))
+        item.stateIdx++
+      })
+    })
+    setBoardUpdate(false)
+  }, [boardUpdate])
+
   /**
    * @des 监听是否选中当前图形
    */
+
   useEffect(() => {
     // 监听选中对象
     const board = canvas.current!
@@ -106,17 +205,47 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current!.canvas.renderAll()
   }
 
+  function updateCanvas(x: any) {
+    isUpdate(true)
+    setTimeout(() => {
+      isUpdate(false)
+    }, 500)
+  }
+  const canvasBoardRef = useRef<HTMLDivElement | null>(null)
+
   return (
     <div className={styles['canvas-wrapper']}>
-      <Header></Header>
+      {userLists && (
+        <Header
+          userList={curUserList}
+          canvas={canvas}
+          ws={ws}
+          type1Data={type1Data.current!}
+          curTools={curTools}
+          canvasBoardRef={canvasBoardRef.current!}
+          currentCanvas={updateCanvas}
+          baseBoardArr={BaseBoardArr.current!}
+          boardMode={boardMode}
+        ></Header>
+      )}
 
       {loading ? (
         <></>
       ) : (
         <>
           {' '}
-          <SelectBar canvas={canvas.current!}></SelectBar>
-          <FooterBar canvas={canvas.current!}></FooterBar>
+          <SelectBar canvas={canvas.current!} boardMode={boardMode}></SelectBar>
+          <FooterBar
+            canvas={canvas.current!}
+            canvasCurrent={canvas}
+            type1Data={type1Data.current!}
+            curTools={curTools}
+            currentCanvas={updateCanvas}
+            ws={ws}
+            canvasBoardRef={canvasBoardRef.current!}
+            boardMode={boardMode}
+            baseBoardArr={BaseBoardArr.current!}
+          ></FooterBar>
         </>
       )}
 
@@ -191,8 +320,16 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           </div>
         </div>
       </div>
-
-      <canvas width={width} height={height} id={type}></canvas>
+      <div className={styles['canvasBoard']} ref={canvasBoardRef}>
+        <canvas width={width} height={height} id={type}></canvas>
+        {receiveArr.current.length != 0 ? (
+          receiveArr.current.map((item, index) => {
+            return <canvas width={width} height={height} id={`${index + 1}`} key={index}></canvas>
+          })
+        ) : (
+          <></>
+        )}
+      </div>
     </div>
   )
 }

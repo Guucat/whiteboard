@@ -24,6 +24,7 @@ export class BaseBoard {
   textObject: any
   selectedObj: fabric.Object[] | null
   curObj: {}
+  id: number | undefined
 
   constructor(props: BaseBoardProp) {
     this.type = props.type
@@ -60,7 +61,7 @@ export class BaseBoard {
       this.canvas.selection = false
       // 设置当前鼠标停留在
       this.canvas.hoverCursor = 'default'
-      // 重新渲染画布
+      // // 重新渲染画布
       this.canvas.renderAll()
       this.stateIdx = 0
     }
@@ -68,7 +69,6 @@ export class BaseBoard {
 
   initCanvasEvent() {
     this.canvas.on('mouse:down', (options) => {
-      console.log('鼠标按下事件执行了', options)
       if (this.selectedObj) {
         this.isDrawing = false
         return
@@ -127,10 +127,17 @@ export class BaseBoard {
     // 监听鼠标松开事件
     let recordTimer: any
     // 鼠标抬起是发送消息
-    this.canvas.on('mouse:up', () => {
+    this.canvas.on('mouse:up', (e) => {
       // 清空鼠标移动时保存的临时绘图对象
       this.drawingObject = null
-      let obj = { pageId: 0, seqData: JSON.stringify(this.canvas.toJSON()) }
+
+      if (this.type === 'create' || this.type === 'join') {
+        this.id = 0
+      } else {
+        this.id = parseInt(this.type)
+      }
+
+      let obj = { pageId: this.id, seqData: JSON.stringify(this.canvas.toJSON()) }
       let sendObj = JSON.stringify(obj)
       this.ws.current?.send(sendObj)
       if (this.isDrawing) {
@@ -152,8 +159,6 @@ export class BaseBoard {
     })
   }
   initBrush() {
-    console.log('初始化画笔执行了')
-
     // 设置绘画模式画笔类型为 铅笔类型
     this.canvas.freeDrawingBrush = new fabric.PencilBrush(this.canvas)
     // 设置画布模式为绘画模式
@@ -167,7 +172,6 @@ export class BaseBoard {
     if (!this.textObject) {
       // 当前不存在绘制中的文本对象
       // 创建文本对象
-      console.log('文本', this.selectTool)
 
       this.textObject = new fabric.Textbox('', {
         left: this.mouseFrom.x,
@@ -329,14 +333,19 @@ export class BaseBoard {
     this.selectedObj &&
       this.selectedObj.map((item) => {
         this.canvas.remove(item)
+        let obj = { pageId: this.id, seqData: JSON.stringify(this.canvas.toJSON()) }
+        let sendObj = JSON.stringify(obj)
+        this.ws.current?.send(sendObj)
       })
   }
   // 清屏
   clearCanvas() {
     let children = this.canvas.getObjects()
-
     if (children.length > 0) {
       this.canvas.remove(...children)
     }
+    let obj = { pageId: this.id, seqData: JSON.stringify(this.canvas.toJSON()) }
+    let sendObj = JSON.stringify(obj)
+    this.ws.current?.send(sendObj)
   }
 }
