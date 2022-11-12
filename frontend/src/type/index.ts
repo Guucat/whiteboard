@@ -20,7 +20,7 @@ export interface SelectBarProps {
   boardMode: any
 }
 export interface FooterBarProps {
-  canvas: React.MutableRefObject<BaseBoard | null>
+  canvas: BaseBoard
   // boardId: number
   canvasBoardRef: HTMLDivElement
   ws: React.MutableRefObject<WebSocket | null>

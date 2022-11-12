@@ -136,6 +136,7 @@ export class BaseBoard {
       } else {
         this.id = parseInt(this.type)
       }
+      console.log('发送数据的画布', this.id)
 
       let obj = { pageId: this.id, seqData: JSON.stringify(this.canvas.toJSON()) }
       let sendObj = JSON.stringify(obj)
@@ -156,9 +157,6 @@ export class BaseBoard {
       } else {
         this.isRedoing = false
       }
-    })
-    this.canvas.on('object:added', () => {
-      console.log('事物被添加了')
     })
   }
   initBrush() {

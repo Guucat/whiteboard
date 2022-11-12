@@ -21,17 +21,17 @@ const FooterBar: FC<FooterBarProps> = (props) => {
   function handlePicker(e: React.ChangeEvent<HTMLInputElement>, id: number) {
     switch (id) {
       case 0:
-        canvas.current!.strokeColor = e.target.value
-        canvas.current!.canvas.renderAll()
+        canvas.strokeColor = e.target.value
+        canvas.canvas.renderAll()
         break
       case 1:
-        canvas.current!.fillColor = e.target.value
-        canvas.current!.canvas.renderAll()
+        canvas.fillColor = e.target.value
+        canvas.canvas.renderAll()
         break
       case 2:
-        canvas.current!.canvas.backgroundColor = e.target.value
+        canvas.canvas.backgroundColor = e.target.value
 
-        canvas.current!.canvas.renderAll()
+        canvas.canvas.renderAll()
         break
       default:
         break
@@ -43,8 +43,8 @@ const FooterBar: FC<FooterBarProps> = (props) => {
    * @param e
    */
   function handleSize(e: React.ChangeEvent<HTMLInputElement>) {
-    canvas.current!.fontSize = parseInt(e.target.value)
-    canvas.current!.canvas.renderAll()
+    canvas.fontSize = parseInt(e.target.value)
+    canvas.canvas.renderAll()
   }
   // 导出类型弹窗出现
   function showDownload() {
@@ -53,7 +53,7 @@ const FooterBar: FC<FooterBarProps> = (props) => {
   // 导出为图片类型
   function downloadPic() {
     setIsDownload(false)
-    let card = canvas.current!
+    let card = canvas
     const dataURL = card.canvas.toDataURL({
       format: 'png',
       multiplier: card.canvas.getZoom(),
@@ -72,7 +72,7 @@ const FooterBar: FC<FooterBarProps> = (props) => {
   // 导出为json类型
   function downloadJson() {
     setIsDownload(false)
-    let card = canvas.current!
+    let card = canvas
     jsonData.current = card.canvas.toJSON()
 
     setModalType('jsonModal')
@@ -110,7 +110,7 @@ const FooterBar: FC<FooterBarProps> = (props) => {
     const x = new BaseBoard({ type: id, curTools, ws })
 
     currentCanvas(x)
-    canvas.current = x
+
     fileRef.current!.value = ''
   }
   return (

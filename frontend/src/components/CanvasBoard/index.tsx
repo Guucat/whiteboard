@@ -225,7 +225,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           {' '}
           <SelectBar canvas={canvas.current!} boardMode={boardMode}></SelectBar>
           <FooterBar
-            canvas={canvas}
+            canvas={canvas.current!}
             type1Data={type1Data.current!}
             curTools={curTools}
             currentCanvas={updateCanvas}
