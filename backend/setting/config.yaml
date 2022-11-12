@@ -30,3 +30,8 @@ rabbitMQ:
   port: 5672
   root: "test"
   password: "test"
+
+mongoDB:
+  host: "127.0.0.1"
+  port: 27017
+  dbname: "whiteBoard"

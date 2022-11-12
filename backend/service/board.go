@@ -20,13 +20,15 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 	if owner == userName {
 		isOwner = true
 	}
+
 	boardInfo := gin.H{
 		"type": model.EnterBoardSign,
 		"data": gin.H{
-			"boardId":  boardId,
-			"history":  history,
-			"userName": userName,
-			"isOwner":  isOwner,
+			"boardId":   boardId,
+			"history":   history,
+			"userName":  userName,
+			"isOwner":   isOwner,
+			"boardMode": board.EditType,
 		},
 	}
 	j, _ := json.Marshal(boardInfo)

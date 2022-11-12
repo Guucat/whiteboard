@@ -19,6 +19,7 @@ type WhiteBoardConfig struct {
 	*AESConfig      `mapstructure:"aes"`
 	*TokenConfig    `mapstructure:"token"`
 	*RabbitMQConfig `mapstructure:"rabbitMQ"`
+	*MongoDBConfig  `mapstructure:"mongoDB"`
 }
 
 type MySQLConfig struct {
@@ -29,6 +30,15 @@ type MySQLConfig struct {
 	DbName      string `mapstructure:"db_name"`
 	MaxOpenConn int    `mapstructure:"max_open_conn"`
 	MaxIdleConn int    `mapstructure:"max_idle_conn"`
+}
+
+type MongoDBConfig struct {
+	Host        string `mapstructure:"host"`
+	Port        int    `mapstructure:"port"`
+	MaxOpenConn int    `mapstructure:"max_open_conn"`
+	MaxIdleConn int    `mapstructure:"max_idle_conn"`
+	DBName      string `mapstructure:"dbname"`
+	TimeOut     int    `mapstructure:"timeout"`
 }
 
 type RedisConfig struct {
