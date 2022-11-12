@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/gin-contrib/pprof"
 	"log"
+	"whiteboard/dao/mongodb"
 	"whiteboard/dao/mysql"
 	"whiteboard/dao/redis"
 	"whiteboard/middleware/rabbitmq"
@@ -22,6 +23,8 @@ func init() {
 	redis.Init(setting.Conf.RedisConfig)
 	//初始化RabbitMQ
 	rabbitmq.Init(setting.Conf.RabbitMQConfig)
+	////初始化MongoDB
+	mongodb.Init(setting.Conf.MongoDBConfig)
 	//初始化Validate
 	validator.Init()
 }
