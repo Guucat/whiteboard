@@ -28,7 +28,6 @@ const Modal: FC<ModalProps> = (ModalProps) => {
     if (BoardIdRef.current) {
       const boardId = parseInt(BoardIdRef.current.value)
       judgeIdData.current = await judgeBoardId(boardId)
-      console.log(judgeIdData.current)
 
       if (judgeIdData.current.code == 200) {
         navigate('/joinBoard', { state: { boardId } })

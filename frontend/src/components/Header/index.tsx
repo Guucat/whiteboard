@@ -4,12 +4,11 @@ import { Avatar, Message, Pagination } from '@arco-design/web-react'
 import { HeaderProps } from '@/type'
 import { addNewPage, deleteBoard, exitBoard, switchMode } from '@/service'
 import { useNavigate } from 'react-router-dom'
-import { BaseBoard } from '@/utils'
 import { useRecoilState } from 'recoil'
 import { Page } from '@/utils/data'
 
 const Header: FC<HeaderProps> = (props) => {
-  const { canvas, userList, ws, type1Data, curTools, canvasBoardRef, currentCanvas, baseBoardArr, boardMode } = props
+  const { canvas, userList, type1Data, canvasBoardRef, currentCanvas, baseBoardArr, boardMode } = props
   const AvatarGroup = Avatar.Group
   const navigate = useNavigate()
 
@@ -34,7 +33,6 @@ const Header: FC<HeaderProps> = (props) => {
   /**
    * @des 添加新页
    */
-  //let index: number = 1
   const index = useRef(1)
   const [curPage, setCurPage] = useRecoilState(Page)
   async function handleNewPage() {

@@ -46,11 +46,7 @@ export interface BaseBoardProp {
 export interface HeaderProps {
   canvas: React.MutableRefObject<BaseBoard | null>
   userList: string[]
-  // curUser: string
-  // boardId: number
   ws: React.MutableRefObject<WebSocket | null>
-  // isOwner: boolean
-
   curTools: string
   canvasBoardRef: HTMLDivElement
   currentCanvas: any

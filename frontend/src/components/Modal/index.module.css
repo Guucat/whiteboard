@@ -1,160 +1,167 @@
 /* 未登录弹窗 */
 .modal {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    /* width: 300px; */
-    padding: 30px 20px 20px 20px;
-    z-index: 9;
-    transform: translate(-50%, -50%);
-    position: absolute;
-    animation: toShow 0.5s;
-    animation-fill-mode: both !important;
-    -webkit-animation-fill-mode: both !important;
-    background-color: #fff;
-    border-radius: 8px;
-    box-shadow: rgb(113 115 119 / 60%) 0px 7px 29px 0px;
-  }
-  
-  @keyframes toShow {
-    0% {
-      opacity: 0;
-    }
-    100% {
-      opacity: 1;
-    }
-  }
-  .login-modal-wrap{
-    width: 300px;
-  }
-  .modal-avatar {
-    width: 60px;
-    height: 60px;
-    border-radius: 30px;
-    background-color: blueviolet;
-    position: absolute;
-    left: 41%;
-    top: -30px;
-    background: url('../../assets/Snipaste_2022-10-29_10-19-41.jpg');
-    background-size: cover;
-  }
-  .modal-delete {
-    position: absolute;
-    right: 15px;
-    top: 5px;
-    font-size: 20px;
-  }
-  .modal-delete:hover,
-  .go-login:hover,
-  .modal-cancle:hover {
-    cursor: pointer;
-   
-  }
-  .modal-title {
-    font-size: 20px;
-    font-weight: bold;
-    margin: 10px auto;
-    text-align: center;
-  }
-  .modal-des {
-    margin: 25px 0;
-    font-size: 15px;
-    text-align: center;
-    color: #474747;
-  }
-  .login-wrap {
-    width: 68%;
-    margin: 0 auto;
-  }
-  .go-login {
-    text-align: center;
-    padding: 10px;
-    width: 100%;
-    background-image: linear-gradient(to right, var(--theme-bg-blue), var(--theme-bg-pink));
-    color: #fff;
-    border: none;
-    border-radius: 20px;
-    transition: ease 0.6s;
-    font-size: 15px;
-    letter-spacing: 4px;
-  }
-  .go-login:hover {
-    background: linear-gradient(315deg, #ddbdfc 0%, #96c8fb 74%);
-  }
-  .modal-cancle {
-    text-align: center;
-    background-color: transparent;
-    border: none;
-    width: 100%;
-    margin-top: 10px;
-    color: #898484;
-    font-size: 14px;
-  }
-/* 加入白板modal */
-  .input-item {
-    /* position: relative; */
-    display: block;
-    width: 240px;
-    margin: 0 auto;
-    /* margin-bottom: 30px; */
-    border: 0;
-    padding: 10px;
-    border-bottom: 1px solid rgb(128, 125, 125);
-    font-size: 15px;
-    outline: none;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* width: 300px; */
+  padding: 30px 20px 20px 20px;
+  z-index: 9;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  animation: toShow 0.5s;
+  animation-fill-mode: both !important;
+  -webkit-animation-fill-mode: both !important;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: rgb(113 115 119 / 60%) 0px 7px 29px 0px;
+}
+
+@keyframes toShow {
+  0% {
+    opacity: 0;
   }
 
-  /* .json-wrapper{
-    position: absolute;
-    z-index: 8;
-  } */
-  .jsonData{
-    width: 500px;
-    height: 400px;
-    overflow: auto;
-  padding:  20px ;
+  100% {
+    opacity: 1;
+  }
+}
+
+.login-modal-wrap {
+  width: 300px;
+}
+
+.modal-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 30px;
+  background-color: blueviolet;
+  position: absolute;
+  left: 41%;
+  top: -30px;
+  background: url('../../assets/Snipaste_2022-10-29_10-19-41.jpg');
+  background-size: cover;
+}
+
+.modal-delete {
+  position: absolute;
+  right: 15px;
+  top: 5px;
+  font-size: 20px;
+}
+
+.modal-delete:hover,
+.go-login:hover,
+.modal-cancle:hover {
+  cursor: pointer;
+
+}
+
+.modal-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin: 10px auto;
+  text-align: center;
+}
+
+.modal-des {
+  margin: 25px 0;
+  font-size: 15px;
+  text-align: center;
+  color: #474747;
+}
+
+.login-wrap {
+  width: 68%;
+  margin: 0 auto;
+}
+
+.go-login {
+  text-align: center;
+  padding: 10px;
+  width: 100%;
+  background-image: linear-gradient(to right, var(--theme-bg-blue), var(--theme-bg-pink));
+  color: #fff;
+  border: none;
+  border-radius: 20px;
+  transition: ease 0.6s;
+  font-size: 15px;
+  letter-spacing: 4px;
+}
+
+.go-login:hover {
+  background: linear-gradient(315deg, #ddbdfc 0%, #96c8fb 74%);
+}
+
+.modal-cancle {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  width: 100%;
+  margin-top: 10px;
+  color: #898484;
+  font-size: 14px;
+}
+
+/* 加入白板modal */
+.input-item {
+  /* position: relative; */
+  display: block;
+  width: 240px;
+  margin: 0 auto;
+  /* margin-bottom: 30px; */
+  border: 0;
+  padding: 10px;
+  border-bottom: 1px solid rgb(128, 125, 125);
+  font-size: 15px;
+  outline: none;
+}
+
+.jsonData {
+  width: 500px;
+  height: 400px;
+  overflow: auto;
+  padding: 20px;
   margin-top: 15px;
   background-color: #f5f5f5;
-    /* margin-top: 20px;
-    margin-left: 20px; */
-  }
-  .json-btn-wrapper{  
-    margin: 10px;
-    display: flex;
-    justify-content: end;
-  }
-  .modal-title-json{
-    font-size: 20px;
-    font-weight: bold;
-    /* margin: 10px auto; */
-    text-align: center;
-  }
-  .json-cancle{
-    text-align: center;
-    background-color: transparent;
-    border: none;
-   
-    /* margin-top: 10px; */
-    color: #898484;
-    font-size: 15px;
-  }
-  .json-confirm{
-    border: none;
-    background-color: #1398e6;
-    color: #fff;
-    margin-right: 10px;
-    padding: 8px;
-    border-radius: 3px;
-    font-size: 15px;
-    letter-spacing: 2px;
-  }
-  .error {
-    color: #ee0a0a;
-    font-size: 15px;
-   position: absolute;
-   bottom: 88px;
-   left: 108px;
-   text-align: center;
-  }
+}
 
-  
+.json-btn-wrapper {
+  margin: 10px;
+  display: flex;
+  justify-content: end;
+}
+
+.modal-title-json {
+  font-size: 20px;
+  font-weight: bold;
+
+  text-align: center;
+}
+
+.json-cancle {
+  text-align: center;
+  background-color: transparent;
+  border: none;
+  color: #898484;
+  font-size: 15px;
+}
+
+.json-confirm {
+  border: none;
+  background-color: #1398e6;
+  color: #fff;
+  margin-right: 10px;
+  padding: 8px;
+  border-radius: 3px;
+  font-size: 15px;
+  letter-spacing: 2px;
+}
+
+.error {
+  color: #ee0a0a;
+  font-size: 15px;
+  position: absolute;
+  bottom: 88px;
+  left: 108px;
+  text-align: center;
+}

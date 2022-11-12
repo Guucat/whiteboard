@@ -4,11 +4,9 @@ import { color, ModalVisible, Page } from '@/utils/data'
 import { FC, useRef, useState } from 'react'
 import { useRecoilState } from 'recoil'
 import Modal from '../Modal'
-import { BaseBoard } from '@/utils'
 import styles from './index.module.css'
 const FooterBar: FC<FooterBarProps> = (props) => {
-  const { canvas, type1Data, canvasBoardRef, ws, curTools, currentCanvas, boardMode, baseBoardArr, canvasCurrent } =
-    props
+  const { canvas, type1Data, canvasBoardRef, currentCanvas, boardMode, baseBoardArr, canvasCurrent } = props
 
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   const jsonData = useRef<string | null>(null)
@@ -32,7 +30,6 @@ const FooterBar: FC<FooterBarProps> = (props) => {
         break
       case 2:
         canvas.canvas.backgroundColor = e.target.value
-
         canvas.canvas.renderAll()
         break
       default:

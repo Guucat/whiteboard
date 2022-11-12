@@ -4,7 +4,6 @@ specifiers:
   '@arco-design/web-react': ^2.40.2
   '@types/fabric': ^4.5.12
   '@types/node': ^18.11.7
-  '@types/pubsub-js': ^1.8.3
   '@types/react': ^18.0.22
   '@types/react-color': ^3.0.6
   '@types/react-dom': ^18.0.7
@@ -16,10 +15,8 @@ specifiers:
   eslint-config-prettier: ^8.5.0
   eslint-plugin-prettier: ^4.2.1
   fabric: ^5.2.4
-  fabric-with-erasing: ^1.0.1
   postcss-px-to-viewport: ^1.1.1
   prettier: ^2.7.1
-  pubsub-js: ^1.9.4
   react: ^18.2.0
   react-color: ^2.19.3
   react-dom: ^18.2.0
@@ -33,16 +30,13 @@ dependencies:
   '@arco-design/web-react': 2.40.2_yyloj25vv7zmuk3uh3z5jonzqq
   '@types/fabric': 4.5.12
   '@types/node': 18.11.7
-  '@types/pubsub-js': 1.8.3
   '@types/react-color': 3.0.6
   '@typescript-eslint/eslint-plugin': 5.41.0_huremdigmcnkianavgfk3x6iou
   '@typescript-eslint/parser': 5.41.0_wyqvi574yv7oiwfeinomdzmc3m
   axios: 1.1.3
   eslint: 8.26.0
   fabric: 5.2.4
-  fabric-with-erasing: 1.0.1
   postcss-px-to-viewport: 1.1.1
-  pubsub-js: 1.9.4
   react: 18.2.0
   react-color: 2.19.3_react@18.2.0
   react-dom: 18.2.0_react@18.2.0
@@ -526,10 +520,6 @@ packages:
 
   /@types/prop-types/15.7.5:
     resolution: {integrity: sha512-JCB8C6SnDoQf0cNycqd/35A7MjcnK+ZTqE7judS6o7utxUCg6imJg3QK2qzHKszlTjcj2cn+NwMB2i96ubpj7w==}
-
-  /@types/pubsub-js/1.8.3:
-    resolution: {integrity: sha512-6BqY04dh2UV1dNV690tyJVJYQ0U6qBH4tU+FCwY1Mhl8jOPOP9qiIvgLnB59cVik/E6/R002oXZpGiDm+2C8eA==}
-    dev: false
 
   /@types/react-color/3.0.6:
     resolution: {integrity: sha512-OzPIO5AyRmLA7PlOyISlgabpYUa3En74LP8mTMa0veCA719SvYQov4WLMsHvCgXP+L+KI9yGhYnqZafVGG0P4w==}
@@ -1498,19 +1488,6 @@ packages:
     resolution: {integrity: sha512-kVscqXk4OCp68SZ0dkgEKVi6/8ij300KBWTJq32P/dYeWTSwK41WyTxalN1eRmA5Z9UU/LX9D7FWSmV9SAYx6g==}
     engines: {node: '>=0.10.0'}
 
-  /fabric-with-erasing/1.0.1:
-    resolution: {integrity: sha512-+t5XUJChH2UFBbR1UXCHhQln0V9JwPAtpyvJhuCHrP64NcUQCL+3XbCvR2Pcs+OGDe6/XOgmdl+H7mY9aOmElQ==}
-    engines: {node: '>=14.0.0'}
-    optionalDependencies:
-      canvas: 2.10.2
-      jsdom: 19.0.0_canvas@2.10.2
-    transitivePeerDependencies:
-      - bufferutil
-      - encoding
-      - supports-color
-      - utf-8-validate
-    dev: false
-
   /fabric/5.2.4:
     resolution: {integrity: sha512-3+oLKvsbSJ76/nvPPrQVuUJDp0kOh8i867PpdrOPIHUyN+eLc+9nY3rmzMmDw6ndRm20f/uULv55G8sN01j9+Q==}
     engines: {node: '>=14.0.0'}
@@ -2286,10 +2263,6 @@ packages:
     resolution: {integrity: sha512-E/ZsdU4HLs/68gYzgGTkMicWTLPdAftJLfJFlLUAAKZGkStNU72sZjT66SnMDVOfOWY/YAoiD7Jxa9iHvngcag==}
     dev: false
     optional: true
-
-  /pubsub-js/1.9.4:
-    resolution: {integrity: sha512-hJYpaDvPH4w8ZX/0Fdf9ma1AwRgU353GfbaVfPjfJQf1KxZ2iHaHl3fAUw1qlJIR5dr4F3RzjGaWohYUEyoh7A==}
-    dev: false
 
   /punycode/2.1.1:
     resolution: {integrity: sha512-XRsRjdf+j5ml+y/6GKHPZbrF/8p2Yga0JPtdqTIY2Xe5ohJPD9saDJJLPvp9+NSBprVvevdXZybnj2cv8OEd0A==}
