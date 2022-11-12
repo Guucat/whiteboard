@@ -70,6 +70,10 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			//}
 			// 清理redis的users和pages键值？
 			_ = redis.RemoveUserFromBoard(boardId, userName)
+			users := GetUsers(boardId)
+			if len(users) == 0 {
+				SetExpireBoard(boardId)
+			}
 			// 清理rabbitMq的exchange和queue?
 			_ = mq.DeletePsQueue()
 			//return
@@ -81,8 +85,14 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			log.Println("获取board错误, err", err)
 			return
 		}
+		recData := model.ReceiveWsMessage{}
+		err = json.Unmarshal(data, &recData)
+		if err != nil {
+			log.Println("websocket消息读取失败 ", err)
+			continue
+		}
 		//判断是否可协作
-		if board.EditType == model.ReadMode {
+		if board.EditType == model.ReadMode || (recData.PageId >= 0 || recData.PageId < board.PageSum) {
 			message := gin.H{
 				"type": model.ForbiddenWrite,
 			}
@@ -91,13 +101,6 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 				log.Println("断开连接, 进入房间时消息写入websocket失败：", err)
 				return
 			}
-			continue
-		}
-
-		recData := model.ReceiveWsMessage{}
-		err = json.Unmarshal(data, &recData)
-		if err != nil {
-			log.Println("websocket消息读取失败 ", err)
 			continue
 		}
 
@@ -212,8 +215,16 @@ func GetBoardInfo(boardId string) (*model.Board, error) {
 	return redis.GetBoard(boardId)
 }
 
+func GenUniqueId() (int, error) {
+	return redis.PutUniqueId()
+}
+
 func AddBoard(boardId int, owner string, editType int, pageSum int) error {
 	return redis.AddBoard(boardId, owner, editType, pageSum)
+}
+
+func SetExpireBoard(boardId int) {
+	redis.SetExpireBoard(boardId)
 }
 
 func AddUser(boardId int, userName string) error {
@@ -231,6 +242,11 @@ func DeleteAllUser(boardId int) error {
 func GetUsers(boardId int) []string {
 	return redis.GetUsersOfBoard(boardId)
 }
+
+func ExistUserInBoard(boardId int, userName string) (bool, error) {
+	return redis.ExistUserInBoard(boardId, userName)
+}
+
 func AddPage(boardId int, pageId int, data string) error {
 	return redis.PutPageIntoBoard(boardId, pageId, data)
 }

@@ -32,6 +32,12 @@ func GetBoard(boardId string) (*model.Board, error) {
 	}, nil
 }
 
+func SetExpireBoard(boardId int) {
+	key := strconv.Itoa(boardId) + "pages"
+	db.Expire(ctx, key, 1*time.Minute)
+	db.Expire(ctx, strconv.Itoa(boardId), 1*time.Minute)
+}
+
 func PutUniqueId() (boardId int, err error) {
 	rand.Seed(time.Now().UnixNano())
 	for {
@@ -64,6 +70,10 @@ func RemoveAllUserFromBoard(boardId int) error {
 func GetUsersOfBoard(boarId int) []string {
 	key := strconv.Itoa(boarId) + "users"
 	return db.SMembers(ctx, key).Val()
+}
+
+func ExistUserInBoard(boardId int, userName string) (bool, error) {
+	return db.SIsMember(ctx, strconv.Itoa(boardId)+"users", userName).Result()
 }
 
 func PutPageIntoBoard(boardId int, pageId int, data string) error {

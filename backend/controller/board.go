@@ -20,7 +20,7 @@ import (
 
 func CreateBoard(c *gin.Context) {
 	// 生成白板id
-	boardId, err := redis.PutUniqueId()
+	boardId, err := service.GenUniqueId()
 	if err != nil {
 		log.Println("生成boardId错误", err)
 		res.Fail(c, 500, "服务器生成boardId错误", nil)
@@ -266,7 +266,17 @@ func AddOnePage(c *gin.Context) {
 }
 func ExitBoard(c *gin.Context) {
 	boardId := c.GetInt("boardId")
-	userName := c.Query("userName") //校验？？？？？
+	userName := c.Query("userName")
+	ok, err := service.ExistUserInBoard(boardId, userName)
+	if err != nil {
+		log.Println("查询用户是否在房间失败", err)
+		res.Fail(c, 500, "服务器错误", nil)
+		return
+	}
+	if !ok {
+		res.Fail(c, 200, "不在房间内", nil)
+		return
+	}
 
 	mq, err := service.BindExchange(boardId)
 	if err != nil {
@@ -286,6 +296,10 @@ func ExitBoard(c *gin.Context) {
 		return
 	}
 	_ = service.DeleteUser(boardId, userName)
+	users := service.GetUsers(boardId)
+	if len(users) == 0 {
+		service.SetExpireBoard(boardId)
+	}
 	err = mq.SendMessage(string(j)) //异步？？
 	if err != nil {
 		log.Println("mq消息发送失败") //轮询？？？？
@@ -328,6 +342,8 @@ func DissolveBoard(c *gin.Context) {
 		return
 	}
 	_ = service.DeleteAllUser(boardId)
+	service.SetExpireBoard(boardId)
+
 	err = mq.SendMessage(string(j)) //异步？？
 	if err != nil {
 		log.Println("mq消息发送失败") //轮询？？？？
