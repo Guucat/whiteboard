@@ -35,15 +35,12 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	user, err := service.GetUserByName(name)
+	user, err := service.GetUserByNamePwd(name, pwd)
 	if err != nil {
-		res.Ok(c, 400, "用户不存在", nil)
+		res.Ok(c, 400, "用户名或密码错误", nil)
 		return
 	}
-	if user == nil || user.Pwd != pwd {
-		res.Ok(c, 400, "账号或密码错误", nil)
-		return
-	}
+
 	token, _ := jwt.GenToken(user.Id, user.Name)
 	res.Ok(c, 200, "登录成功", gin.H{
 		"token": token,

@@ -15,6 +15,6 @@ func Register(name string, pwd string) error {
 	return errors.New("用户已存在")
 }
 
-func GetUserByName(name string) (*model.User, error) {
-	return mysql.GetUserByName(name)
+func GetUserByNamePwd(name, pwd string) (*model.User, error) {
+	return mysql.GetUserByNamePwd(name, pwd)
 }
