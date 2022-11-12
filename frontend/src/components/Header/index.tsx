@@ -5,6 +5,8 @@ import { HeaderProps } from '@/type'
 import { addNewPage, deleteBoard, exitBoard, switchMode } from '@/service'
 import { useNavigate } from 'react-router-dom'
 import { BaseBoard } from '@/utils'
+import { useRecoilState } from 'recoil'
+import { Page } from '@/utils/data'
 
 const Header: FC<HeaderProps> = (props) => {
   const { canvas, userList, ws, type1Data, curTools, canvasBoardRef, currentCanvas, baseBoardArr, boardMode } = props
@@ -34,19 +36,14 @@ const Header: FC<HeaderProps> = (props) => {
    */
   //let index: number = 1
   const index = useRef(1)
-  const newBoardRef = useRef<BaseBoard | null>(null)
-  const [curPage, setCurPage] = useState(1)
+  const [curPage, setCurPage] = useRecoilState(Page)
   async function handleNewPage() {
     let formData = new FormData()
     formData.append('boardId', `${type1Data.ReboardId}`)
     const addnewPage = await addNewPage(formData)
     const pageId = addnewPage.data.pageId
-    const id: string = JSON.stringify(pageId)
-    newBoardRef.current = new BaseBoard({ type: id, curTools, ws })
     index.current = pageId + 1
-    setCurPage(index.current)
     handleSwitchPage(index.current)
-    currentCanvas()
   }
   /**
    * @des 解散白板

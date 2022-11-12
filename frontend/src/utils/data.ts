@@ -84,3 +84,8 @@ export const boardSize = atom({
     height: window.innerHeight,
   },
 })
+
+export const Page = atom({
+  key: 'Page',
+  default: 1,
+})

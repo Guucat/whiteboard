@@ -1,13 +1,16 @@
 import { addNewPage } from '@/service'
 import { FooterBarProps } from '@/type'
-import { color, ModalVisible } from '@/utils/data'
+import { color, ModalVisible, Page } from '@/utils/data'
 import { FC, useRef, useState } from 'react'
 import { useRecoilState } from 'recoil'
 import Modal from '../Modal'
 import { BaseBoard } from '@/utils'
 import styles from './index.module.css'
 const FooterBar: FC<FooterBarProps> = (props) => {
-  const { canvas, type1Data, canvasBoardRef, ws, curTools, currentCanvas, boardMode } = props
+  const { canvas, type1Data, canvasBoardRef, ws, curTools, currentCanvas, boardMode, baseBoardArr, canvasCurrent } =
+    props
+  console.log('footter', props)
+
   const pickerColorRef = useRef<HTMLInputElement | null>(null)
   const jsonData = useRef<string | null>(null)
   const [visiable, setVisiable] = useRecoilState(ModalVisible)
@@ -81,7 +84,7 @@ const FooterBar: FC<FooterBarProps> = (props) => {
   function handleCancle() {
     setIsDownload(false)
   }
-
+  const [curPage, setCurPage] = useRecoilState(Page)
   const uploadIconRef = useRef<HTMLElement | null>(null)
   const fileRef = useRef<HTMLInputElement>(null)
   //上传json文件到白板
@@ -89,28 +92,23 @@ const FooterBar: FC<FooterBarProps> = (props) => {
     fileRef.current?.click()
   }
   // input变化时
+  const indexId = useRef(1)
   async function uploadFile(e: any) {
     let file = e.target.files[0]
-
     const formdata = new FormData()
     formdata.append('jsonFile', file)
     formdata.append('boardId', `${type1Data.ReboardId}`)
     const getUploadFileData = await addNewPage(formdata)
-
     const pageId = getUploadFileData.data.pageId
-    const newCanvas = document.createElement('canvas')
-    const width = JSON.stringify(window.innerWidth)
-    const height = JSON.stringify(window.innerHeight)
-    const id: string = JSON.stringify(pageId)
-    newCanvas.setAttribute('width', width)
-    newCanvas.setAttribute('height', height)
-    newCanvas.setAttribute('id', id)
-    canvasBoardRef.appendChild(newCanvas)
-
-    const x = new BaseBoard({ type: id, curTools, ws })
-
-    currentCanvas(x)
-
+    indexId.current = pageId + 1
+    setCurPage(indexId.current)
+    canvasBoardRef.style.left = `-${window.innerWidth * (indexId.current - 1)}px`
+    baseBoardArr.map((item, index) => {
+      if (indexId.current == index + 1) {
+        canvasCurrent.current = item
+        currentCanvas()
+      }
+    })
     fileRef.current!.value = ''
   }
   return (

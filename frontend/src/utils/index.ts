@@ -334,14 +334,19 @@ export class BaseBoard {
     this.selectedObj &&
       this.selectedObj.map((item) => {
         this.canvas.remove(item)
+        let obj = { pageId: this.id, seqData: JSON.stringify(this.canvas.toJSON()) }
+        let sendObj = JSON.stringify(obj)
+        this.ws.current?.send(sendObj)
       })
   }
   // 清屏
   clearCanvas() {
     let children = this.canvas.getObjects()
-
     if (children.length > 0) {
       this.canvas.remove(...children)
     }
+    let obj = { pageId: this.id, seqData: JSON.stringify(this.canvas.toJSON()) }
+    let sendObj = JSON.stringify(obj)
+    this.ws.current?.send(sendObj)
   }
 }

@@ -22,6 +22,8 @@ export interface SelectBarProps {
 export interface FooterBarProps {
   canvas: BaseBoard
   // boardId: number
+  canvasCurrent: React.MutableRefObject<BaseBoard | null>
+  baseBoardArr: BaseBoard[]
   canvasBoardRef: HTMLDivElement
   ws: React.MutableRefObject<WebSocket | null>
   curTools: string

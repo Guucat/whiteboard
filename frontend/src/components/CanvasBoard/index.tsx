@@ -100,14 +100,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           default:
             break
         }
-
-        BaseBoardArr.current.map((item, index) => {
-          item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
-            item.canvas.renderAll()
-            item.stateArr.push(JSON.stringify(item.canvas))
-            item.stateIdx++
-          })
-        })
         isUpdate(true)
         setTimeout(() => {
           isUpdate(false)
@@ -139,14 +131,33 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         }
         break
       case 5:
+        console.log('case5执行了')
+
         canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
         BaseBoardArr.current.push(canvas.current)
+        console.log('现在的arr', BaseBoardArr.current)
+
         break
       default:
         break
     }
   }, [pageID])
 
+  useEffect(() => {
+    console.log('渲染画布时的arr', BaseBoardArr.current)
+    console.log('现在接收到的所有数据', receieveFullArr.current)
+    BaseBoardArr.current.map((item, index) => {
+      item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
+        item.canvas.renderAll()
+        item.stateArr.push(JSON.stringify(item.canvas))
+        item.stateIdx++
+      })
+    })
+    isUpdate(true)
+    setTimeout(() => {
+      isUpdate(false)
+    }, 500)
+  }, [pageID])
   /**
    * @des 监听是否选中当前图形
    */
@@ -226,12 +237,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           <SelectBar canvas={canvas.current!} boardMode={boardMode}></SelectBar>
           <FooterBar
             canvas={canvas.current!}
+            canvasCurrent={canvas}
             type1Data={type1Data.current!}
             curTools={curTools}
             currentCanvas={updateCanvas}
             ws={ws}
             canvasBoardRef={canvasBoardRef.current!}
             boardMode={boardMode}
+            baseBoardArr={BaseBoardArr.current!}
           ></FooterBar>
         </>
       )}
