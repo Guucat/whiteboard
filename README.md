@@ -22,7 +22,7 @@ http://114.55.132.72:82/#/home
 1. 下载克隆仓库
 
 ```JavaScript
-git clone <仓库地址>
+git clone https://github.com/Guucat/whiteboard.git
 ```
 
 1. 安装依赖
@@ -73,7 +73,7 @@ docker run --name wb -p 8080:8080 -d guptang/wb
 
 ## 项目流程图
 
-This content is only supported in a Feishu Docs
+![Flowchart](Flowchart.jpg)
 
 ## 目前实现的功能
 
@@ -180,4 +180,3 @@ collaboration-whiteboard
 └─ index.js
 
 ```
->>>>>>> 67ad4958dde5190f3f03c6c7abdc7e00b0e1559b
