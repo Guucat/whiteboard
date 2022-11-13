@@ -1,3 +1,4 @@
+// Package res simplifies the return of response results
 package res
 
 import (

@@ -7,7 +7,7 @@ import (
 type ExchangeInfo struct {
 	ExchangeName string
 	queueName    string
-	// 创建队列后, 通过Message消费消息
+	// After the queue is created, the Message will be consumed via the message chan
 	messages <-chan amqp.Delivery
 }
 
@@ -24,7 +24,7 @@ func (info *ExchangeInfo) NewPsExchange() error {
 }
 
 func (info *ExchangeInfo) NewPsQueue() error {
-	// 创建消息队列
+	// Creating a Message Queue
 	que, err := Chan.QueueDeclare(
 		"",
 		false,
@@ -37,7 +37,7 @@ func (info *ExchangeInfo) NewPsQueue() error {
 		return err
 	}
 	info.queueName = que.Name
-	// 将消息队列绑定到Exchange
+	// Bind the message queue to Exchange
 	err = Chan.QueueBind(info.queueName,
 		"",
 		info.ExchangeName,
@@ -47,7 +47,7 @@ func (info *ExchangeInfo) NewPsQueue() error {
 	if err != nil {
 		return err
 	}
-	// 初始化消息Channel
+	// Initializes the message Channel
 	info.messages, err = Chan.Consume(
 		info.queueName,
 		"",

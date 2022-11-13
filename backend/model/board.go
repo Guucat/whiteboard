@@ -1,18 +1,15 @@
 package model
 
-import "sync"
-
 const EditMode = 0
 const ReadMode = 1
 
-// Board 定义白板的结构体
+// Board defines the whiteboard structure
 type Board struct {
-	BoardId  int        // 白板id
-	Owner    string     // 白板创建者
-	EditType int        // 白板编辑类型
-	PageSum  int        // 当前page总数
-	Mu       sync.Mutex // 添加新页时加锁
-	//Users    []string   // 当前加入白板的用户            -> redis
-	//Websockets []*websocket.Conn // 当前白板维持的websocket连接   -> rabbitmq
-	//Pages      map[int]string    // 每个页的数据				  -> redis
+	BoardId  int    // whiteboard id
+	Owner    string // whiteboard creator
+	EditType int    // whiteboard editing types
+	PageSum  int    // number of current pages
+	//Users    []string   				// Current user joined to the whiteboard            			   -> redis
+	//Websockets []*websocket.Conn 		// The websocket connection maintained by the current whiteboard   -> rabbitmq
+	//Pages      map[int]string         // Data per page				  								   -> redis
 }

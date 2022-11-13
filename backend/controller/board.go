@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"log"
+	"mime/multipart"
 	"net/http"
 	"strconv"
 	"strings"
@@ -169,10 +170,10 @@ func AddOnePage(c *gin.Context) {
 	jsonFile, _ := c.FormFile("jsonFile")
 	board, v := service.ValidateBoardId(boardId)
 	if v == false {
-		res.Fail(c, 400, "boardId无效", nil)
+		res.Fail(c, 400, "invalid boardId", nil)
 		return
 	}
-	// redis 分布式锁
+	// Get the distributed lock
 	key := "boardLock" + boardId
 	threadId := uuid.Get()
 	ctx, cancel := context.WithCancel(context.Background())
@@ -181,52 +182,46 @@ func AddOnePage(c *gin.Context) {
 
 	curPage := board.(*model.Board).PageSum
 	data := ""
+	// Import canvas data from a file if exists
 	if jsonFile != nil {
-		// creat a json decoder
 		f, err := jsonFile.Open()
 		if err != nil {
-			res.Fail(c, 400, "json文件无效", nil)
+			res.Fail(c, 400, "invalid jsonfile", nil)
 			return
 		}
-		defer f.Close()
+		defer func(f multipart.File) {
+			err = f.Close()
+			if err != nil {
+				log.Printf("fail to close file")
+			}
+		}(f)
 		var info = make([]byte, jsonFile.Size)
 		_, err = f.Read(info)
 		if err != nil {
-			res.Fail(c, 400, "json文件无法读取", nil)
+			res.Fail(c, 400, "fail to read jsonfile", nil)
 			return
 		}
 		data = strings.Trim(string(info), "/")
-		//decoder := json.NewDecoder(f)
-		//err = decoder.Decode(&data)
-		//if err != nil {
-		//	res.Fail(c, 400, "json无法被解析", nil)
-		//	return
-		//}
 	}
 	numBoardId, _ := strconv.Atoi(boardId)
-	err := service.AddPage(numBoardId, curPage, data)
-	if err != nil {
-		res.Fail(c, 400, "添加新页失败", nil)
+
+	// Save the new page data
+	if err := service.AddPage(numBoardId, curPage, data); err != nil {
+		res.Fail(c, 400, "fail to add a new page", nil)
 		return
 	}
 	board.(*model.Board).PageSum += 1
 
+	// Save the board info
 	id, _ := strconv.Atoi(boardId)
-	err = service.AddBoard(id, board.(*model.Board).Owner, board.(*model.Board).EditType, board.(*model.Board).PageSum)
-	if err != nil {
+	if err := service.AddBoard(id, board.(*model.Board).Owner, board.(*model.Board).EditType, board.(*model.Board).PageSum); err != nil {
 		log.Println("fail to fresh board info: ", err)
 		return
 	}
-	//pageInfo := gin.H{
-	//	"type": model.AddNewPageSign,
-	//	"data": gin.H{
-	//		"newPageId": curPage,
-	//		"seqData":   data,
-	//	},
-	//}
 	mq, err := service.BindExchange(numBoardId)
 	if err != nil {
-		res.Fail(c, 500, "rabbitMQ绑定失败", nil)
+		res.Fail(c, 500, "fail to bind rabbitmq exchange", nil)
+		return
 	}
 	mqMessage := model.MqMessage{
 		MessageType: model.AddNewPageSign,
@@ -237,20 +232,18 @@ func AddOnePage(c *gin.Context) {
 	}
 	m, err := json.Marshal(mqMessage)
 	if err != nil {
-		res.Fail(c, 500, "mq消息序列化失败", nil)
+		res.Fail(c, 500, "fail to serialize rabbitmq message", nil)
 	}
-	err = mq.SendMessage(string(m))
-	if err != nil {
-		res.Fail(c, 500, "mq消息发送失败", nil)
+	if err = mq.SendMessage(string(m)); err != nil {
+		res.Fail(c, 500, "fail to send rabbitmq message", nil)
 		return
 	}
-	res.Ok(c, 200, "新建页成功", gin.H{
+	res.Ok(c, 200, "success to add a new page", gin.H{
 		"pageId":  curPage,
 		"seqData": data,
 	})
 }
 func ExitBoard(c *gin.Context) {
-	// Get Info
 	boardId := c.GetInt("boardId")
 	userName := c.Query("userName")
 

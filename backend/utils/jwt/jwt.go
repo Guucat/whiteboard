@@ -1,3 +1,4 @@
+// Package jwt is a permission authentication processing middleware
 package jwt
 
 import (

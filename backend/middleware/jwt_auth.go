@@ -7,15 +7,15 @@ import (
 	"whiteboard/utils/res"
 )
 
-// JWTAuthMiddleware JWT认证中间件
+// JWTAuthMiddleware the authentication middleware
 func JWTAuthMiddleware() func(c *gin.Context) {
 	return func(c *gin.Context) {
-		// websocket token 验证
+		// Verify  websocket token from the protocol header
 		protocolToken := c.Request.Header.Get("Sec-WebSocket-Protocol")
 		if protocolToken != "" {
 			mes, err := jwt.ParseToken(protocolToken)
 			if err != nil {
-				res.Fail(c, 400, "token无效", nil)
+				res.Fail(c, 400, "invalid token", nil)
 				c.Abort()
 				return
 			}
@@ -28,20 +28,21 @@ func JWTAuthMiddleware() func(c *gin.Context) {
 
 		header := c.Request.Header.Get("Authorization")
 		if header == "" {
-			res.Fail(c, 400, "token为空", nil)
+			res.Fail(c, 400, "token is null", nil)
 			c.Abort()
 			return
 		}
-		// 按空格分割
+
+		// Separate data by space
 		parts := strings.SplitN(header, " ", 2)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
-			res.Fail(c, 400, "请求头中auth格式有误", nil)
+			res.Fail(c, 400, "incorrect request header format", nil)
 			c.Abort()
 			return
 		}
 		mes, err := jwt.ParseToken(parts[1])
 		if err != nil {
-			res.Fail(c, 400, "token无效", nil)
+			res.Fail(c, 400, "invalid token", nil)
 			c.Abort()
 			return
 		}
