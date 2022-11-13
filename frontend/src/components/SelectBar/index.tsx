@@ -1,13 +1,15 @@
 import { SelectBarProps } from '@/type'
 import { BaseBoard } from '@/utils'
 import { tools } from '@/utils/data'
-import { FC, useRef, useState } from 'react'
+import { FC, useEffect, useRef, useState } from 'react'
 import styles from './index.module.css'
 
 const SelectBar: FC<SelectBarProps> = (props) => {
   const { canvas, boardMode } = props
   const [activeIndex, setActiveIndex] = useState(0)
-
+  useEffect(() => {
+    setActiveIndex(0)
+  }, [canvas])
   /**
    * @param id 画板工具的唯一id
    * @param tool 画板工具名称

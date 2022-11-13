@@ -41,6 +41,7 @@
 
 .color-label {
     margin-right: 3px;
+    caret-color: transparent;
 }
 
 .btn-size-wrapper i {

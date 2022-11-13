@@ -18,7 +18,6 @@ export default function Register() {
     formData.append('pwd', password)
 
     getData.current = await register(formData)
-    console.log('register', getData)
 
     if (getData.current.msg === '注册成功') {
       navigate('/login', { state: { username, password } })

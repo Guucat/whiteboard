@@ -116,7 +116,7 @@ const Header: FC<HeaderProps> = (props) => {
               >
                 只读
               </button>
-              <span className={style['division']}>|</span>
+              <span className={style['division']}> | </span>
               <button
                 className={style['edit']}
                 style={!isReadOnly ? { color: '#1398e6' } : { color: 'black' }}
@@ -144,7 +144,7 @@ const Header: FC<HeaderProps> = (props) => {
             {userList &&
               userList.map((item, index) => {
                 return (
-                  <Avatar style={{ backgroundColor: '#168CFF' }} key={index}>
+                  <Avatar className={style['avatar']} style={{ backgroundColor: '#168CFF' }} key={index}>
                     {item}
                   </Avatar>
                 )
