@@ -35,8 +35,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const receiveArr = useRef<string[]>([])
   const receieveFullArr = useRef<string[]>([])
   useEffect(() => {
-    console.log('执行了')
-
     window.addEventListener('resize', () => {
       canvas.current!.canvas.setDimensions({
         width: window.innerWidth,
