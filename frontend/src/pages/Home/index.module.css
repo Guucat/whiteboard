@@ -25,12 +25,15 @@
   display: flex;
   justify-content: space-between;
 }
+.join-board,.create-board{
+   width: 220px;
+  height: 52px;font-size: 20px;
+}
 .join-board,
-.create-board {
-  width: 220px;
-  height: 52px;
+.create-board,.login,.register {
+
   margin: 5px;
-  font-size: 20px;
+  
   font-weight: bold;
   color: rgba(255, 255, 255, 0.9);
   text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
@@ -43,13 +46,24 @@
 }
 
 .join-board:hover,
-.create-board:hover {
+.create-board:hover,.login:hover,.register:hover {
   transform: translateY(5px);
   box-shadow: 0px 0px transparent, 0px 5px 10px rgba(0, 0, 0, 0.25);
 }
 
 .join-board:focus .create-board:focus {
   outline: none;
+}
+.top-wrapper{
+  padding-top: 10px;
+  margin-right: 10px;
+}
+.login,.register{
+  width: 90px;
+  height: 30px;
+  font-size: 16px;
+  float: right;
+  margin-right: 15px;
 }
 
 

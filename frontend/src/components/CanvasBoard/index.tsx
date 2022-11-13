@@ -56,7 +56,12 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           ws.current = new WebSocket('ws://114.55.132.72:8080/board/create', [token])
         }
       } else {
-        ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`)
+        if (tokenstr) {
+          const token = tokenstr.substring(1, tokenstr.length - 1)
+          ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`, [token])
+        } else {
+          ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`)
+        }
       }
     } else {
       alert('当前浏览器 Not support websocket')

@@ -23,12 +23,25 @@ const Home: FC = () => {
     setVisible(true)
     setModalType('joinBoard')
   }
-
+  function handleLogin() {
+    navigate('/login')
+  }
+  function handleRegister() {
+    navigate('/register')
+  }
   useEffect(() => {
     setVisible(false)
   }, [])
   return (
     <div className={style['container']}>
+      <div className={style['top-wrapper']}>
+        <button className={style['login']} onClick={handleLogin}>
+          Login
+        </button>
+        <button className={style['register']} onClick={handleRegister}>
+          Register
+        </button>
+      </div>
       <div className={style['welcome-wrapper']}>
         <div className={style['welcome-text']}>
           <span style={{ fontSize: '75px' }}>Welcome to</span> Collaboration Whiteboard
