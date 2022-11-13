@@ -19,44 +19,48 @@ import (
 )
 
 func CreateBoard(c *gin.Context) {
-	// 生成白板id
+	// Generating a Whiteboard ID
 	boardId, err := service.GenUniqueId()
 	if err != nil {
-		log.Println("生成boardId错误", err)
-		res.Fail(c, 500, "服务器生成boardId错误", nil)
+		log.Println("Generating a Whiteboard ID err:", err)
+		res.Fail(c, 500, "Generate a Whiteboard ID", nil)
 		return
 	}
 
-	// 初始化白板信息
+	// Initializing whiteboard information
 	userName := c.GetString("name")
 	err = service.AddBoard(boardId, userName, model.EditMode, 1)
 	if err != nil {
-		log.Println("redis添加白板失败", err)
-		res.Fail(c, 500, "服务器添加白板失败", nil)
-		return
-	}
-	//添加用户
-	err = service.AddUser(boardId, userName)
-	if err != nil {
-		log.Println("redis添加用户失败", err)
-		res.Fail(c, 500, "服务器添加用户失败", nil)
-		return
-	}
-	//mongodb修改
-	err = service.AddPage(boardId, 0, "")
-	if err != nil {
-		log.Println("redis添加协作用户失败", err)
-		res.Fail(c, 500, "服务器添加协作用户失败", nil)
+		log.Println("Initializing whiteboard information err:", err)
+		res.Fail(c, 500, "Initializing whiteboard information err", nil)
 		return
 	}
 
-	mq, err := service.NewMQ(boardId)
+	//	Add user
+	err = service.AddUser(boardId, userName)
 	if err != nil {
-		log.Println("rabbitMq创建队列失败", err)
-		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		log.Println("Add user err:", err)
+		res.Fail(c, 500, "Add user err", nil)
 		return
 	}
-	// 升级为websocket协议
+
+	// Add page
+	err = service.AddPage(boardId, 0, "")
+	if err != nil {
+		log.Println("Add page err:", err)
+		res.Fail(c, 500, "Add page err", nil)
+		return
+	}
+
+	// Create MQ
+	mq, err := service.NewMQ(boardId)
+	if err != nil {
+		log.Println("Create MQ err:", err)
+		res.Fail(c, 500, "Create MQ err", nil)
+		return
+	}
+
+	// Upgrade protocol
 	c.Writer.Header().Set("Sec-WebSocket-Protocol", c.GetString("token"))
 	webConn, err := (&websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -66,33 +70,19 @@ func CreateBoard(c *gin.Context) {
 		},
 	}).Upgrade(c.Writer, c.Request, c.Writer.Header())
 	if err != nil {
-		res.Fail(c, 500, "websocket 创建失败", nil)
+		log.Println("Upgrade protocol err:", err)
+		res.Fail(c, 500, "fail to upgrade websocket protocol", nil)
 		return
 	}
-	log.Println("升级协议完成, boardId: " + strconv.Itoa(boardId))
+
+	// Enter Board
 	service.EnterBoard(webConn, mq, boardId, userName)
-	//err = mysql.CreateBoard(&model.Board{BoardId: boardId, Owner: owner, EditType: editType})
-	//if err != nil {
-	//	res.Ok(c, 400, "创建白板错误", nil)
-	//	return
-	//}
-	//redis.PutUserIntoBoard(boardId, owner)
-
-	//websockets := []*websocket.Conn{webConn}
-	//users = append(users, owner)
-	//local.Boards.Store(boardId, &model.Board{
-	//	BoardId:    boardId,
-	//	Owner:      owner,
-	//	EditType:   editType,
-	//	Users:      users,
-	//	Websockets: websockets,
-	//})
-
 }
 
 func EnterBoard(c *gin.Context) {
+	// GET Info
 	boardId := c.GetInt("boardId")
-
+	// Names are generated randomly if no token
 	protocolToken := c.Request.Header.Get("Sec-WebSocket-Protocol")
 	var userName string
 	if protocolToken == "" {
@@ -101,31 +91,30 @@ func EnterBoard(c *gin.Context) {
 	} else {
 		mes, err := jwt.ParseToken(protocolToken)
 		if err != nil {
-			res.Fail(c, 400, "token无效", nil)
+			res.Fail(c, 400, "token is valid", nil)
 			c.Abort()
 			return
 		}
 		userName = mes.Name
 	}
 
+	// Create MQ
 	mq, err := service.NewMQ(boardId)
 	if err != nil {
-		log.Println("rabbitMq创建队列失败", err)
-		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		log.Println("Create MQ err:", err)
+		res.Fail(c, 500, "Create MQ err", nil)
 		return
 	}
+
+	// Add user
 	err = service.AddUser(boardId, userName)
 	if err != nil {
-		log.Println("redis添加协作用户失败", err)
-		res.Fail(c, 500, "服务器添加协作用户失败", nil)
+		log.Println("Add user err:", err)
+		res.Fail(c, 500, "Add user err", nil)
 		return
 	}
-	//if redis.GetBoardById(boardId) {
-	//	log.Println("查找board失败", err)
-	//	res.Ok(c, 400, "查找board失败", nil)
-	//	return
-	//}
-	//升级ws协议
+
+	// Upgrade protocol
 	c.Writer.Header().Set("Sec-WebSocket-Protocol", protocolToken)
 	webConn, err := (&websocket.Upgrader{
 		ReadBufferSize:  1024,
@@ -135,35 +124,30 @@ func EnterBoard(c *gin.Context) {
 		},
 	}).Upgrade(c.Writer, c.Request, c.Writer.Header())
 	if err != nil {
+		log.Println("Upgrade protocol err:", err)
 		res.Fail(c, 400, "fail to upgrade websocket protocol", nil)
 		return
 	}
+
+	// Enter Board
 	service.EnterBoard(webConn, mq, boardId, userName)
-
-	//redis.PutUserIntoBoard(boardId, "")
-	//websockets := board.(*model.Board).Websockets
-	//websockets = append(websockets, webConn)
-	//board.(*model.Board).Websockets = websockets
-
-	//users := board.(*model.Board).Users
-	//users = append(users, "zhy")
-	//board.(*model.Board).Users = users
-
 }
 
 func ValidateBoardId(c *gin.Context) {
+	// GET Info
 	boardId := c.Query("boardId")
 	if boardId == "" {
 		boardId = c.PostForm("boardId")
 	}
+	// Verify boardId
 	_, ok := service.ValidateBoardId(boardId)
 	if !ok {
-		res.Fail(c, 400, "boardId无效", nil)
+		res.Fail(c, 400, "boardId is valid", nil)
 		c.Abort()
 		return
 	}
 	if c.FullPath() == "/board/validate" {
-		res.Ok(c, 200, "boardId验证通过", nil)
+		res.Ok(c, 200, "boardId is passed", nil)
 		return
 	}
 	Id, _ := strconv.Atoi(boardId)
@@ -172,6 +156,7 @@ func ValidateBoardId(c *gin.Context) {
 }
 
 func GetOnlineUsers(c *gin.Context) {
+	// Get info
 	boardId := c.GetInt("boardId")
 	users := service.GetUsers(boardId)
 	res.Ok(c, 200, "success to get all online users of current whiteboard", gin.H{
@@ -265,25 +250,31 @@ func AddOnePage(c *gin.Context) {
 	})
 }
 func ExitBoard(c *gin.Context) {
+	// Get Info
 	boardId := c.GetInt("boardId")
 	userName := c.Query("userName")
+
+	// Judge if the user is inside the whiteboard
 	ok, err := service.ExistUserInBoard(boardId, userName)
 	if err != nil {
-		log.Println("查询用户是否在房间失败", err)
-		res.Fail(c, 500, "服务器错误", nil)
+		log.Println("Query user failure err: ", err)
+		res.Fail(c, 500, "Query user failure", nil)
 		return
 	}
 	if !ok {
-		res.Fail(c, 200, "不在房间内", nil)
+		res.Fail(c, 200, "The user is not in the room", nil)
 		return
 	}
 
+	// Binding exchange
 	mq, err := service.BindExchange(boardId)
 	if err != nil {
-		log.Println("退出房间时rabbitMq创建队列失败", err)
-		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		log.Println("rabbitMq failed to bind exchange when exiting the room err:", err)
+		res.Fail(c, 500, "rabbitMq failed to bind exchange when exiting the room err", nil)
 		return
 	}
+
+	// Sending an exit message
 	message := model.MqMessage{
 		MessageType: model.ExitBoardSign,
 		UserName:    userName,
@@ -292,44 +283,51 @@ func ExitBoard(c *gin.Context) {
 	j, err := json.Marshal(message)
 	if err != nil {
 		log.Println("Marshal message err:", err)
-		res.Fail(c, 500, "序列化消息失败", nil)
+		res.Fail(c, 500, "Marshal message err", nil)
 		return
 	}
+
+	// Deleting a user If the number of users on the whiteboard is 0, set the expiration time for the whiteboard
 	_ = service.DeleteUser(boardId, userName)
 	users := service.GetUsers(boardId)
 	if len(users) == 0 {
 		service.SetExpireBoard(boardId)
 	}
-	err = mq.SendMessage(string(j)) //异步？？
+
+	err = mq.SendMessage(string(j))
 	if err != nil {
-		log.Println("mq消息发送失败") //轮询？？？？
-		res.Fail(c, 500, "消息发送失败", nil)
+		log.Println("Sending message err:", err)
+		res.Fail(c, 500, "Message sending failure", nil)
 		return
 	}
 
-	res.Ok(c, 200, "退出成功", nil)
+	res.Ok(c, 200, "Exit successful", nil)
 }
 
 func DissolveBoard(c *gin.Context) {
+	// Get Info
 	boardId := c.GetInt("boardId")
 	ownerName := c.GetString("name")
 	board, err := service.GetBoardInfo(strconv.Itoa(boardId))
 	if err != nil {
-		log.Println("获取board信息错误, err:", err)
-		res.Fail(c, 400, "获取board信息错误", nil)
+		log.Println("Get board info err:", err)
+		res.Fail(c, 400, "Get board info err", nil)
 		return
 	}
 	if ownerName != board.Owner {
-		res.Ok(c, 200, "无权限解散房间", nil)
+		res.Ok(c, 200, "No permission to dissolve the room", nil)
 		return
 	}
 
+	// Binding exchange
 	mq, err := service.BindExchange(boardId)
 	if err != nil {
-		log.Println("退出房间时rabbitMq创建队列失败", err)
-		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		log.Println("rabbitMq failed to bind exchange when dissolving the room err:", err)
+		res.Fail(c, 500, "rabbitMq failed to bind exchange when dissolving the room err", nil)
 		return
 	}
+
+	// Sending message
 	message := model.MqMessage{
 		MessageType: model.DissolveBoardSign,
 		UserName:    ownerName,
@@ -338,57 +336,64 @@ func DissolveBoard(c *gin.Context) {
 	j, err := json.Marshal(message)
 	if err != nil {
 		log.Println("Marshal message err:", err)
-		res.Fail(c, 500, "序列化消息失败", nil)
+		res.Fail(c, 500, "Marshal message err", nil)
 		return
 	}
+
+	// Set expire to board
 	_ = service.DeleteAllUser(boardId)
 	service.SetExpireBoard(boardId)
 
-	err = mq.SendMessage(string(j)) //异步？？
+	err = mq.SendMessage(string(j))
 	if err != nil {
-		log.Println("mq消息发送失败") //轮询？？？？
-		res.Fail(c, 500, "消息发送失败", nil)
+		log.Println("Sending message err")
+		res.Fail(c, 500, "Sending message err", nil)
 		return
 	}
 
-	res.Ok(c, 200, "解散成功", nil)
+	res.Ok(c, 200, "Successful dissolution", nil)
 }
 
 func SwitchMode(c *gin.Context) {
+	// Get Info
 	boardId := c.PostForm("boardId")
 	board, v := service.ValidateBoardId(boardId)
 	if v == false {
-		res.Fail(c, 400, "boardId无效", nil)
+		res.Fail(c, 400, "boardId is invalid", nil)
 		return
 	}
 	userName := c.GetString("name")
 
 	Mode := c.PostForm("newMode")
 	if Mode != "1" && Mode != "0" {
-		res.Fail(c, 400, "切换模式无效", nil)
+		res.Fail(c, 400, "Invalid switch mode", nil)
 		return
 	}
 	newMode, _ := strconv.Atoi(Mode)
 
 	boardInfo := board.(*model.Board)
 	if userName != boardInfo.Owner {
-		res.Ok(c, 200, "无权限切换模式", nil)
+		res.Ok(c, 200, "Switch mode without permission", nil)
 		return
 	}
 
+	// Update new mode
 	err := service.PutNewMode(boardId, newMode)
 	if err != nil {
-		log.Println("模式转换失败", err)
-		res.Fail(c, 500, "模式转换失败", nil)
+		log.Println("Failed mode switching err:", err)
+		res.Fail(c, 500, "Failed mode switching", nil)
 		return
 	}
 
+	// Binding exchange
 	mq, err := service.BindExchange(boardInfo.BoardId)
 	if err != nil {
-		log.Println("模式转换时rabbitMq创建队列失败", err)
-		res.Fail(c, 500, "服务器添创建mq失败", nil)
+		log.Println("rabbitMq failed to bind exchange when dissolving the room err:", err)
+		res.Fail(c, 500, "rabbitMq failed to bind exchange when dissolving the room err", nil)
 		return
 	}
+
+	// Sending message
 	message := model.MqMessage{
 		MessageType: model.SwitchModeSign,
 		UserName:    userName,
@@ -398,14 +403,15 @@ func SwitchMode(c *gin.Context) {
 	m, err := json.Marshal(message)
 	if err != nil {
 		log.Println("Marshal message err:", err)
-		res.Fail(c, 500, "序列化消息失败", nil)
+		res.Fail(c, 500, "Marshal message err", nil)
 		return
 	}
-	err = mq.SendMessage(string(m)) //异步？？
+
+	err = mq.SendMessage(string(m))
 	if err != nil {
-		log.Println("mq消息发送失败") //轮询？？？？
-		res.Fail(c, 500, "消息发送失败", nil)
+		log.Println("Sending message err:", err)
+		res.Fail(c, 500, "Sending message err", nil)
 		return
 	}
-	res.Ok(c, 200, "切换成功", nil)
+	res.Ok(c, 200, "Successful mode switch", nil)
 }

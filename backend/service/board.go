@@ -13,7 +13,7 @@ import (
 )
 
 func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int, userName string) {
-	// 历史序列化数据
+	// Historical serialized data
 	history, board := GetAllPages(boardId)
 	owner := board.Owner
 	isOwner := false
@@ -33,11 +33,11 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 	}
 	j, _ := json.Marshal(boardInfo)
 	if err := webConn.WriteMessage(websocket.TextMessage, j); err != nil {
-		log.Println("断开连接, 进入房间时消息写入websocket失败：", err)
+		log.Println("Disconnected, failed to write message to websocket while entering the room err:", err)
 		return
 	}
 
-	//通知其他用户自己的进入消息
+	// Notify other users of their own entry message
 	mqMessage := model.MqMessage{
 		MessageType: model.EnterBoardSign,
 		UserName:    userName,
@@ -47,7 +47,7 @@ func EnterBoard(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int,
 	jsonMqMessage, _ := json.Marshal(mqMessage)
 	err := mq.SendMessage(string(jsonMqMessage))
 	if err != nil {
-		log.Println("mq消息发送失败")
+		log.Println("Sending message err:", err)
 	}
 
 	// read websocketMessage
@@ -60,53 +60,47 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 	for {
 		dataType, data, err := webConn.ReadMessage()
 		if err != nil {
-			log.Println("读取websocket消息失败, 退出连接:"+userName, err)
-			// 判断board是否存在,
-			//board, _ := local.Boards.Load(boardId)
-			//// 房主清理board
-			//if board != nil && board.(*model.Board).Owner == userName {
-			//	local.Boards.Delete(boardId)
-			//	return
-			//}
-			// 清理redis的users和pages键值？
+			log.Println("Failed to read websocket message, quit connection err:", err)
+
+			// Deleting a user If the number of users on the whiteboard is 0, set the expiration time for the whiteboard
 			_ = redis.RemoveUserFromBoard(boardId, userName)
 			users := GetUsers(boardId)
 			if len(users) == 0 {
 				SetExpireBoard(boardId)
 			}
-			// 清理rabbitMq的exchange和queue?
+			// Deleting queue
 			_ = mq.DeletePsQueue()
-			//return
 			break
 		}
 
 		board, err := GetBoardInfo(strconv.Itoa(boardId))
 		if err != nil {
-			log.Println("获取board错误, err", err)
+			log.Println("Get board err:", err)
 			return
 		}
 		recData := model.ReceiveWsMessage{}
 		err = json.Unmarshal(data, &recData)
 		if err != nil {
-			log.Println("websocket消息读取失败 ", err)
+			log.Println("websocket message read failed err:", err)
 			continue
 		}
-		//判断是否可协作
+		// Determine if collaboration is possible
 		if board.EditType == model.ReadMode || (recData.PageId < 0 || recData.PageId >= board.PageSum) {
 			message := gin.H{
 				"type": model.ForbiddenWrite,
 			}
 			m, _ := json.Marshal(message)
 			if err := webConn.WriteMessage(websocket.TextMessage, m); err != nil {
-				log.Println("断开连接, 进入房间时消息写入websocket失败：", err)
+				log.Println("Disconnected, failed to write message to websocket while entering the room err:", err)
 				return
 			}
 			continue
 		}
 
+		// Add page
 		err = AddPage(boardId, recData.PageId, recData.SeqData)
 		if err != nil {
-			log.Println("序列化消息存储到redis失败 ", err)
+			log.Println("Failed to serialize messages for storage in redis ", err)
 		}
 		mqMessage := model.MqMessage{
 			MessageType: model.SequenceBoardSign,
@@ -118,7 +112,7 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 		jsonMqMessage, _ := json.Marshal(mqMessage)
 		err = mq.SendMessage(string(jsonMqMessage))
 		if err != nil {
-			log.Println("mq消息发送失败")
+			log.Println("Send message err")
 		}
 	}
 }
@@ -166,10 +160,9 @@ func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 				"isOwner": mqMessage.UserName == userName,
 			}
 		} else if mqMessage.MessageType == model.ExitBoardSign {
-			log.Println(userName + "退出房间中")
 			webConn.Close()
 			if err = mq.DeletePsQueue(); err != nil {
-				log.Println("删除队列错误", err)
+				log.Println("Delete queue err:", err)
 			}
 			return
 		} else if mqMessage.MessageType == model.SwitchModeSign {
@@ -180,7 +173,7 @@ func sendMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 				},
 			}
 		} else {
-			continue //忽略自己的消息
+			continue // Ignore your own messages
 		}
 		j, _ := json.Marshal(sendData)
 		err = webConn.WriteMessage(mqMessage.DataType, j)
@@ -202,7 +195,7 @@ func ValidateBoardId(boardId string) (any, bool) {
 	}
 	board, err := GetBoardInfo(boardId)
 	if err != nil {
-		log.Println("获取board信息错误，err:", err)
+		log.Println("Get board info err:", err)
 		return nil, false
 	}
 	if board == nil {
@@ -262,7 +255,7 @@ func GetPage(boardId int, pageId int) string {
 func GetAllPages(boardId int) ([]string, *model.Board) {
 	board, err := GetBoardInfo(strconv.Itoa(boardId))
 	if err != nil {
-		log.Println("获取board信息失败")
+		log.Println("Get board info")
 		return nil, nil
 	}
 	history := make([]string, board.PageSum)
@@ -272,7 +265,8 @@ func GetAllPages(boardId int) ([]string, *model.Board) {
 		}
 		page, err := json.Marshal(o)
 		if err != nil {
-			log.Println("history序列化失败", err)
+			log.Println("history serialization failed", err)
+			return nil, nil
 		}
 		history[i] = string(page)
 	}
