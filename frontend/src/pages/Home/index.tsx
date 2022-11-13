@@ -21,7 +21,6 @@ const Home: FC = () => {
   }
   function handleJoin() {
     setVisible(true)
-
     setModalType('joinBoard')
   }
 

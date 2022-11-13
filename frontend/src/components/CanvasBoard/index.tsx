@@ -35,12 +35,17 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   const receiveArr = useRef<string[]>([])
   const receieveFullArr = useRef<string[]>([])
   useEffect(() => {
-    window.addEventListener('resize', () => {
+    const handelResize = () => {
       canvas.current!.canvas.setDimensions({
         width: window.innerWidth,
         height: window.innerHeight,
       })
-    })
+    }
+    window.addEventListener('resize', handelResize)
+
+    return () => {
+      window.removeEventListener('resize', handelResize)
+    }
   }, [])
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
@@ -62,7 +67,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
         switch (data.type) {
           case 1:
-            console.log(' data.data.history', data.data.history)
+            // console.log(' data.data.history', data.data.history)
 
             data.data.history.map((item: string, index: number) => {
               let x = JSON.parse(item)
@@ -118,6 +123,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         setBoardUpdate(true)
       }
     }
+    return () => {
+      receieveFullArr.current = []
+      receiveArr.current = []
+    }
   }, [ws])
   /**
    * @des 初始化白板类
@@ -127,6 +136,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     BaseBoardArr.current.push(canvas.current)
     setVisibles(false)
     setLoading(false)
+    return () => {
+      canvas.current!.canvas.clear()
+      canvas.current = null
+      BaseBoardArr.current = []
+    }
   }, [])
   /**
    * @des 监听新增白板，实例化新增的白板类
@@ -147,6 +161,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         break
       default:
         break
+    }
+    return () => {
+      BaseBoardArr.current = []
     }
   }, [pageID])
   /**
@@ -209,12 +226,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
   function updateCanvas() {
     isUpdate(true)
-    setTimeout(() => {
+    const x = setTimeout(() => {
       isUpdate(false)
     }, 500)
+    return () => {
+      clearTimeout(x)
+    }
   }
   const canvasBoardRef = useRef<HTMLDivElement | null>(null)
-  // const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   return (
     <div className={styles['canvas-wrapper']}>
