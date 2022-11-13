@@ -56,19 +56,20 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           ws.current = new WebSocket('ws://114.55.132.72:8080/board/create', [token])
         }
       } else {
-        if (tokenstr) {
-          const token = tokenstr.substring(1, tokenstr.length - 1)
-          ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`, [token])
-        } else {
-          ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`)
-        }
+        // if (tokenstr) {
+        //   const token = tokenstr.substring(1, tokenstr.length - 1)
+        //   ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`, [token])
+        // } else {
+        ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`)
       }
+      // }
     } else {
       alert('当前浏览器 Not support websocket')
     }
     if (ws.current) {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
+        console.log('接收到数据', data)
 
         switch (data.type) {
           case 1:
@@ -129,6 +130,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       }
     }
     return () => {
+      console.log('指向了')
+
       receieveFullArr.current = []
       receiveArr.current = []
     }
@@ -142,9 +145,12 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     setVisibles(false)
     setLoading(false)
     return () => {
+      // console.log('清空数据')
+
       canvas.current!.canvas.clear()
       canvas.current = null
       BaseBoardArr.current = []
+      canvasBoardRef.current = null
     }
   }, [])
   /**
@@ -167,14 +173,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       default:
         break
     }
-    return () => {
-      BaseBoardArr.current = []
-    }
   }, [pageID])
   /**
    * @des 渲染数据生成画布
    */
   useEffect(() => {
+    console.log(' BaseBoardArr.current', BaseBoardArr.current)
+    console.log('receieveFullArr.current', receieveFullArr.current)
+
     BaseBoardArr.current.map((item, index) => {
       item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
         item.canvas.renderAll()
@@ -182,6 +188,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         item.stateIdx++
       })
     })
+    console.log('重新渲染')
+
     setBoardUpdate(false)
   }, [boardUpdate])
 
@@ -191,10 +199,18 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
   useEffect(() => {
     // 监听选中对象
+    console.log('监听选中')
+    console.log('canvas.current!', canvas.current!)
     const board = canvas.current!
+    // const board = canvas.current!
     board.canvas.on('selection:created', (e) => {
+      console.log('选中')
+
       if (e.selected!.length == 1) {
         setIsSelect(true)
+        console.log('选中执行了')
+      } else {
+        board.canvas.selection = false
       }
 
       // // 选中图层事件触发时，动态更新赋值
@@ -209,6 +225,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     board.canvas.on('selection:updated', (e) => {
       if (e.selected!.length == 1) {
         setIsSelect(true)
+        console.log('选中更新了')
       }
       board.selectedObj = e.selected!
       document.onkeydown = (e) => {
@@ -221,8 +238,9 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     board.canvas.on('selection:cleared', (e) => {
       setIsSelect(false)
       board.selectedObj = null
+      console.log('点击空白处了')
     })
-  }, [isSelect])
+  }, [isSelect, pageID])
 
   function editObj(type: any, e: React.ChangeEvent<HTMLInputElement>) {
     canvas.current!.selectedObj![0].set(type, e.target.value)
