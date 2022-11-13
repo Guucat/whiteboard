@@ -11,7 +11,7 @@
 
 ## 项目预览
 
-视频演示： 
+视频演示： 【在线协作白板】 https://www.bilibili.com/video/BV1HG4y1f7mX/?share_source=copy_web&vd_source=ebb1bacbe515c61fb26cac77764783a5
 
 ## 线上访问地址
 
