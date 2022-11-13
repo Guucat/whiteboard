@@ -17,15 +17,10 @@ const Login: FC = () => {
   const getLoginData = useRef<any>(null)
   const [showErr, setShowErr] = useState(false)
   const handleLogin = async () => {
-    // 发送登录请求，得到token
-    // 如果得到了token以后，判断登录是否成功，如果成功则跳转到主面
-    //将token存起来
     let formData = new FormData()
     formData.append('name', userNameRef.current!.value)
     formData.append('pwd', pwdRef.current!.value)
     getLoginData.current = await login(formData)
-    console.log(getLoginData.current)
-
     if (getLoginData.current.msg === '登录成功') {
       localStorage.setItem('token', JSON.stringify(getLoginData.current.data.token))
       navigate('/home')
@@ -60,9 +55,11 @@ const Login: FC = () => {
           Don't have account?
           <Link to={'/register'}>Sign up</Link>
         </div>
-        <div className={style['error']} style={showErr ? { display: 'block' } : { display: 'none' }}>
-          {getLoginData.current.msg}
-        </div>
+        {getLoginData.current && (
+          <div className={style['error']} style={showErr ? { display: 'block' } : { display: 'none' }}>
+            {getLoginData.current.msg}
+          </div>
+        )}
       </div>
     </div>
   )

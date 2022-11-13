@@ -10,7 +10,8 @@ body {
   --theme-bg-blue: #a6c1ee;
 }
 html {
-  font-family: 'apercu', sans-serif;overflow: hidden;
+  font-family: 'apercu', sans-serif;
+  overflow: hidden;
 }
 button:hover,
 a:hover {

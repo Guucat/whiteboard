@@ -1,7 +1,6 @@
 .container {
   height: 100vh;
   background-image: linear-gradient(315deg, #96c8fb 0%, #ddbdfc 74%);
-  /* caret-color: transparent; */
 }
 .welcome-wrapper {
   position: absolute;

@@ -72,3 +72,20 @@ export const ModalVisible = atom<boolean>({
   key: 'ModalVisibles',
   default: false,
 })
+export const userLists = atom<string[]>({
+  key: 'userList',
+  default: [],
+})
+
+export const boardSize = atom({
+  key: 'boardSize',
+  default: {
+    width: window.innerWidth,
+    height: window.innerHeight,
+  },
+})
+
+export const Page = atom({
+  key: 'Page',
+  default: 1,
+})

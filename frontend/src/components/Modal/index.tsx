@@ -12,7 +12,6 @@ interface ModalProps {
   jsonData?: any | null
 }
 const Modal: FC<ModalProps> = (ModalProps) => {
-  //  const [visible, setVisible] = useState(false)
   const { visible, describe, jsonData } = ModalProps
   const [visiblt, setVisiblt] = useRecoilState(ModalVisible)
   const BoardIdRef = useRef<HTMLInputElement>(null)
@@ -27,9 +26,8 @@ const Modal: FC<ModalProps> = (ModalProps) => {
   const [showErr, setShowErr] = useState(false)
   async function handleJoinBoard() {
     if (BoardIdRef.current) {
-      const boardId = BoardIdRef.current.value
+      const boardId = parseInt(BoardIdRef.current.value)
       judgeIdData.current = await judgeBoardId(boardId)
-      console.log(judgeIdData.current)
 
       if (judgeIdData.current.code == 200) {
         navigate('/joinBoard', { state: { boardId } })
@@ -39,14 +37,13 @@ const Modal: FC<ModalProps> = (ModalProps) => {
           setShowErr(false)
         }, 2000)
       }
-
-      // navigate('/joinBoard', { state: { boardId } })
     }
   }
   function handleJson() {
     let link = document.createElement('a')
     link.download = 'config.json'
-    link.href = 'data:text/plain,' + JSON.stringify(jsonData)
+    let blob = new Blob([JSON.stringify(jsonData)])
+    link.href = URL.createObjectURL(blob)
     link.click()
   }
   return (

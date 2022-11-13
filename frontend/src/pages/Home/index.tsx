@@ -1,6 +1,6 @@
 import Modal from '@/components/Modal'
-import { FC, useEffect, useRef, useState } from 'react'
-import { atom, useRecoilState } from 'recoil'
+import { FC, useEffect, useState } from 'react'
+import { useRecoilState } from 'recoil'
 import { useNavigate } from 'react-router-dom'
 import style from './index.module.css'
 import { ModalVisible } from '@/utils/data'

@@ -92,7 +92,7 @@ func readMessage(webConn *websocket.Conn, mq *rabbitmq.ExchangeInfo, boardId int
 			continue
 		}
 		//判断是否可协作
-		if board.EditType == model.ReadMode || (recData.PageId >= 0 || recData.PageId < board.PageSum) {
+		if board.EditType == model.ReadMode || (recData.PageId < 0 || recData.PageId >= board.PageSum) {
 			message := gin.H{
 				"type": model.ForbiddenWrite,
 			}

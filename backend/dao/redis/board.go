@@ -34,8 +34,8 @@ func GetBoard(boardId string) (*model.Board, error) {
 
 func SetExpireBoard(boardId int) {
 	key := strconv.Itoa(boardId) + "pages"
-	db.Expire(ctx, key, 24*3*time.Hour)
-	db.Expire(ctx, strconv.Itoa(boardId), 24*3*time.Hour)
+	db.Expire(ctx, key, 1*time.Minute)
+	db.Expire(ctx, strconv.Itoa(boardId), 180*time.Minute)
 }
 
 func PutUniqueId() (boardId int, err error) {

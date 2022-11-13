@@ -1,4 +1,4 @@
-import { FC, useRef } from 'react'
+import { FC } from 'react'
 import { CanvasProps } from '@/type'
 import CanvasBoard from '@/components/CanvasBoard'
 
