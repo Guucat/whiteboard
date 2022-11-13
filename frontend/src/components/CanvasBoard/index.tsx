@@ -354,8 +354,4 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     </div>
   )
 }
-// CanvasBoard.defaultProps = {
-//   width: window.innerWidth,
-//   height: window.innerHeight,
-// }
 export default CanvasBoard
