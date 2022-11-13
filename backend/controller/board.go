@@ -1,3 +1,5 @@
+// Package controller is used to accept frontend data and return page request information
+
 package controller
 
 import (
@@ -19,6 +21,9 @@ import (
 	"whiteboard/utils/uuid"
 )
 
+// CreateBoard Randomly generate the whiteboard ID, cache the whiteboard data to the Redis database,
+//and create a message queue through the whiteboard ID, then upgrade the protocol to WebSocket protocol,
+//and finally start reading and receiving messages from yourself and other users.
 func CreateBoard(c *gin.Context) {
 	// Generating a Whiteboard ID
 	boardId, err := service.GenUniqueId()
@@ -80,6 +85,11 @@ func CreateBoard(c *gin.Context) {
 	service.EnterBoard(webConn, mq, boardId, userName)
 }
 
+// EnterBoard According to the whiteboard ID sent by the user's request,
+//if the token is not carried, it will enter anonymously (the system randomly generates a digital mark name).
+//If the token is carried, it will enter according to the username.
+//Bind the message queue to the whiteboard ID, then upgrade to the WebSocket protocol,
+//and finally start reading and receiving messages from yourself and other users.
 func EnterBoard(c *gin.Context) {
 	// GET Info
 	boardId := c.GetInt("boardId")
@@ -134,6 +144,7 @@ func EnterBoard(c *gin.Context) {
 	service.EnterBoard(webConn, mq, boardId, userName)
 }
 
+// ValidateBoardId Verify the ID by the third-party package validate and the redis database
 func ValidateBoardId(c *gin.Context) {
 	// GET Info
 	boardId := c.Query("boardId")
@@ -156,6 +167,7 @@ func ValidateBoardId(c *gin.Context) {
 	c.Next()
 }
 
+// GetOnlineUsers The list of online users is obtained through redis database
 func GetOnlineUsers(c *gin.Context) {
 	// Get info
 	boardId := c.GetInt("boardId")
@@ -243,6 +255,12 @@ func AddOnePage(c *gin.Context) {
 		"seqData": data,
 	})
 }
+
+// ExitBoard Exit the room according to the whiteboard ID and username,
+//send information to other users in the whiteboard,
+//update the user online list in the whiteboard, delete the user's message queue,
+//and finally close the websocket connection. When the number of whiteboard members is 0,
+//set an expiration time on the whiteboard, and you can still access the whiteboard within the expiration time.
 func ExitBoard(c *gin.Context) {
 	boardId := c.GetInt("boardId")
 	userName := c.Query("userName")
@@ -297,6 +315,11 @@ func ExitBoard(c *gin.Context) {
 	res.Ok(c, 200, "Exit successful", nil)
 }
 
+// DissolveBoard According to the whiteboard ID and the creator of the whiteboard,
+//the dissolve is verified (whether it is the creator).
+//The verification is successful, the corresponding message queue is deleted,
+//the disbandment information is sent to other users,
+//and other users delete their own queue and close the websocket connection.
 func DissolveBoard(c *gin.Context) {
 	// Get Info
 	boardId := c.GetInt("boardId")
@@ -347,6 +370,9 @@ func DissolveBoard(c *gin.Context) {
 	res.Ok(c, 200, "Successful dissolution", nil)
 }
 
+// SwitchMode The default mode for creating a whiteboard is cooperative mode.
+//Only the whiteboard creator can switch the mode,
+//and the mode transition information will be forwarded to other users after the successful switch.
 func SwitchMode(c *gin.Context) {
 	// Get Info
 	boardId := c.PostForm("boardId")
