@@ -32,8 +32,18 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   /**
    * @des 初始化websocket
    */
-  const receiveArr = useRef<any[]>([])
-  const receieveFullArr = useRef<any[]>([])
+  const receiveArr = useRef<string[]>([])
+  const receieveFullArr = useRef<string[]>([])
+  useEffect(() => {
+    console.log('执行了')
+
+    window.addEventListener('resize', () => {
+      canvas.current!.canvas.setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    })
+  }, [])
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
@@ -54,17 +64,22 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
         switch (data.type) {
           case 1:
-            data.data.history.map((item: any, index: number) => {
+            console.log(' data.data.history', data.data.history)
+
+            data.data.history.map((item: string, index: number) => {
               let x = JSON.parse(item)
               setPageId(index)
               receieveFullArr.current.push(x[index])
             })
+            console.log('receieveFullArr.current', receieveFullArr.current)
+
             receieveDataType.current = data.type
             receiveArr.current = receieveFullArr.current.slice(1)
+            console.log('receiveArr.current', receiveArr.current)
+
             type1Data.current!.curUser = data.data.userName
             type1Data.current!.ReboardId = data.data.boardId
             type1Data.current!.isOwner = data.data.isOwner
-            // type1Data.current!.boardMode = data.data.boardMode
             setBoardMode(data.data.boardMode)
             break
           case 2:
@@ -194,13 +209,14 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     canvas.current!.canvas.renderAll()
   }
 
-  function updateCanvas(x: any) {
+  function updateCanvas() {
     isUpdate(true)
     setTimeout(() => {
       isUpdate(false)
     }, 500)
   }
   const canvasBoardRef = useRef<HTMLDivElement | null>(null)
+  // const canvasRef = useRef<HTMLCanvasElement | null>(null)
 
   return (
     <div className={styles['canvas-wrapper']}>
@@ -310,10 +326,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         </div>
       </div>
       <div className={styles['canvasBoard']} ref={canvasBoardRef}>
-        <canvas width={width} height={height} id={type}></canvas>
+        <canvas id={type}></canvas>
         {receiveArr.current.length != 0 ? (
           receiveArr.current.map((item, index) => {
-            return <canvas width={width} height={height} id={`${index + 1}`} key={index}></canvas>
+            return <canvas id={`${index + 1}`} key={index}></canvas>
           })
         ) : (
           <></>
@@ -322,8 +338,8 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     </div>
   )
 }
-CanvasBoard.defaultProps = {
-  width: window.innerWidth,
-  height: window.innerHeight,
-}
+// CanvasBoard.defaultProps = {
+//   width: window.innerWidth,
+//   height: window.innerHeight,
+// }
 export default CanvasBoard
