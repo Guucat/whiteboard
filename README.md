@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # Collaboration Whiteboard
 # **This is a real-time collaborative drawing whiteboard, let's join it**
 
