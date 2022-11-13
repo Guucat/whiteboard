@@ -4,7 +4,6 @@ import "whiteboard/model"
 
 func GetUserByName(name string) (*model.User, error) {
 	var user *model.User
-	//err := DB.Where("name = ?", name).First(&user).Error
 	err := DB.Select("name").Where("name = ?", name).First(&user).Error
 	if err != nil {
 		return nil, err

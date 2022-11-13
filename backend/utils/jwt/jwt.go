@@ -15,7 +15,6 @@ type TokenInfo struct {
 
 const TokenValidDuration = 2 * time.Hour
 
-// GenToken 生成JWT
 func GenToken(id int, name string) (string, error) {
 	c := TokenInfo{
 		id,
@@ -25,9 +24,9 @@ func GenToken(id int, name string) (string, error) {
 			Issuer:    setting.Conf.Issuer,
 		},
 	}
-	// 指定签名算法
+	// Specifying a signature algorithm
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, c)
-	// 返回token编码
+	// Return token encoding
 	return token.SignedString([]byte(setting.Conf.Secret))
 }
 
