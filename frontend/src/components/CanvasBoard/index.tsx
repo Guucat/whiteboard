@@ -11,7 +11,6 @@ import { Message, Modal } from '@arco-design/web-react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
-  const { width, height } = props
   const [visibles, setVisibles] = useRecoilState(ModalVisible)
   const { type, boardId } = props
   const [curTools, setCurTools] = useState('select')
@@ -69,23 +68,16 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     if (ws.current) {
       ws.current.onmessage = (e) => {
         const data = JSON.parse(e.data)
-        console.log('接收到数据', data)
 
         switch (data.type) {
           case 1:
-            // console.log(' data.data.history', data.data.history)
-
             data.data.history.map((item: string, index: number) => {
               let x = JSON.parse(item)
               setPageId(index)
               receieveFullArr.current.push(x[index])
             })
-            console.log('receieveFullArr.current', receieveFullArr.current)
-
             receieveDataType.current = data.type
             receiveArr.current = receieveFullArr.current.slice(1)
-            console.log('receiveArr.current', receiveArr.current)
-
             type1Data.current!.curUser = data.data.userName
             type1Data.current!.ReboardId = data.data.boardId
             type1Data.current!.isOwner = data.data.isOwner
@@ -130,8 +122,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       }
     }
     return () => {
-      console.log('指向了')
-
       receieveFullArr.current = []
       receiveArr.current = []
     }
@@ -140,13 +130,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    * @des 初始化白板类
    */
   useEffect(() => {
-    canvas.current = new BaseBoard({ type, curTools, ws })
+    canvas.current = new BaseBoard({ type, curTools: 'select', ws })
     BaseBoardArr.current.push(canvas.current)
     setVisibles(false)
     setLoading(false)
     return () => {
-      // console.log('清空数据')
-
       canvas.current!.canvas.clear()
       canvas.current = null
       BaseBoardArr.current = []
@@ -161,13 +149,13 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       case 1:
         if (receiveArr.current.length) {
           receiveArr.current.map((item, index) => {
-            canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
+            canvas.current = new BaseBoard({ type: `${index + 1}`, curTools: 'select', ws })
             BaseBoardArr.current.push(canvas.current)
           })
         }
         break
       case 5:
-        canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
+        canvas.current = new BaseBoard({ type: `${pageID}`, curTools: 'select', ws })
         BaseBoardArr.current.push(canvas.current)
         break
       default:
@@ -178,9 +166,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
    * @des 渲染数据生成画布
    */
   useEffect(() => {
-    console.log(' BaseBoardArr.current', BaseBoardArr.current)
-    console.log('receieveFullArr.current', receieveFullArr.current)
-
     BaseBoardArr.current.map((item, index) => {
       item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
         item.canvas.renderAll()
@@ -188,8 +173,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         item.stateIdx++
       })
     })
-    console.log('重新渲染')
-
     setBoardUpdate(false)
   }, [boardUpdate])
 
@@ -199,16 +182,11 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
   useEffect(() => {
     // 监听选中对象
-    console.log('监听选中')
-    console.log('canvas.current!', canvas.current!)
     const board = canvas.current!
     // const board = canvas.current!
     board.canvas.on('selection:created', (e) => {
-      console.log('选中')
-
       if (e.selected!.length == 1) {
         setIsSelect(true)
-        console.log('选中执行了')
       } else {
         board.canvas.selection = false
       }
@@ -225,7 +203,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     board.canvas.on('selection:updated', (e) => {
       if (e.selected!.length == 1) {
         setIsSelect(true)
-        console.log('选中更新了')
       }
       board.selectedObj = e.selected!
       document.onkeydown = (e) => {
@@ -238,7 +215,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
     board.canvas.on('selection:cleared', (e) => {
       setIsSelect(false)
       board.selectedObj = null
-      console.log('点击空白处了')
     })
   }, [isSelect, pageID])
 
