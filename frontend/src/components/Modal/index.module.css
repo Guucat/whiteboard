@@ -3,7 +3,6 @@
   position: absolute;
   left: 50%;
   top: 50%;
-  /* width: 300px; */
   padding: 30px 20px 20px 20px;
   z-index: 9;
   transform: translate(-50%, -50%);
@@ -104,11 +103,9 @@
 
 /* 加入白板modal */
 .input-item {
-  /* position: relative; */
   display: block;
   width: 240px;
   margin: 0 auto;
-  /* margin-bottom: 30px; */
   border: 0;
   padding: 10px;
   border-bottom: 1px solid rgb(128, 125, 125);

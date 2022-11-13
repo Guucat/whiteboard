@@ -56,7 +56,10 @@ export class BaseBoard {
   }
   initCanvas() {
     if (!this.canvas) {
-      this.canvas = new fabric.Canvas(this.type)
+      this.canvas = new fabric.Canvas(this.type, {
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
       // 禁止用户进行组选择
       this.canvas.selection = false
       // 设置当前鼠标停留在

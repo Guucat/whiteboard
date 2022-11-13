@@ -11,7 +11,6 @@ import { Message, Modal } from '@arco-design/web-react'
 import './index.css'
 import { useNavigate } from 'react-router-dom'
 const CanvasBoard: FC<CanvasBoardProps> = (props) => {
-  const { width, height } = props
   const [visibles, setVisibles] = useRecoilState(ModalVisible)
   const { type, boardId } = props
   const [curTools, setCurTools] = useState('select')
@@ -32,8 +31,21 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   /**
    * @des 初始化websocket
    */
-  const receiveArr = useRef<any[]>([])
-  const receieveFullArr = useRef<any[]>([])
+  const receiveArr = useRef<string[]>([])
+  const receieveFullArr = useRef<string[]>([])
+  useEffect(() => {
+    const handelResize = () => {
+      canvas.current!.canvas.setDimensions({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      })
+    }
+    window.addEventListener('resize', handelResize)
+
+    return () => {
+      window.removeEventListener('resize', handelResize)
+    }
+  }, [])
   useEffect(() => {
     const tokenstr = localStorage.getItem('token')
     if (typeof WebSocket !== 'undefined') {
@@ -43,8 +55,13 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           ws.current = new WebSocket('ws://114.55.132.72:8080/board/create', [token])
         }
       } else {
+        // if (tokenstr) {
+        //   const token = tokenstr.substring(1, tokenstr.length - 1)
+        //   ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`, [token])
+        // } else {
         ws.current = new WebSocket(`ws://114.55.132.72:8080/board/enter?boardId=${boardId}`)
       }
+      // }
     } else {
       alert('当前浏览器 Not support websocket')
     }
@@ -54,7 +71,7 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
 
         switch (data.type) {
           case 1:
-            data.data.history.map((item: any, index: number) => {
+            data.data.history.map((item: string, index: number) => {
               let x = JSON.parse(item)
               setPageId(index)
               receieveFullArr.current.push(x[index])
@@ -64,7 +81,6 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
             type1Data.current!.curUser = data.data.userName
             type1Data.current!.ReboardId = data.data.boardId
             type1Data.current!.isOwner = data.data.isOwner
-            // type1Data.current!.boardMode = data.data.boardMode
             setBoardMode(data.data.boardMode)
             break
           case 2:
@@ -102,54 +118,53 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
           default:
             break
         }
-
         setBoardUpdate(true)
-        // setTimeout(() => {
-        //   isUpdate(false)
-        // }, 500)
-        // BaseBoardArr.current.map((item, index) => {
-        //   item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
-        //     item.canvas.renderAll()
-        //     item.stateArr.push(JSON.stringify(item.canvas))
-        //     item.stateIdx++
-        //   })
-        // })
-        // isUpdate(true)
-        // setTimeout(() => {
-        //   isUpdate(false)
-        // }, 500)
       }
+    }
+    return () => {
+      receieveFullArr.current = []
+      receiveArr.current = []
     }
   }, [ws])
   /**
    * @des 初始化白板类
    */
   useEffect(() => {
-    canvas.current = new BaseBoard({ type, curTools, ws })
+    canvas.current = new BaseBoard({ type, curTools: 'select', ws })
     BaseBoardArr.current.push(canvas.current)
     setVisibles(false)
     setLoading(false)
+    return () => {
+      canvas.current!.canvas.clear()
+      canvas.current = null
+      BaseBoardArr.current = []
+      canvasBoardRef.current = null
+    }
   }, [])
+  /**
+   * @des 监听新增白板，实例化新增的白板类
+   */
   useEffect(() => {
     switch (receieveDataType.current) {
       case 1:
         if (receiveArr.current.length) {
           receiveArr.current.map((item, index) => {
-            canvas.current = new BaseBoard({ type: `${index + 1}`, curTools, ws })
+            canvas.current = new BaseBoard({ type: `${index + 1}`, curTools: 'select', ws })
             BaseBoardArr.current.push(canvas.current)
           })
         }
         break
       case 5:
-        canvas.current = new BaseBoard({ type: `${pageID}`, curTools, ws })
+        canvas.current = new BaseBoard({ type: `${pageID}`, curTools: 'select', ws })
         BaseBoardArr.current.push(canvas.current)
-
         break
       default:
         break
     }
   }, [pageID])
-
+  /**
+   * @des 渲染数据生成画布
+   */
   useEffect(() => {
     BaseBoardArr.current.map((item, index) => {
       item.canvas.loadFromJSON(receieveFullArr.current[index], () => {
@@ -168,9 +183,12 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
   useEffect(() => {
     // 监听选中对象
     const board = canvas.current!
+    // const board = canvas.current!
     board.canvas.on('selection:created', (e) => {
       if (e.selected!.length == 1) {
         setIsSelect(true)
+      } else {
+        board.canvas.selection = false
       }
 
       // // 选中图层事件触发时，动态更新赋值
@@ -198,18 +216,21 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       setIsSelect(false)
       board.selectedObj = null
     })
-  }, [isSelect])
+  }, [isSelect, pageID])
 
   function editObj(type: any, e: React.ChangeEvent<HTMLInputElement>) {
     canvas.current!.selectedObj![0].set(type, e.target.value)
     canvas.current!.canvas.renderAll()
   }
 
-  function updateCanvas(x: any) {
+  function updateCanvas() {
     isUpdate(true)
-    setTimeout(() => {
+    const x = setTimeout(() => {
       isUpdate(false)
     }, 500)
+    return () => {
+      clearTimeout(x)
+    }
   }
   const canvasBoardRef = useRef<HTMLDivElement | null>(null)
 
@@ -321,10 +342,10 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
         </div>
       </div>
       <div className={styles['canvasBoard']} ref={canvasBoardRef}>
-        <canvas width={width} height={height} id={type}></canvas>
+        <canvas id={type}></canvas>
         {receiveArr.current.length != 0 ? (
           receiveArr.current.map((item, index) => {
-            return <canvas width={width} height={height} id={`${index + 1}`} key={index}></canvas>
+            return <canvas id={`${index + 1}`} key={index}></canvas>
           })
         ) : (
           <></>
@@ -332,9 +353,5 @@ const CanvasBoard: FC<CanvasBoardProps> = (props) => {
       </div>
     </div>
   )
-}
-CanvasBoard.defaultProps = {
-  width: window.innerWidth,
-  height: window.innerHeight,
 }
 export default CanvasBoard
