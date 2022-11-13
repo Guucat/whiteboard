@@ -22,7 +22,7 @@ http://114.55.132.72:82/#/home
 1. 下载克隆仓库
 
 ```JavaScript
-git clone <仓库地址>
+git clone https://github.com/Guucat/whiteboard.git
 ```
 
 1. 安装依赖
